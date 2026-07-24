@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.09.10
+// @version      26.09.11
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1415,6 +1415,7 @@
             "fastsbc.plan.changed":["部分球员已不在俱乐部或SBC仓库中，请重新生成方案。","部分球員已不在俱樂部或SBC倉庫中，請重新產生方案。","Some players are no longer in your Club or SBC Storage. Regenerate the plans."],
             "fastsbc.plan.requirements":["当前球员组合不再满足SBC要求，请重新生成方案。","目前球員組合不再符合SBC要求，請重新產生方案。","This player selection no longer meets the SBC requirements. Regenerate the plans."],
             "fastsbc.plan.loaderror":["无法读取SBC信息，请重新打开后再试。","無法讀取SBC資訊，請重新開啟後再試。","Could not load the SBC. Reopen it and try again."],
+            "fastsbc.plan.openerror":["快速SBC打开失败：%1","快速SBC開啟失敗：%1","Fast SBC failed to open: %1"],
             "fastsbc.plan.location.club":["俱乐部","俱樂部","Club"],
             "fastsbc.plan.location.storage":["SBC仓库","SBC倉庫","SBC Storage"],
             "fastsbc.plan.location.unknown":["未知位置","未知位置","Unknown"],
@@ -1887,16 +1888,16 @@
             .phone .fsu-clubPlayerDetailAttributeGrid{grid-template-columns:1fr;gap:9px}
             .phone .fsu-clubPlayerDetailSource{padding:0 12px 16px}
             body.fsu-fastSBCPlanOpen .fsu-clubPlayersToolbar{z-index:0!important}
-            .view-modal-container.fsu-fastSBCPlanModal{z-index:45!important}
-            .fsu-fastSBCPlanDialog{position:relative!important;box-sizing:border-box!important;width:min(640px,calc(100vw - 28px))!important;max-width:calc(100vw - 28px)!important;overflow:hidden!important;color:#fcfcfc}
-            .fsu-fastSBCPlanDialogTitle{box-sizing:border-box!important;max-width:100%!important;padding-right:58px!important;padding-left:58px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+            body.fsu-fastSBCPlanOpen{overflow:hidden!important}
+            .fsu-fastSBCPlanOverlay{position:fixed!important;z-index:2147483000!important;inset:0!important;box-sizing:border-box!important;display:grid!important;padding:14px!important;place-items:center!important;overflow:hidden!important;background:rgba(0,0,0,.76)!important;overscroll-behavior:contain!important}
+            .fsu-fastSBCPlanDialog{position:relative!important;box-sizing:border-box!important;display:flex!important;width:min(640px,calc(100vw - 28px))!important;max-width:calc(100vw - 28px)!important;max-height:calc(100vh - 28px)!important;max-height:calc(100dvh - 28px)!important;flex-direction:column!important;overflow:hidden!important;border:1px solid rgba(255,255,255,.16)!important;border-radius:14px!important;background:#191820!important;box-shadow:0 24px 70px rgba(0,0,0,.58)!important;color:#fcfcfc!important}
+            .fsu-fastSBCPlanDialogHeader{position:relative!important;box-sizing:border-box!important;display:flex!important;min-height:54px!important;flex:0 0 54px!important;align-items:center!important;justify-content:center!important;padding:0 62px!important;border-bottom:1px solid #3f444b!important;background:#22232b!important}
+            .fsu-fastSBCPlanDialogTitle{box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:hidden!important;color:#fcfcfc!important;font-family:UltimateTeam,sans-serif!important;font-size:20px!important;font-weight:700!important;line-height:28px!important;text-align:center!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+            .fsu-fastSBCPlanDialogBody{min-height:0!important;flex:1 1 auto!important;overflow:hidden!important}
             .fsu-fastSBCPlanClose{position:absolute!important;z-index:30!important;top:8px!important;right:8px!important;display:grid!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;margin:0!important;padding:0!important;place-items:center!important;border:1px solid rgba(255,255,255,.2)!important;border-radius:50%!important;background:rgba(25,24,32,.94)!important;box-shadow:0 4px 14px rgba(0,0,0,.32)!important;color:#fff!important;font-family:Arial,sans-serif!important;font-size:30px!important;font-weight:300!important;line-height:40px!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
             .fsu-fastSBCPlanClose>*{margin:0!important;padding:0!important;color:inherit!important;font:inherit!important;line-height:1!important}
-            .fsu-fastSBCPlanClose.hover,.fsu-fastSBCPlanClose:active{border-color:#07f468!important;background:#30353e!important;color:#07f468!important}
+            .fsu-fastSBCPlanClose:hover,.fsu-fastSBCPlanClose:active{border-color:#07f468!important;background:#30353e!important;color:#07f468!important}
             .fsu-fastSBCPlanClose:focus-visible{outline:2px solid #07f468!important;outline-offset:2px!important}
-            .fsu-fastSBCPlanNativeActions{display:none!important}
-            .fsu-fastSBCPlanDialog .ea-dialog-view--body{min-width:0!important;padding:0!important;overflow:hidden!important;background:#191820}
-            .fsu-fastSBCPlanDialog .fsu-fastSBCPlanMessage{box-sizing:border-box;max-width:none!important;padding:0!important}
             .fsu-fastSBCPlan{box-sizing:border-box;display:flex;height:min(74vh,700px);max-height:calc(100vh - 150px);flex-direction:column;overflow:hidden;background:#191820;color:#fcfcfc;font-family:UltimateTeamCondensed,sans-serif}
             .fsu-fastSBCPlanHeader{flex:0 0 auto;padding:16px 18px 13px;border-bottom:1px solid #3f444b;background:linear-gradient(145deg,#252b35 0%,#1d1c25 78%)}
             .fsu-fastSBCPlanChallenge{overflow:hidden;color:#fcfcfc;font-family:UltimateTeam,sans-serif;font-size:18px;font-weight:700;line-height:22px;text-overflow:ellipsis;white-space:nowrap}
@@ -1904,8 +1905,8 @@
             .fsu-fastSBCPlanNavigator{display:grid;flex:0 0 auto;grid-template-columns:48px minmax(0,1fr) 48px;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #353942;background:#22232b}
             .fsu-fastSBCPlanNav{box-sizing:border-box!important;display:grid!important;width:44px!important;min-width:44px!important;height:40px!important;min-height:40px!important;margin:0!important;padding:0!important;place-items:center!important;border:1px solid #4b515a!important;border-radius:9px!important;background:#30343e!important;color:#f6f7f8!important;font-family:Arial,sans-serif!important;font-size:28px!important;line-height:36px!important;touch-action:manipulation!important}
             .fsu-fastSBCPlanNav>*{margin:0!important;padding:0!important;color:inherit!important;font:inherit!important;line-height:1!important}
-            .fsu-fastSBCPlanNav.hover,.fsu-fastSBCPlanNav:active{border-color:#1fc3c1!important;background:#39414c!important;color:#7ce0df!important}
-            .fsu-fastSBCPlanNav.disabled{opacity:.35!important}
+            .fsu-fastSBCPlanNav:hover,.fsu-fastSBCPlanNav:active{border-color:#1fc3c1!important;background:#39414c!important;color:#7ce0df!important}
+            .fsu-fastSBCPlanNav.disabled,.fsu-fastSBCPlanNav:disabled{opacity:.35!important}
             .fsu-fastSBCPlanNav--next{justify-self:end}
             .fsu-fastSBCPlanCounter{text-align:center}
             .fsu-fastSBCPlanCounter strong{display:block;color:#fcfcfc;font-family:UltimateTeam,sans-serif;font-size:16px;line-height:20px}
@@ -1930,18 +1931,18 @@
             .fsu-fastSBCPlanFooter{display:grid;flex:0 0 auto;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);gap:9px;padding:11px 14px 13px;border-top:1px solid #3f444b;background:#22232b}
             .fsu-fastSBCPlanRegenerate,.fsu-fastSBCPlanSubmit{box-sizing:border-box!important;width:100%!important;min-height:44px!important;height:44px!important;margin:0!important;padding:0 12px!important;border-radius:9px!important;font-size:14px!important;line-height:42px!important;white-space:nowrap!important}
             .fsu-fastSBCPlanRegenerate{border:1px solid #4b515a!important;background:#30343e!important;color:#e5e7e9!important}
-            .fsu-fastSBCPlanRegenerate.hover,.fsu-fastSBCPlanRegenerate:active{border-color:#1fc3c1!important;background:#39414c!important}
+            .fsu-fastSBCPlanRegenerate:hover,.fsu-fastSBCPlanRegenerate:active{border-color:#1fc3c1!important;background:#39414c!important}
             .fsu-fastSBCPlanSubmit{border:0!important;background:linear-gradient(135deg,#1fc3c1,#5471d8)!important;color:#fff!important;font-family:UltimateTeam,sans-serif!important;font-weight:700!important}
-            .fsu-fastSBCPlanSubmit.hover,.fsu-fastSBCPlanSubmit:active{filter:brightness(1.12)}
-            .fsu-fastSBCPlanSubmit.disabled{filter:none!important;opacity:.38!important}
+            .fsu-fastSBCPlanSubmit:hover,.fsu-fastSBCPlanSubmit:active{filter:brightness(1.12)}
+            .fsu-fastSBCPlanSubmit.disabled,.fsu-fastSBCPlanSubmit:disabled{filter:none!important;opacity:.38!important}
             .fsu-fastSBCPlanError{display:none;grid-column:1/-1;padding:8px 10px;border:1px solid #75433f;border-radius:8px;background:#422c2d;color:#ffc1b9;font-size:12px;line-height:16px}
             .fsu-fastSBCPlan[data-state="invalid"] .fsu-fastSBCPlanError{display:block}
-            @media (max-width:620px){.fsu-fastSBCPlanPlayer{grid-template-columns:25px 40px minmax(0,1fr) auto;gap:7px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanPlayerLocation{max-width:82px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanFooter{grid-template-columns:1fr}}
-            .phone .fsu-fastSBCPlanDialog{display:flex!important;width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important;flex-direction:column!important}
-            .phone .fsu-fastSBCPlanDialog>.ea-dialog-view--title,.phone .fsu-fastSBCPlanDialog>header{box-sizing:border-box!important;display:flex!important;min-height:52px!important;height:52px!important;flex:0 0 52px!important;align-items:center!important;justify-content:center!important;margin:0!important;padding:0 58px!important;overflow:hidden!important}
-            .phone .fsu-fastSBCPlanDialog .fsu-fastSBCPlanDialogTitle{box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:hidden!important;font-size:20px!important;line-height:28px!important;text-overflow:ellipsis!important;white-space:nowrap!important}
-            .phone .fsu-fastSBCPlanDialog .ea-dialog-view--body{min-height:0!important;max-height:none!important;flex:1 1 auto!important;margin:0!important}
-            .phone .fsu-fastSBCPlanDialog .fsu-fastSBCPlanMessage{height:100%!important;min-height:0!important}
+            @media (max-width:620px){.fsu-fastSBCPlanOverlay{padding:6px!important}.fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}.fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}.fsu-fastSBCPlanDialogBody{height:100%!important;min-height:0!important}.fsu-fastSBCPlan{height:100%!important;max-height:none!important}.fsu-fastSBCPlanPlayer{grid-template-columns:25px 40px minmax(0,1fr) auto;gap:7px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanPlayerLocation{max-width:82px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanFooter{grid-template-columns:1fr}}
+            .phone .fsu-fastSBCPlanOverlay{padding:6px!important}
+            .phone .fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}
+            .phone .fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}
+            .phone .fsu-fastSBCPlanDialogTitle{font-size:20px!important;line-height:28px!important}
+            .phone .fsu-fastSBCPlanDialogBody{height:100%!important;min-height:0!important}
             .phone .fsu-fastSBCPlan{height:100%!important;max-height:none!important}
             .phone .fsu-fastSBCPlanHeader{padding:12px 12px 10px}
             .phone .fsu-fastSBCPlanNavigator{padding:8px 10px}
@@ -10854,6 +10855,40 @@
                 control.__text.textContent = text;
             }
         }
+        events.createFastSBCPlanButton = (text, action, classList) => {
+            const root = events.createElementWithConfig("button", {
+                classList,
+                textContent: text,
+                attributes: {
+                    "type": "button"
+                }
+            });
+            const tap = event => {
+                event.preventDefault();
+                event.stopPropagation();
+                if(!root.disabled){
+                    action(control);
+                }
+            };
+            const control = {
+                __root: root,
+                getRootElement: () => root,
+                setText: value => {
+                    root.textContent = value;
+                },
+                setInteractionState: enabled => {
+                    const active = Boolean(enabled);
+                    root.disabled = !active;
+                    root.classList.toggle("disabled", !active);
+                    root.setAttribute("aria-disabled", String(!active));
+                },
+                dealloc: () => {
+                    root.removeEventListener("click", tap);
+                }
+            };
+            root.addEventListener("click", tap);
+            return control;
+        }
         events.createFastSBCPlanView = (session) => {
             const root = events.createElementWithConfig("div", {
                 classList: "fsu-fastSBCPlan",
@@ -10876,8 +10911,7 @@
             const navigator = events.createElementWithConfig("div", {
                 classList: "fsu-fastSBCPlanNavigator"
             });
-            const previousControl = events.createButton(
-                new UTButtonControl(),
+            const previousControl = events.createFastSBCPlanButton(
                 "‹",
                 () => {
                     if(session.currentIndex > 0 && !session.submitting){
@@ -10887,8 +10921,7 @@
                 },
                 "fsu-fastSBCPlanNav fsu-fastSBCPlanNav--previous"
             );
-            const nextControl = events.createButton(
-                new UTButtonControl(),
+            const nextControl = events.createFastSBCPlanButton(
                 "›",
                 () => {
                     if(session.currentIndex < session.plans.length - 1 && !session.submitting){
@@ -10926,14 +10959,12 @@
             const footer = events.createElementWithConfig("div", {
                 classList: "fsu-fastSBCPlanFooter"
             });
-            const regenerateControl = events.createButton(
-                new UTStandardButtonControl(),
+            const regenerateControl = events.createFastSBCPlanButton(
                 fy("fastsbc.plan.regenerate"),
                 () => events.regenerateFastSBCPlanSession(session),
                 "fsu-fastSBCPlanRegenerate"
             );
-            const submitControl = events.createButton(
-                new UTStandardButtonControl(),
+            const submitControl = events.createFastSBCPlanButton(
                 "",
                 () => {
                     const plan = session.plans[session.currentIndex];
@@ -11056,93 +11087,118 @@
             if(!popup){
                 return;
             }
-            const nativeClose = popup._fsu?.nativeCloseControl;
-            if(typeof nativeClose?._tapDetected === "function"){
-                nativeClose._tapDetected();
-                return;
-            }
-            popup.onBackButton?.();
+            popup.close?.();
         }
         events.showFastSBCPlanPopup = (session) => {
-            const currentRoot = events.fastSBCPlanPopup?.getView?.()?.getRootElement?.();
+            const currentRoot = events.fastSBCPlanPopup?.root;
             if(events.fastSBCPlanPopup && currentRoot?.isConnected){
                 session.view?.render?.();
                 return;
             }
             const planView = events.createFastSBCPlanView(session);
-            const popupController = new EADialogViewController({
-                dialogOptions: [{ labelEnum: enums.UIDialogOptions.OK }],
-                message: "",
-                title: fy("fastsbc.plan.title"),
-                type: EADialogView.Type.MESSAGE
+            const overlay = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlanOverlay",
+                attributes: {
+                    "data-fsu-fast-sbc-version": "26.09.11"
+                }
             });
-            popupController.init();
-            popupController.modalDisplayDimensions.width = "640px";
-            popupController.modalDisplayDimensions.minWidth = "300px";
-            const popupView = popupController.getView();
-            const popupRoot = popupView.getRootElement();
-            popupRoot.classList.add("fsu-fastSBCPlanDialog");
-            popupRoot.setAttribute("aria-modal", "true");
-            popupView.__title?.classList.add("fsu-fastSBCPlanDialogTitle");
-            popupView.__msg.classList.add("fsu-fastSBCPlanMessage");
-            popupView.__msg.replaceChildren(planView.root);
-            popupView.__btnContainer?.classList.add("fsu-fastSBCPlanNativeActions");
-
-            const nativeCloseControl = popupView.dialogOptions?.[0];
-            const closeControl = events.createButton(
-                new UTButtonControl(),
+            const dialog = events.createElementWithConfig("section", {
+                classList: "fsu-fastSBCPlanDialog",
+                attributes: {
+                    "role": "dialog",
+                    "aria-modal": "true",
+                    "aria-labelledby": "fsu-fastSBCPlanDialogTitle"
+                }
+            });
+            const dialogHeader = events.createElementWithConfig("header", {
+                classList: "fsu-fastSBCPlanDialogHeader"
+            });
+            const dialogTitle = events.createElementWithConfig("h2", {
+                classList: "fsu-fastSBCPlanDialogTitle",
+                textContent: fy("fastsbc.plan.title"),
+                attributes: {
+                    "id": "fsu-fastSBCPlanDialogTitle"
+                }
+            });
+            const dialogBody = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlanDialogBody"
+            });
+            let closePopup = () => {};
+            const closeControl = events.createFastSBCPlanButton(
                 "×",
-                () => {
-                    if(typeof nativeCloseControl?._tapDetected === "function"){
-                        nativeCloseControl._tapDetected();
-                        return;
-                    }
-                    popupView.__btnContainer?.querySelector("button")?.click?.();
-                },
+                () => closePopup(),
                 "fsu-fastSBCPlanClose"
             );
             const closeRoot = closeControl.getRootElement();
-            closeRoot.setAttribute("type", "button");
             closeRoot.setAttribute("title", fy("fastsbc.plan.close"));
             closeRoot.setAttribute("aria-label", fy("fastsbc.plan.close"));
-            popupRoot.appendChild(closeRoot);
+            dialogHeader.append(dialogTitle, closeRoot);
+            dialogBody.appendChild(planView.root);
+            dialog.append(dialogHeader, dialogBody);
+            overlay.appendChild(dialog);
 
-            let modalContainer = null;
-            const releasePopupLayer = () => {
-                modalContainer?.classList.remove("fsu-fastSBCPlanModal");
-                document.body?.classList.remove("fsu-fastSBCPlanOpen");
-                modalContainer = null;
-            };
-            popupController._fsu = {
-                planView,
-                closeControl,
-                nativeCloseControl
-            };
-            popupController.onExit.observe(popupController, token => {
-                token.unobserve(popupController);
-                if(events.fastSBCPlanPopup === popupController){
-                    events.fastSBCPlanPopup = null;
+            const previousFocus = document.activeElement;
+            const onKeyDown = event => {
+                if(event.key === "Escape"){
+                    event.preventDefault();
+                    closePopup();
                 }
-                session.view = null;
-                releasePopupLayer();
-                planView.dealloc();
-                closeControl.dealloc?.();
-                popupController.dealloc();
-            });
-            session.view = planView;
-            events.fastSBCPlanPopup = popupController;
-            document.body?.classList.add("fsu-fastSBCPlanOpen");
-            gPopupClickShield.setActivePopup(popupController);
-            const syncPopupLayer = () => {
-                if(!popupRoot.isConnected){
+            };
+            const onOverlayClick = event => {
+                if(event.target === overlay){
+                    closePopup();
+                }
+            };
+            let closed = false;
+            closePopup = () => {
+                if(closed){
                     return;
                 }
-                modalContainer = popupRoot.closest(".view-modal-container");
-                modalContainer?.classList.add("fsu-fastSBCPlanModal");
-                planView.list.scrollTop = 0;
+                closed = true;
+                document.removeEventListener("keydown", onKeyDown, true);
+                overlay.removeEventListener("click", onOverlayClick);
+                if(events.fastSBCPlanPopup?.root === overlay){
+                    events.fastSBCPlanPopup = null;
+                }
+                if(session.view === planView){
+                    session.view = null;
+                }
+                document.body?.classList.remove("fsu-fastSBCPlanOpen");
+                planView.dealloc();
+                closeControl.dealloc();
+                overlay.remove();
+                previousFocus?.focus?.();
             };
-            syncPopupLayer();
-            requestAnimationFrame(syncPopupLayer);
+            const popup = {
+                root: overlay,
+                dialog,
+                planView,
+                close: closePopup
+            };
+
+            session.view = planView;
+            events.fastSBCPlanPopup = popup;
+            document.body?.classList.add("fsu-fastSBCPlanOpen");
+            document.addEventListener("keydown", onKeyDown, true);
+            overlay.addEventListener("click", onOverlayClick);
+            document.body.appendChild(overlay);
+            planView.list.scrollTop = 0;
+            requestAnimationFrame(() => {
+                if(overlay.isConnected){
+                    closeRoot.focus();
+                }
+            });
+        }
+        events.getFastSBCPlanDiagnostic = (stage, error) => {
+            const version = typeof GM_info !== "undefined"
+                ? GM_info?.script?.version ?? "unknown"
+                : "unknown";
+            const errorName = String(error?.name ?? "Error").replace(/\s+/g, "");
+            const errorMessage = String(error?.message ?? error ?? "")
+                .replace(/\s+/g, " ")
+                .trim()
+                .slice(0, 96);
+            return `v${version}/${stage}/${errorName}${errorMessage ? `: ${errorMessage}` : ""}`;
         }
         events.buildFastSBCPlanSession = async(setId, challengeId) => {
             const requirements = info.base.fastsbc[`${challengeId}#${setId}`];
@@ -11170,7 +11226,18 @@
                 repositories.Item.getUnassignedItems(),
                 item => item?.isPlayer?.() && item.duplicateId !== 0
             );
-            const plans = events.generateFastSBCPlans(requirements, requiredCount, 10);
+            let plans;
+            try {
+                plans = events.generateFastSBCPlans(requirements, requiredCount, 10);
+            } catch(error) {
+                if(error && typeof error === "object"){
+                    error.fsuFastSBCStage = "generate";
+                    throw error;
+                }
+                const generationError = new Error(String(error));
+                generationError.fsuFastSBCStage = "generate";
+                throw generationError;
+            }
             const estimatedCount = Math.max(
                 events.fastSBCQuantity(true, unassignedPlayers, requirements),
                 plans.length
@@ -11195,12 +11262,16 @@
             if(events.fastSBCPlanOpening){
                 return;
             }
-            const activeRoot = events.fastSBCPlanPopup?.getView?.()?.getRootElement?.();
+            const activeRoot =
+                events.fastSBCPlanPopup?.root ??
+                events.fastSBCPlanPopup?.getView?.()?.getRootElement?.();
             if(events.fastSBCPlanPopup && !activeRoot?.isConnected){
+                events.fastSBCPlanPopup.close?.();
                 events.fastSBCPlanPopup = null;
             }
             events.fastSBCPlanOpening = true;
             events.showLoader();
+            let stage = "prepare";
             try {
                 let session = events.fastSBCPlanSession;
                 const matchesCurrent =
@@ -11209,24 +11280,37 @@
                     Number(session.challengeId) === Number(challengeId);
 
                 if(!forceRegenerate && matchesCurrent){
+                    stage = "revalidate";
                     events.revalidateFastSBCPlanSession(session);
                     const nextReadyIndex = _.findIndex(session.plans, plan => plan.status === "ready");
                     if(nextReadyIndex !== -1 && session.plans[session.currentIndex]?.status !== "ready"){
                         session.currentIndex = nextReadyIndex;
                     }
                 }else{
+                    stage = "build";
                     session = await events.buildFastSBCPlanSession(setId, challengeId);
                     events.fastSBCPlanSession = session;
                 }
 
+                stage = "plans";
                 if(!session.plans.length){
                     events.notice("fastsbc.plan.empty", 2);
                     return;
                 }
+                stage = "render";
                 events.showFastSBCPlanPopup(session);
             } catch(error) {
                 console.error("[FSU] Fast SBC plan opening failed", error);
-                events.notice("fastsbc.plan.loaderror", 2);
+                const diagnostic = events.getFastSBCPlanDiagnostic(
+                    error?.fsuFastSBCStage ?? stage,
+                    error
+                );
+                try {
+                    GM_setValue("fastSBCPlanLastError", diagnostic);
+                } catch(storageError) {
+                    console.warn("[FSU] Fast SBC diagnostic could not be stored", storageError);
+                }
+                events.notice(["fastsbc.plan.openerror", diagnostic], 2);
             } finally {
                 events.hideLoader();
                 events.fastSBCPlanOpening = false;
@@ -11276,7 +11360,9 @@
                 option => {
                     if(option === 2){
                         info.base.fastsbctips = true;
-                        openPlanner();
+                        // 경고 모달의 onExit 처리가 끝난 다음 독립 제출안 오버레이를 연다.
+                        // 모바일 Edge에서 같은 이벤트 턴에 두 레이어가 교체되는 충돌을 막는다.
+                        setTimeout(openPlanner, 0);
                     }
                 }
             )
