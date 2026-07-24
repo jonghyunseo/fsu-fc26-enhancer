@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.09.1
+// @version      26.09.2
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -10,7 +10,6 @@
 // @match        https://www.easysbc.io/evolutions*
 // @match        https://www.futbin.com/*
 // @match        https://www.fut.gg/*
-// @require      https://s4.zstatic.net/ajax/libs/lodash.js/4.17.21/lodash.min.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js
 // @icon         data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBmaWxsPSJub25lIiB2ZXJzaW9uPSIxLjEiIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDY0IDY0Ij48ZGVmcz48Y2xpcFBhdGggaWQ9Im1hc3Rlcl9zdmcwXzJfMCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMCIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNtYXN0ZXJfc3ZnMF8yXzApIj48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIwIiBmaWxsPSIjMjE3REZGIiBmaWxsLW9wYWNpdHk9IjEiLz48Zz48cGF0aCBkPSJNNS4yNjQwMDAyLDEwLjM1MTk5N0wyNy43MjgwMDEsMTAuMzUxOTk3TDI3LjcyODAwMSwxOC4yODc5OThMMTQuODY0LDE4LjI4Nzk5OEwxNC44NjQsMjkuNDI0TDI1LjgwODAwMSwyOS40MjRMMjUuODA4MDAxLDM3LjM2MDAwMUwxNC44NjQsMzcuMzYwMDAxTDE0Ljg2NCw1NEw1LjI2NDAwMDIsNTRMNS4yNjQwMDAyLDEwLjM1MTk5N1pNNDAuMjcyMDAzLDE4LjI4Nzk5OEwzMC42MDgwMDIsMTguMjg3OTk4TDMwLjYwODAwMiwxMC4zNTE5OTdMNTkuNTM2MDAzLDEwLjM1MTk5N0w1OS41MzYwMDMsMTguMjg3OTk4TDQ5Ljg3MjAwMiwxOC4yODc5OThMNDkuODcyMDAyLDU0TDQwLjI3MjAwMyw1NEw0MC4yNzIwMDMsMTguMjg3OTk4WiIgZmlsbD0iI0ZGRkZGRiIgZmlsbC1vcGFjaXR5PSIxIi8+PC9nPjwvZz48L3N2Zz4=
 // @grant        GM_addStyle
