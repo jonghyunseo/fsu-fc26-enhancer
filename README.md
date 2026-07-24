@@ -14,6 +14,7 @@ GreasyFork에 공개된 `【FSU】EAFC FUT WEB 增强器`를 분석하고, FC26 
 ## 문서
 
 - [코드 분석 및 목표 설계](./docs/ANALYSIS.md)
+- [원본 출처 및 라이선스](./docs/UPSTREAM.md)
 
 분석 문서에는 다음 내용이 포함된다.
 
@@ -56,3 +57,7 @@ GreasyFork에 공개된 `【FSU】EAFC FUT WEB 增强器`를 분석하고, FC26 
 ## 주의
 
 이 코드는 EA FC Web App의 비공개 내부 객체를 후킹하며 구매, 판매, SBC 제출과 팩 개봉을 자동화할 수 있다. 계정 및 아이템에 영향을 주는 기능은 테스트 계정과 제한된 대상에서 먼저 검증해야 한다.
+
+## 라이선스와 출처
+
+원본 userscript는 `Futcd_kcka`가 MIT 라이선스로 공개한 코드다. 원본 출처와 기준 버전은 [UPSTREAM.md](./docs/UPSTREAM.md), 라이선스 전문은 [LICENSE](./LICENSE)를 참고한다. 이 저장소는 원본 작성자의 공식 저장소가 아니다.
