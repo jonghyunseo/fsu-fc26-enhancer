@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.10.04
+// @version      26.10.05
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1411,6 +1411,8 @@
             "fastsbc.plan.invalid":["方案已失效","方案已失效","Plan unavailable"],
             "fastsbc.plan.valid":["满足要求 · %1 名球员 · 无重复","滿足要求 · %1 名球員 · 無重複","Requirements met · %1 players · no duplicates"],
             "fastsbc.plan.playercount":["%1 名球员","%1 名球員","%1 players"],
+            "fastsbc.plan.layout.list":["列表","清單","List"],
+            "fastsbc.plan.layout.grid":["网格","網格","Grid"],
             "fastsbc.plan.fill":["填入方案 %1","填入方案 %1","Fill Plan %1"],
             "fastsbc.plan.filled":["方案已填入 SBC 阵容。","方案已填入 SBC 陣容。","Plan filled into the SBC squad."],
             "fastsbc.plan.submit":["提交方案 %1","提交方案 %1","Submit Plan %1"],
@@ -1911,7 +1913,12 @@
             .fsu-fastSBCPlan{box-sizing:border-box;display:flex;height:min(74vh,700px);max-height:calc(100vh - 150px);flex-direction:column;overflow:hidden;background:#191820;color:#fcfcfc;font-family:UltimateTeamCondensed,sans-serif}
             .fsu-fastSBCPlanHeader{flex:0 0 auto;padding:16px 18px 13px;border-bottom:1px solid #3f444b;background:linear-gradient(145deg,#252b35 0%,#1d1c25 78%)}
             .fsu-fastSBCPlanChallenge{overflow:hidden;color:#fcfcfc;font-family:UltimateTeam,sans-serif;font-size:18px;font-weight:700;line-height:22px;text-overflow:ellipsis;white-space:nowrap}
-            .fsu-fastSBCPlanSummary{margin-top:5px;color:#aeb3ba;font-size:13px;line-height:17px}
+            .fsu-fastSBCPlanHeaderMeta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:5px}
+            .fsu-fastSBCPlanSummary{min-width:0;flex:1 1 auto;overflow:hidden;color:#aeb3ba;font-size:13px;line-height:17px;text-overflow:ellipsis;white-space:nowrap}
+            .fsu-fastSBCPlanViewMode{display:grid;flex:0 0 auto;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;padding:2px;border:1px solid #454b54;border-radius:8px;background:#20232a}
+            .fsu-fastSBCPlanViewButton{box-sizing:border-box!important;min-width:50px!important;min-height:40px!important;height:40px!important;margin:0!important;padding:0 10px!important;border:0!important;border-radius:6px!important;background:transparent!important;color:#9da3aa!important;font-family:UltimateTeamCondensed,sans-serif!important;font-size:13px!important;line-height:38px!important;white-space:nowrap!important}
+            .fsu-fastSBCPlanViewButton[aria-pressed="true"]{background:#3b4754!important;color:#fff!important;box-shadow:inset 0 0 0 1px #1fc3c1!important}
+            .fsu-fastSBCPlanViewButton.disabled,.fsu-fastSBCPlanViewButton:disabled{opacity:.4!important}
             .fsu-fastSBCPlanNavigator{display:grid;flex:0 0 auto;grid-template-columns:48px minmax(0,1fr) 48px;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #353942;background:#22232b}
             .fsu-fastSBCPlanNav{box-sizing:border-box!important;display:grid!important;width:44px!important;min-width:44px!important;height:40px!important;min-height:40px!important;margin:0!important;padding:0!important;place-items:center!important;border:1px solid #4b515a!important;border-radius:9px!important;background:#30343e!important;color:#f6f7f8!important;font-family:Arial,sans-serif!important;font-size:28px!important;line-height:36px!important;touch-action:manipulation!important}
             .fsu-fastSBCPlanNav>*{margin:0!important;padding:0!important;color:inherit!important;font:inherit!important;line-height:1!important}
@@ -1925,20 +1932,26 @@
             .fsu-fastSBCPlan[data-state="filling"] .fsu-fastSBCPlanStatus,
             .fsu-fastSBCPlan[data-state="submitting"] .fsu-fastSBCPlanStatus{color:#f7d36a}
             .fsu-fastSBCPlan[data-state="invalid"] .fsu-fastSBCPlanStatus{color:#ff9e91}
-            .fsu-fastSBCPlanList{display:grid;min-height:0;flex:1 1 auto;grid-template-columns:repeat(4,minmax(0,1fr));align-content:start;gap:10px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:10px 12px;background:#191820;scrollbar-color:#575753 #23232b;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+            .fsu-fastSBCPlanList{display:flex;min-height:0;flex:1 1 auto;flex-direction:column;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:6px 12px;background:#191820;scrollbar-color:#575753 #23232b;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
             .fsu-fastSBCPlanList::-webkit-scrollbar{width:7px}
             .fsu-fastSBCPlanList::-webkit-scrollbar-track{background:#23232b}
             .fsu-fastSBCPlanList::-webkit-scrollbar-thumb{border:2px solid #23232b;border-radius:7px;background:#575753}
-            .fsu-fastSBCPlanPlayer{display:grid;min-width:0;min-height:150px;padding:3px 0;place-items:center;overflow:hidden}
-            .fsu-fastSBCPlanPlayerCard{display:grid;width:118px;height:146px;place-items:center;overflow:hidden;pointer-events:none}
-            .fsu-fastSBCPlanPlayerCardView{max-width:none!important;max-height:none!important;pointer-events:none!important;zoom:.43}
+            .fsu-fastSBCPlanPlayer{display:grid;min-width:0;min-height:228px;padding:3px 0;place-items:center;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.07)}
+            .fsu-fastSBCPlanPlayer:last-child{border-bottom:0}
+            .fsu-fastSBCPlanPlayerCard{display:grid;width:176px;height:222px;place-items:center;overflow:hidden;pointer-events:none}
+            .fsu-fastSBCPlanPlayerCardView{max-width:none!important;max-height:none!important;pointer-events:none!important;zoom:.66}
             .fsu-fastSBCPlanPlayerCard .fsu-cards,
             .fsu-fastSBCPlanPlayerCard .fsu-player-other,
             .fsu-fastSBCPlanPlayerCard .fsu-cards-attr,
             .fsu-fastSBCPlanPlayerCard .fsu-cards-pos,
             .fsu-fastSBCPlanPlayerCard .fsu-cardlock,
             .fsu-fastSBCPlanPlayerCard .fsu-lockbtn{display:none!important}
-            .fsu-fastSBCPlanPlayerCardFallback{display:grid;width:88px;height:122px;place-items:center;border:1px solid #4b515a;border-radius:10px;background:linear-gradient(145deg,#3b414b,#252831);color:#aeb3ba;font-family:UltimateTeam,sans-serif;font-size:26px;font-weight:700;clip-path:polygon(12% 0,88% 0,100% 9%,100% 82%,50% 100%,0 82%,0 9%)}
+            .fsu-fastSBCPlanPlayerCardFallback{display:grid;width:132px;height:184px;place-items:center;border:1px solid #4b515a;border-radius:10px;background:linear-gradient(145deg,#3b414b,#252831);color:#aeb3ba;font-family:UltimateTeam,sans-serif;font-size:30px;font-weight:700;clip-path:polygon(12% 0,88% 0,100% 9%,100% 82%,50% 100%,0 82%,0 9%)}
+            .fsu-fastSBCPlanList[data-layout="grid"]{display:grid;grid-template-columns:repeat(4,minmax(0,120px));align-content:start;justify-content:center;gap:0;padding:4px 6px}
+            .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayer{min-height:148px;padding:0;border:0}
+            .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCard{width:100%;max-width:120px;height:146px}
+            .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardView{zoom:.43}
+            .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardFallback{width:88px;height:122px;font-size:26px}
             .fsu-fastSBCPlanFooter{display:grid;flex:0 0 auto;grid-template-columns:minmax(0,.9fr) minmax(0,1fr) minmax(0,1.18fr);gap:9px;padding:11px 14px 13px;border-top:1px solid #3f444b;background:#22232b}
             .fsu-fastSBCPlanRegenerate,.fsu-fastSBCPlanFill,.fsu-fastSBCPlanSubmit{box-sizing:border-box!important;width:100%!important;min-height:44px!important;height:44px!important;margin:0!important;padding:0 12px!important;border-radius:9px!important;font-size:14px!important;line-height:42px!important;white-space:nowrap!important}
             .fsu-fastSBCPlanRegenerate{border:1px solid #4b515a!important;background:#30343e!important;color:#e5e7e9!important}
@@ -1951,7 +1964,7 @@
             .fsu-fastSBCPlanSubmit.disabled,.fsu-fastSBCPlanSubmit:disabled{filter:none!important;opacity:.38!important}
             .fsu-fastSBCPlanError{display:none;grid-column:1/-1;padding:8px 10px;border:1px solid #75433f;border-radius:8px;background:#422c2d;color:#ffc1b9;font-size:12px;line-height:16px}
             .fsu-fastSBCPlan[data-state="invalid"] .fsu-fastSBCPlanError{display:block}
-            @media (max-width:620px){.fsu-fastSBCPlanOverlay{padding:6px!important}.fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}.fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}.fsu-fastSBCPlanDialogBody{height:100%!important;min-height:0!important}.fsu-fastSBCPlan{height:100%!important;max-height:none!important}.fsu-fastSBCPlanList{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px 7px}.fsu-fastSBCPlanPlayer{min-height:136px;padding:0}.fsu-fastSBCPlanPlayerCard{width:104px;height:132px}.fsu-fastSBCPlanPlayerCardView{zoom:.39}.fsu-fastSBCPlanPlayerCardFallback{width:82px;height:112px}.fsu-fastSBCPlanFooter{grid-template-columns:repeat(2,minmax(0,1fr))}.fsu-fastSBCPlanRegenerate{grid-column:1/-1}}
+            @media (max-width:620px){.fsu-fastSBCPlanOverlay{padding:6px!important}.fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}.fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}.fsu-fastSBCPlanDialogBody{height:100%!important;min-height:0!important}.fsu-fastSBCPlan{height:100%!important;max-height:none!important}.fsu-fastSBCPlanHeaderMeta{gap:6px}.fsu-fastSBCPlanSummary{font-size:12px}.fsu-fastSBCPlanViewButton{min-width:46px!important;padding:0 7px!important}.fsu-fastSBCPlanList{padding:6px 7px}.fsu-fastSBCPlanPlayer{min-height:208px;padding:3px 0}.fsu-fastSBCPlanPlayerCard{width:162px;height:202px}.fsu-fastSBCPlanPlayerCardView{zoom:.6}.fsu-fastSBCPlanPlayerCardFallback{width:122px;height:170px}.fsu-fastSBCPlanList[data-layout="grid"]{grid-template-columns:repeat(3,minmax(0,114px));gap:0;padding:4px 2px}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayer{min-height:144px;padding:0}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCard{width:100%;max-width:114px;height:144px}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardView{zoom:.43}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardFallback{width:86px;height:120px}.fsu-fastSBCPlanFooter{grid-template-columns:repeat(2,minmax(0,1fr))}.fsu-fastSBCPlanRegenerate{grid-column:1/-1}}
             .phone .fsu-fastSBCPlanOverlay{padding:6px!important}
             .phone .fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}
             .phone .fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}
@@ -1959,12 +1972,20 @@
             .phone .fsu-fastSBCPlanDialogBody{height:100%!important;min-height:0!important}
             .phone .fsu-fastSBCPlan{height:100%!important;max-height:none!important}
             .phone .fsu-fastSBCPlanHeader{padding:12px 12px 10px}
+            .phone .fsu-fastSBCPlanHeaderMeta{gap:6px}
+            .phone .fsu-fastSBCPlanSummary{font-size:12px}
+            .phone .fsu-fastSBCPlanViewButton{min-width:46px!important;padding:0 7px!important}
             .phone .fsu-fastSBCPlanNavigator{padding:8px 10px}
-            .phone .fsu-fastSBCPlanList{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px 7px}
-            .phone .fsu-fastSBCPlanPlayer{min-height:136px;padding:0}
-            .phone .fsu-fastSBCPlanPlayerCard{width:104px;height:132px}
-            .phone .fsu-fastSBCPlanPlayerCardView{zoom:.39}
-            .phone .fsu-fastSBCPlanPlayerCardFallback{width:82px;height:112px}
+            .phone .fsu-fastSBCPlanList{padding:6px 7px}
+            .phone .fsu-fastSBCPlanPlayer{min-height:208px;padding:3px 0}
+            .phone .fsu-fastSBCPlanPlayerCard{width:162px;height:202px}
+            .phone .fsu-fastSBCPlanPlayerCardView{zoom:.6}
+            .phone .fsu-fastSBCPlanPlayerCardFallback{width:122px;height:170px}
+            .phone .fsu-fastSBCPlanList[data-layout="grid"]{grid-template-columns:repeat(3,minmax(0,114px));gap:0;padding:4px 2px}
+            .phone .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayer{min-height:144px;padding:0}
+            .phone .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCard{width:100%;max-width:114px;height:144px}
+            .phone .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardView{zoom:.43}
+            .phone .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardFallback{width:86px;height:120px}
             .phone .fsu-fastSBCPlanFooter{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px 10px 10px}
             .phone .fsu-fastSBCPlanRegenerate{grid-column:1/-1}
         `;
@@ -12183,6 +12204,8 @@
             return control;
         }
         events.createFastSBCPlanView = (session) => {
+            session.viewMode = session.viewMode === "grid" ? "grid" : "list";
+            let applyViewMode = () => {};
             const root = events.createElementWithConfig("div", {
                 classList: "fsu-fastSBCPlan",
                 attributes: {
@@ -12198,7 +12221,45 @@
             const summary = events.createElementWithConfig("div", {
                 classList: "fsu-fastSBCPlanSummary"
             });
-            header.append(challengeName, summary);
+            const headerMeta = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlanHeaderMeta"
+            });
+            const viewMode = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlanViewMode",
+                attributes: {
+                    "role": "group",
+                    "aria-label": `${fy("fastsbc.plan.layout.list")} / ${fy("fastsbc.plan.layout.grid")}`
+                }
+            });
+            const listModeControl = events.createFastSBCPlanButton(
+                fy("fastsbc.plan.layout.list"),
+                () => {
+                    if(!session.submitting){
+                        session.viewMode = "list";
+                        applyViewMode();
+                    }
+                },
+                "fsu-fastSBCPlanViewButton"
+            );
+            const gridModeControl = events.createFastSBCPlanButton(
+                fy("fastsbc.plan.layout.grid"),
+                () => {
+                    if(!session.submitting){
+                        session.viewMode = "grid";
+                        applyViewMode();
+                    }
+                },
+                "fsu-fastSBCPlanViewButton"
+            );
+            const listModeRoot = listModeControl.getRootElement();
+            const gridModeRoot = gridModeControl.getRootElement();
+            listModeRoot.setAttribute("title", fy("fastsbc.plan.layout.list"));
+            listModeRoot.setAttribute("aria-label", fy("fastsbc.plan.layout.list"));
+            gridModeRoot.setAttribute("title", fy("fastsbc.plan.layout.grid"));
+            gridModeRoot.setAttribute("aria-label", fy("fastsbc.plan.layout.grid"));
+            viewMode.append(listModeRoot, gridModeRoot);
+            headerMeta.append(summary, viewMode);
+            header.append(challengeName, headerMeta);
             root.appendChild(header);
 
             const navigator = events.createElementWithConfig("div", {
@@ -12245,8 +12306,19 @@
             root.appendChild(navigator);
 
             const list = events.createElementWithConfig("div", {
-                classList: "fsu-fastSBCPlanList"
+                classList: "fsu-fastSBCPlanList",
+                attributes: {
+                    "data-layout": session.viewMode
+                }
             });
+            applyViewMode = () => {
+                const mode = session.viewMode === "grid" ? "grid" : "list";
+                session.viewMode = mode;
+                list.setAttribute("data-layout", mode);
+                listModeRoot.setAttribute("aria-pressed", String(mode === "list"));
+                gridModeRoot.setAttribute("aria-pressed", String(mode === "grid"));
+            };
+            applyViewMode();
             root.appendChild(list);
 
             const footer = events.createElementWithConfig("div", {
@@ -12303,6 +12375,8 @@
                 root,
                 list,
                 controls: [
+                    listModeControl,
+                    gridModeControl,
                     previousControl,
                     nextControl,
                     regenerateControl,
@@ -12345,6 +12419,7 @@
                         ? `${status} · ${fy(["fastsbc.plan.valid", plan.snapshots.length])}${planMetrics}`
                         : status;
                     errorText.textContent = plan.error || fy("fastsbc.plan.changed");
+                    applyViewMode();
                     disposeRenderedItemViews();
                     list.replaceChildren();
                     _.forEach(plan.snapshots, (snapshot, index) => {
@@ -12396,6 +12471,8 @@
                         !session.submitting && session.currentIndex < session.plans.length - 1
                     );
                     regenerateControl.setInteractionState(!session.submitting);
+                    listModeControl.setInteractionState(!session.submitting);
+                    gridModeControl.setInteractionState(!session.submitting);
                     fillControl.setInteractionState(!session.submitting && plan.status === "ready");
                     submitControl.setInteractionState(!session.submitting && plan.status === "ready");
                     events.setFastSBCPlanControlText(
@@ -12601,6 +12678,7 @@
                 mode: challengeMode ? "challenge" : "simple",
                 challengeSpec,
                 currentIndex: 0,
+                viewMode: "list",
                 submitting: false,
                 view: null
             };
