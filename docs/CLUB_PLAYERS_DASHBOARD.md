@@ -35,6 +35,8 @@ UTClubHubView.clearTileContent
                       ├─ 열 수 × 6장 단위 추가 렌더링
                       └─ 카드 TAP
                            └─ openClubPlayerDetail
+                                ├─ ensureClubPlayerDetailMetadata
+                                ├─ getClubPlayerDetailStatSource
                                 ├─ getClubPlayerDetailData
                                 └─ EADialogViewController
 ```
@@ -124,14 +126,21 @@ UTClubHubView.clearTileContent
 
 PlayStyle+는 `getPlusPlayStyles()`, 일반 PlayStyle은 `getBasicPlayStyles()`를 우선 사용한다. 표시 이름은 EA 객체와 현지화 값을 먼저 사용하고, 없으면 `PlayerTrait` 열거형 이름, 마지막에는 trait ID로 안전하게 대체한다.
 
-선수 메타데이터가 이미 EA 저장소에 있으면 즉시 팝업을 만든다. 아직 없으면 해당 선수 한 명만 `PlayerMetaData.updateItemPlayerMeta()`로 요청하며, 응답이 없더라도 2.5초 후 사용 가능한 데이터로 계속 연다. 따라서 메타데이터 실패가 화면 전체를 무기한 막지 않는다.
+선수 메타데이터가 이미 EA 저장소에 있으면 `repositories.PlayerMeta`에서 읽어 현재 보유 아이템에 `setMetaData()`로 연결한 뒤 팝업을 만든다. 아직 없으면 해당 선수 한 명만 `PlayerMetaData.updateItemPlayerMeta()`로 요청하고, 응답 후에도 같은 연결 단계를 거친다. 응답이 없더라도 2.5초 후 사용 가능한 데이터로 계속 열기 때문에 메타데이터 실패가 화면 전체를 무기한 막지 않는다.
+
+세부 능력치는 먼저 메타데이터와 아이템의 업그레이드 정보를 반영한 `getSubAttribute()` 값을 사용한다. 각 대표 능력치와 EA 가중치로 다시 계산한 세부 능력치가 1보다 크게 어긋나면, 특수·진화 카드에서 EA가 업그레이드된 대표값만 노출한 경우로 판단한다. 이때 기존 FSU의 `fgCreateVirtualPlayers()`를 사용해 명시적인 세부 능력치 override는 보존하고 나머지만 대표값에 맞게 보정한다. 보정값을 사용한 경우 팝업 하단에 추정값임을 표시한다. 즉, 원본 세부값이 일치하는 일반 카드는 변경하지 않는다.
+
+EA 현지화 서비스가 없는 키 앞에 `*`를 붙여 반환하면 이를 번역 결과로 사용하지 않고 안정적인 영문 세부 능력치 이름으로 대체한다.
 
 반응형 구조는 다음과 같다.
 
 - 데스크톱: 최대 1040px 팝업, 카드와 요약을 2열로 배치하고 세부 능력치를 3열로 표시
 - 태블릿: 세부 능력치를 2열로 축소
-- 모바일: 화면 폭에 가까운 팝업, 카드와 요약을 1열로 쌓고 PlayStyle 및 세부 능력치를 1열로 표시
-- Android Edge를 포함한 터치 환경: 네이티브 `EventType.TAP`, `touch-action: manipulation`, 내부 관성 스크롤 사용
+- 모바일: `100dvh` 기반으로 실제 브라우저 표시 영역 안에 팝업을 고정하고, 카드와 요약을 1열로 쌓으며 PlayStyle 및 세부 능력치를 1열로 표시
+- 닫기: 모든 화면에서 오른쪽 상단에 44×44px `×` 버튼을 고정하고 EA 다이얼로그의 기본 `TAP` 종료 동작에 연결
+- Android Edge를 포함한 터치 환경: 네이티브 `EventType.TAP`, `touch-action: manipulation`, 팝업 내부 관성 스크롤 사용
+
+기존 하단 확인 버튼은 긴 본문과 모바일 브라우저 도구 모음 때문에 화면 밖으로 밀릴 수 있어 이 상세 팝업에서만 숨긴다. 닫기 동작은 항상 보이는 상단 `×`가 담당하며 다른 FSU 팝업의 버튼 구성에는 영향을 주지 않는다.
 
 ## 수명주기와 안전성
 
@@ -157,9 +166,13 @@ PlayStyle+는 `getPlusPlayStyles()`, 일반 PlayStyle은 `getBasicPlayStyles()`�
 - Club과 SBC Storage 간 동일 아이템 ID 중복 제거
 - 필드 선수 상세 데이터 6개 그룹과 29개 세부 능력치 생성
 - 골키퍼 상세 데이터 6개 그룹과 8개 골키퍼 세부 능력치 생성
+- 대표 PAC 92, 원본 세부값 76/78 모형을 기존 FSU 방식으로 91/93에 보정하고 가중 대표값이 92가 되는지 확인
+- 이미 일치하는 일반 선수는 보정 함수를 호출하지 않고, 골키퍼 대표·세부 능력치도 별도 구성으로 일치 판정
+- 저장소에 이미 있는 메타데이터와 비동기 로드한 메타데이터가 모두 현재 아이템에 연결되는지 확인
 - PlayStyle+와 일반 PlayStyle 분리 및 중복 제거
 - 상세 DOM의 정보, PlayStyle, 세부 능력치 섹션 생성
 - 카드와 상세 팝업 `UTItemView`, TAP 컨트롤의 수명주기 정리
+- 상단 닫기 버튼의 44×44px 터치 영역, EA 기본 종료 이벤트 연결, 모바일 동적 뷰포트 규칙 확인
 - 상세 기능이 FUT.GG 또는 다른 외부 API 요청을 만들지 않음
 
 EA Web App에서 수동으로 확인해야 할 항목:
@@ -174,8 +187,9 @@ EA Web App에서 수동으로 확인해야 할 항목:
 8. 반복 필터링과 화면 재진입 후 카드 뷰 또는 이벤트가 누적되지 않는가
 9. 일반 선수와 골키퍼 카드를 TAP하면 각각 올바른 능력치 그룹의 상세 팝업이 열리는가
 10. PlayStyle+와 일반 PlayStyle 아이콘 및 이름이 실제 카드 정보와 일치하는가
-11. 팝업을 반복해서 열고 닫은 뒤 카드 렌더러나 TAP 이벤트가 누적되지 않는가
-12. Android Edge 세로 화면에서 팝업이 가로로 넘치지 않고 내부 스크롤과 닫기 버튼이 동작하는가
+11. 특수·진화 카드의 대표 능력치와 세부 능력치가 일치하며, 추정값을 사용했다면 하단 안내가 표시되는가
+12. 팝업을 반복해서 열고 닫은 뒤 카드 렌더러나 TAP 이벤트가 누적되지 않는가
+13. Android Edge 세로 화면에서 팝업이 가로로 넘치지 않고 내부 스크롤과 오른쪽 상단 `×`가 동작하는가
 
 ## 후속 개선 후보
 
