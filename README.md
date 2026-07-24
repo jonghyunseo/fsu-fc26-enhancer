@@ -4,7 +4,7 @@ GreasyFork에 공개된 `【FSU】EAFC FUT WEB 增强器`를 분석하고, FC26 
 
 ## 프로젝트 상태
 
-- 현재 포크 버전: `26.09.6`
+- 현재 포크 버전: `26.09.7`
 - 원본 기준 버전: `26.09`
 - userscript: [`fsu-eafc-fut-web.user.js`](./fsu-eafc-fut-web.user.js)
 - 원본 SHA-256: `A2E0BEB018921CDD334D68BD4AF9BEE843F9F391A98E01E3B27D67E74D6B9634`
@@ -12,13 +12,15 @@ GreasyFork에 공개된 `【FSU】EAFC FUT WEB 增强器`를 분석하고, FC26 
 
 `6e3cc9f` 커밋은 내려받은 원본을 수정하지 않은 기준점이다.
 
-현재 구현된 첫 개선 기능은 Club 허브의 `My Players` 대시보드다. Club과 SBC Storage의 선수를 카드 그리드로 보고, 안정적으로 판별 가능한 속성으로 필터링하며, 열 수를 2~4개로 조절할 수 있다. 선수 카드를 누르면 모바일 대응 대형 상세 팝업에서 기본 정보, PlayStyle/PlayStyle+, 6대 능력치와 세부 능력치를 확인할 수 있다.
+Club 허브의 `My Players` 대시보드에서는 Club과 SBC Storage의 선수를 카드 그리드로 보고, 안정적으로 판별 가능한 속성으로 필터링하며, 열 수를 2~4개로 조절할 수 있다. 선수 카드를 누르면 모바일 대응 대형 상세 팝업에서 기본 정보, PlayStyle/PlayStyle+, 6대 능력치와 세부 능력치를 확인할 수 있다.
+
+진화 선수 검색 화면에는 기본 `검색` 버튼 아래 `Browse Eligible Players` 진입점이 추가된다. 현재 진화 조건을 통과한 Club 선수만 같은 필터·카드 그리드로 탐색할 수 있고, 카드 선택은 EA의 기존 진화 미리보기 및 오류 처리 경로로 전달된다.
 
 ## Edge / Tampermonkey 설치
 
 1. 기존 GreasyFork판 FSU가 설치되어 있다면 먼저 **비활성화**한다.
 2. Edge 주소창에서 [이 저장소의 userscript 설치 링크](https://raw.githubusercontent.com/jonghyunseo/fsu-fc26-enhancer/main/fsu-eafc-fut-web.user.js)를 직접 연다.
-3. Tampermonkey 설치 화면에서 버전이 `26.09.6` 이상인지 확인하고 **설치**를 누른다.
+3. Tampermonkey 설치 화면에서 버전이 `26.09.7` 이상인지 확인하고 **설치**를 누른다.
 4. 같은 이름의 FSU 스크립트가 두 개 동시에 활성화되지 않게 한다.
 
 Tampermonkey의 **도구 → URL에서 가져오기** 화면에서 `디코딩 중` 상태가 오래 지속되면 해당 작업을 취소하고 위 링크를 주소창에서 직접 여는 방식을 먼저 사용한다. 이 포크는 설치 지연을 줄이기 위해 원본에 중복 선언되어 있던 Lodash CDN 의존성 하나를 제거했다.
@@ -27,6 +29,7 @@ Tampermonkey의 **도구 → URL에서 가져오기** 화면에서 `디코딩 �
 
 - [코드 분석 및 목표 설계](./docs/ANALYSIS.md)
 - [My Players 대시보드 설계](./docs/CLUB_PLAYERS_DASHBOARD.md)
+- [진화 선수 선택기 설계](./docs/ACADEMY_PLAYER_SELECTOR.md)
 - [원본 출처 및 라이선스](./docs/UPSTREAM.md)
 
 분석 문서에는 다음 내용이 포함된다.
@@ -47,6 +50,7 @@ Tampermonkey의 **도구 → URL에서 가져오기** 화면에서 `디코딩 �
 ├─ docs/
 │  ├─ ANALYSIS.md            # 분석 및 개선 설계 기준서
 │  ├─ CLUB_PLAYERS_DASHBOARD.md
+│  ├─ ACADEMY_PLAYER_SELECTOR.md
 │  └─ UPSTREAM.md            # 원본 출처와 라이선스
 ├─ LICENSE
 └─ README.md
