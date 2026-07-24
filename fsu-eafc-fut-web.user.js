@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.09.7
+// @version      26.09.8
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1775,6 +1775,8 @@
             .fsu-academyClubPlayersSelector .fsu-lockbtn{display:none!important}
             .phone .fsu-academyClubPlayersEntryRow{margin-top:9px}
             .phone .fsu-academyClubPlayersEntry{min-height:52px!important;font-size:17px!important}
+            body.fsu-clubPlayerDetailOpen .fsu-clubPlayersToolbar{z-index:0!important}
+            .view-modal-container.fsu-clubPlayerDetailModal{z-index:40!important}
             .fsu-clubPlayerDetailDialog{position:relative!important;box-sizing:border-box!important;width:min(1040px,calc(100vw - 32px))!important;max-width:calc(100vw - 32px)!important;overflow:hidden!important;color:#fcfcfc}
             .fsu-clubPlayerDetailDialogTitle{box-sizing:border-box!important;max-width:100%!important;padding-right:58px!important;padding-left:58px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
             .fsu-clubPlayerDetailClose{position:absolute!important;z-index:30!important;top:8px!important;right:8px!important;display:grid!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;margin:0!important;padding:0!important;place-items:center!important;border:1px solid rgba(255,255,255,.2)!important;border-radius:50%!important;background:rgba(25,24,32,.9)!important;box-shadow:0 4px 14px rgba(0,0,0,.32)!important;color:#fff!important;font-family:Arial,sans-serif!important;font-size:30px!important;font-weight:300!important;line-height:40px!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
@@ -1845,7 +1847,9 @@
             .fsu-clubPlayerDetailSource{padding:0 24px 20px;color:#7f858c;font-size:11px;line-height:15px;text-align:center}
             @media (max-width:900px){.fsu-clubPlayerDetailHero{grid-template-columns:220px minmax(0,1fr);gap:18px;padding:18px}.fsu-clubPlayerDetailCardStage{min-height:290px}.fsu-clubPlayerDetailFactGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.fsu-clubPlayerDetailAttributeGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
             .phone .fsu-clubPlayerDetailDialog{display:flex!important;width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important;flex-direction:column!important}
-            .phone .fsu-clubPlayerDetailDialog .ea-dialog-view--body{min-height:0!important;max-height:none!important;flex:1 1 auto!important}
+            .phone .fsu-clubPlayerDetailDialog>.ea-dialog-view--title,.phone .fsu-clubPlayerDetailDialog>header{box-sizing:border-box!important;display:flex!important;min-height:52px!important;height:52px!important;flex:0 0 52px!important;align-items:center!important;justify-content:center!important;margin:0!important;padding:0 58px!important;overflow:hidden!important}
+            .phone .fsu-clubPlayerDetailDialog .fsu-clubPlayerDetailDialogTitle{box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:hidden!important;font-size:20px!important;line-height:28px!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+            .phone .fsu-clubPlayerDetailDialog .ea-dialog-view--body{min-height:0!important;max-height:none!important;flex:1 1 auto!important;margin:0!important}
             .phone .fsu-clubPlayerDetailDialog .fsu-clubPlayerDetailMessage{height:100%!important;min-height:0!important}
             .phone .fsu-clubPlayerDetail{height:100%!important;max-height:none}
             .phone .fsu-clubPlayerDetailHero{grid-template-columns:1fr;gap:12px;padding:12px}
@@ -14647,6 +14651,7 @@
             const activePopupRoot = events.clubPlayerDetailPopup?.getView?.()?.getRootElement?.();
             if(events.clubPlayerDetailPopup && !activePopupRoot?.isConnected){
                 events.clubPlayerDetailPopup = null;
+                document.body?.classList.remove("fsu-clubPlayerDetailOpen");
             }
             if(events.clubPlayerDetailOpening || events.clubPlayerDetailPopup || !record?.item){
                 return;
@@ -14655,6 +14660,12 @@
             events.showLoader();
             let detailView = null;
             let popupController = null;
+            let modalContainer = null;
+            const releasePopupLayer = () => {
+                modalContainer?.classList.remove("fsu-clubPlayerDetailModal");
+                document.body?.classList.remove("fsu-clubPlayerDetailOpen");
+                modalContainer = null;
+            };
             try {
                 await events.ensureClubPlayerDetailMetadata(record.item);
                 detailView = events.createClubPlayerDetailView(record);
@@ -14676,6 +14687,7 @@
                 popupRoot.setAttribute("aria-modal", "true");
                 popupView.__title?.classList.add("fsu-clubPlayerDetailDialogTitle");
                 popupView.__msg.classList.add("fsu-clubPlayerDetailMessage");
+                detailView.root.scrollTop = 0;
                 popupView.__msg.replaceChildren(detailView.root);
                 const primaryButton = popupView.__btnContainer?.querySelector("button");
                 primaryButton?.classList.remove("text");
@@ -14706,14 +14718,30 @@
                     if(events.clubPlayerDetailPopup === popupController){
                         events.clubPlayerDetailPopup = null;
                     }
+                    releasePopupLayer();
                     popupController.dealloc();
                 });
                 events.clubPlayerDetailPopup = popupController;
+                document.body?.classList.add("fsu-clubPlayerDetailOpen");
                 gPopupClickShield.setActivePopup(popupController);
+                const syncPopupLayer = () => {
+                    if(!popupRoot.isConnected){
+                        return;
+                    }
+                    modalContainer = popupRoot.closest(".view-modal-container");
+                    modalContainer?.classList.add("fsu-clubPlayerDetailModal");
+                    modalContainer && (modalContainer.scrollTop = 0);
+                    popupRoot.scrollTop = 0;
+                    popupView.__msg.scrollTop = 0;
+                    detailView.root.scrollTop = 0;
+                };
+                syncPopupLayer();
+                requestAnimationFrame(syncPopupLayer);
             } catch(error) {
                 if(events.clubPlayerDetailPopup === popupController){
                     events.clubPlayerDetailPopup = null;
                 }
+                releasePopupLayer();
                 const popupOwnsItemView = popupController?._fsu?.itemView === detailView?.itemView;
                 if(popupController){
                     popupController.dealloc?.();
