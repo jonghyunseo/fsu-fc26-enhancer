@@ -19,6 +19,7 @@
 - 이 저장소는 원본 작성자가 운영하는 공식 저장소가 아니다.
 - 첫 Git 커밋 `6e3cc9f`는 분석 기준으로 보존한 버전 26.09 소스다.
 - 이후 변경 사항은 이 저장소의 Git 이력과 문서에서 구분한다.
+- 개선판의 Tampermonkey `@downloadURL`과 `@updateURL`은 원본 자동 업데이트가 포크 변경을 덮어쓰지 않도록 이 저장소의 raw userscript를 가리킨다.
 - EA, EA SPORTS FC, FUTBIN, FUT.GG, FutNext 등 제3자 서비스와 이 저장소는 공식적인 제휴 관계가 없다.
 
 ## 라이선스
