@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.09
+// @version      26.09.1
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1530,6 +1530,49 @@
             "pickpreview.popupm":["请注意此处仅为展示挑选球员的预览，并非全部获得。且可能存在数据差异，请以游戏本身效果为准。","請注意，此處僅為展示可挑選球員的預覽，並非實際全部獲得的內容。且可能存在資料差異，請以遊戲內的實際效果為準。","Please note that this is only a preview of the selectable players and does not represent all obtained items. Some data discrepancies may occur; please refer to the in-game results as the final standard."],
             "inpacktile.title":["包内球员","包內球員","In Packs"],
             "inpacktile.desc":["仅为展示，不包含常驻的低概率传奇和英雄。","僅供展示，不包含常駐的低機率傳奇與英雄。","For display only. Does not include permanently available low-probability Icons and Heroes."],
+            "clubplayers.tile.title":["我的球员","我的球員","My Players"],
+            "clubplayers.tile.desc":["浏览俱乐部与SBC仓库中的球员。","瀏覽俱樂部與SBC倉庫中的球員。","Browse players in your Club and SBC Storage."],
+            "clubplayers.scope":["俱乐部 + SBC仓库","俱樂部 + SBC倉庫","Club + SBC Storage"],
+            "clubplayers.search":["搜索球员姓名","搜尋球員姓名","Search player name"],
+            "clubplayers.filter.minovr":["最低评分","最低評分","Min OVR"],
+            "clubplayers.filter.maxovr":["最高评分","最高評分","Max OVR"],
+            "clubplayers.filter.position":["位置","位置","Position"],
+            "clubplayers.filter.primary":["仅首选位置","僅首選位置","Primary only"],
+            "clubplayers.filter.nation":["国家/地区","國家/地區","Nation"],
+            "clubplayers.filter.league":["联赛","聯賽","League"],
+            "clubplayers.filter.club":["俱乐部","俱樂部","Club"],
+            "clubplayers.filter.rarity":["稀有度","稀有度","Rarity"],
+            "clubplayers.filter.quality":["品质","品質","Quality"],
+            "clubplayers.filter.skills":["花式动作","花式動作","Skill Moves"],
+            "clubplayers.filter.weakfoot":["逆足","逆足","Weak Foot"],
+            "clubplayers.filter.foot":["惯用脚","慣用腳","Strong Foot"],
+            "clubplayers.filter.gender":["性别","性別","Gender"],
+            "clubplayers.filter.location":["存放位置","存放位置","Location"],
+            "clubplayers.filter.tradeable":["交易状态","交易狀態","Trade Status"],
+            "clubplayers.filter.sort":["排序","排序","Sort"],
+            "clubplayers.filter.columns":["列数","欄數","Columns"],
+            "clubplayers.select.all":["全部","全部","All"],
+            "clubplayers.quality.bronze":["青铜","青銅","Bronze"],
+            "clubplayers.quality.silver":["白银","白銀","Silver"],
+            "clubplayers.quality.gold":["黄金","黃金","Gold"],
+            "clubplayers.quality.special":["特殊","特殊","Special"],
+            "clubplayers.location.club":["俱乐部","俱樂部","Club"],
+            "clubplayers.location.storage":["SBC仓库","SBC倉庫","SBC Storage"],
+            "clubplayers.tradeable.yes":["可交易","可交易","Tradeable"],
+            "clubplayers.tradeable.no":["不可交易","不可交易","Untradeable"],
+            "clubplayers.foot.left":["左脚","左腳","Left"],
+            "clubplayers.foot.right":["右脚","右腳","Right"],
+            "clubplayers.gender.male":["男","男","Male"],
+            "clubplayers.gender.female":["女","女","Female"],
+            "clubplayers.sort.ratingdesc":["评分：高到低","評分：高到低","Rating: High to Low"],
+            "clubplayers.sort.ratingasc":["评分：低到高","評分：低到高","Rating: Low to High"],
+            "clubplayers.sort.nameasc":["姓名：A-Z","姓名：A-Z","Name: A-Z"],
+            "clubplayers.sort.namedesc":["姓名：Z-A","姓名：Z-A","Name: Z-A"],
+            "clubplayers.results":["%1 / %2 名球员","%1 / %2 名球員","%1 of %2 players"],
+            "clubplayers.visible":["显示 %1 / %2","顯示 %1 / %2","Showing %1 of %2"],
+            "clubplayers.reset":["重置筛选","重設篩選","Reset Filters"],
+            "clubplayers.loadmore":["加载更多","載入更多","Load More"],
+            "clubplayers.empty":["没有符合当前筛选条件的球员。","沒有符合目前篩選條件的球員。","No players match the current filters."],
             "player.inclub":["已拥有","已擁有","Owned"],
             "player.noclub":["未拥有","未擁有","Not Owned"],
             "specialtile.title":["特殊品质","特殊品質","Special Quality"],
@@ -1620,7 +1663,64 @@
             "uasBtn":"<button class=\"btn-standard section-header-btn mini call-to-action fsu-getprice\" id=\"uasreset\">{uasreset.btntext}</button>",
         };
         info.base.sytle = ".tns-horizontal.tns-subpixel>.tns-item{position: relative;}button.notevents{pointer-events: none;color: #a4a9b4;}.btn-standard.section-header-btn.mini.call-to-action.fsu-getprice{margin-left: 1rem;}.btn-standard.section-header-btn.mini.call-to-action.fsu-getprice:hover{background-color:#e9dfcd}.view-modal-container.form-modal header .fsu-getprice{position: absolute;top: .5rem;left: 0;height: 2rem;line-height: 2rem;}.ut-sbc-set-tile-view.production-tagged .tileHeader::before{display:none;}a.header_explain{color: #a2a2a2;text-decoration: none;line-height: 3rem;}a.header_explain:hover{color: #ffffff;}.ut-fifa-header-view{display: flex;justify-content: space-between;}    .fsu-loading-close{display: none;position: absolute;bottom: 38%;z-index: 999;}.fsu-loading .fsu-loading-close{display: block;text-align: center;}                                                               .fsu-sbc-info div{width: 50%;}.fsu-sbc-info div:last-child{display: flex;justify-content: space-around;}.fsu-sbc-info .currency-coins::after{font-size:16px}                .rewards-footer li{position: relative;}.fsu-sbc-vplayer {position: absolute;bottom: .25rem;right:0;background-color: #8A6E2C;padding: .5rem;color: #15191d;line-height: 1rem;font-size: 16px;}.fsu-sbc-vplayer:hover{background-color: #f6b803;}                 @media screen and (min-width:1280px) and (max-width:1441px) {.ut-split-view {padding:0;}.ut-split-view>.ut-content {max-height:100%;}}                     li.with-icon.hide {display: none;}                      .fsu-input{border: 0 !important;background-color: rgba(0,0,0,0) !important;padding-left: 0 !important;font-family: UltimateTeamCondensed,sans-serif;font-size: 1em;color: #f8eede;}                  .fsu-quick{position:absolute;top:100%;width:100%;display:flex;align-items:center;font-family:UltimateTeam,sans-serif;justify-content:center;margin-top:.2rem}.fsu-quick.top .fsu-quick-list{display:flex;align-items:center}.fsu-quick-list .im{height:1.8rem;line-height:1.8rem;cursor:pointer;background-color:#2b3540;font-family:UltimateTeam,sans-serif;border-radius:4px;padding:0 .2rem;font-size:1rem;font-weight:900;color:#f2f2f2;overflow: hidden;}.fsu-quick-list .im:hover{background-color:#394754}.fsu-quick-list.other .im{background-color:#f8eede;color:#ef6405;font-weight:500;margin-left:.3rem;text-align:center;}.fsu-quick-list.other .im:hover{background-color:#f5efe6}.fsu-quick-list .im span{font-size:.8rem;font-weight:300;color:#a4a9b4}.fsu-quick-list.left .im{margin-right:.3rem}.fsu-quick-list.right .im{margin-left:.3rem}.fsu-quick-inr{font-size:.8rem;margin:0 .3rem}.fsu-quick.right{position:absolute;top:50%;width:2rem;display:block;right:0%;z-index:3;-webkit-transform:translateY(-50%) !important;transform:translateY(-50%) !important}.phone .fsu-quick.right{top:8rem;-webkit-transform:translateY(0%) !important;transform:translateY(0%) !important}.fsu-quick.right .fsu-quick-list .im{width:1.4rem;margin-bottom:.2rem;text-align:center}.fsu-quick.right .fsu-quick-list .im.disabled{background-color:#30302e;color:#656563}.entityContainer>.name.untradeable{color:#f6b803}                                  .phone .fsu-sbc-info{font-size:.875rem}.phone .fsu-task{display:block;font-size:.875rem}.phone .fsu-price-box.right > div .value{font-size:1rem;margin-top:.2rem}.phone .fsu-price-box.right > div .title{font-size:.875rem}.phone .fsu-player-other > div{font-size:0.6rem}.phone .small.player .fsu-cards-price{font-size:.875rem}.phone .small.player .fsu-cards-price::after{font-size:.875rem}.phone .fsu-cards.fsu-cards-attr{font-size:.6rem}.phone .fsu-quick-list .im{font-size:.875rem}                                              .ut-pinned-item .listFUTItem.has-auction-data .fsu-player-other{margin-top:0 !important;top:.8rem;right:.2rem;position:absolute;z-index:2}        .fsu-sbcfilter-box{align-items:center;background-color:#394754;display:flex;justify-content:center;padding:1rem;z-index:10}.fsu-sbcfilter-option{align-items:center;box-sizing:border-box;display:flex;flex:1;max-width:300px}.fsu-sbcfilter-option .ut-drop-down-control{margin-left:1rem;flex:1}                                .fsu-setbox{display: grid;grid-template-columns: repeat(3, minmax(0, 1fr));}.phone .fsu-setbox{display: grid;grid-template-columns: repeat(1, minmax(0, 1fr));}                                  .btn-standard.mini.fsu-reward-but{height:2rem;line-height:2rem;position:absolute;top:.2rem;left:50%;transform:translateX(-50%)}.btn-standard.mini.fsu-reward-but.pcr{bottom:1.9rem;top:auto}           .btn-standard.mini.fsu-pickspc{line-height:2rem;height:2rem;margin:.5rem auto 0 auto}.ut-image-button-control.back-btn.fsu-picksback{height:100%;width:3rem;position:absolute;left:0;font-size:1.6rem}                       .fsu-fcount{position:absolute;right:0.5rem;height:1.4rem;top:.8rem;line-height:1.5rem;padding:0 .4rem;border-radius:.2rem;z-index:1;background-color: #264A35;}        .phone .fsu-store-tile .ut-tile-content-graphic-info .description{display:block;}        .fsu-range button{margin:0}                                                               .fsu-price-box{font-family:UltimateTeamCondensed,sans-serif}.fsu-price-box.right{position:absolute;right:1rem;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%);display:flex;align-items:center}.fsu-price-box.right>div{background-color:#3B4754;color: #ffffff;padding:0.5rem;text-align:center;border-radius:4px;margin-top:0;display:block}.fsu-price-box.right>div .title{color:#a4a9b4;padding:0;font-size:1rem;line-height:1rem}.fsu-price-box.right>div .title span.plus{color:#36b84b;font-weight:500;padding-left:.2rem}.fsu-price-box.right>div .title span.minus{color:#d21433;font-weight:500;padding-left:.2rem}.fsu-price-val .currency-coins::after{font-size:1rem;margin-top:-3px}.fsu-price-box.bottom{padding-left:6.3rem;margin:.2rem 0rem}.fsu-price-box.bottom>div{display:flex;align-items:center;font-size:0.9375rem}.fsu-price-box.bottom>div .title{color:#a4a9b4;margin-right:.2rem}.fsu-price-box.bottom .fsu-price-val .currency-coins::after{font-size:inherit}.fsu-price-box.trf{position:absolute;left:54%;margin-top:.2rem}.fsu-price-box.trf .fsu-price-val{display:flex;align-items:center;background-color:#3B4754;color: #ffffff;text-align:center;border-radius:4px;padding:0 .3rem;height:20px}.fsu-price-box.trf .fsu-price-val .title{font-size:.875rem;margin-right:.2rem}.fsu-price-box.trf .fsu-price-val .currency-coins::after{margin-top:-2px}.fsu-price-box.top{position:absolute;right:0%;top:8%;display:flex;align-items:center}.fsu-price-box.top>div{display:flex;align-items:center;background-color:#3B4754;color: #ffffff;padding:.1rem 0.5rem;text-align:center;border-radius:4px}.fsu-price-box.top>div .title{font-size:0.875rem;margin-right:0.5rem}.fsu-price-last{margin-right:.5rem}.fsu-player-other{display:flex;margin-top:.2rem;font-family:UltimateTeamCondensed,sans-serif;font-size:.8rem;line-height:1rem}.fsu-price-box.top+.fsu-player-other{margin-top:.4rem}                                                                    .fsu-cards-lea-small,.fsu-cards-accele-large,.fsu-cards-meta,.fsu-cards-price{position:absolute;z-index:2;font-family:UltimateTeamCondensed,sans-serif;font-weight:300;text-align:center;width:1.6rem;top:25%}.fsu-cards-lea-small{bottom:8%;height:16%;font-size:70%;width:100%;top:auto;font-weight:500;line-height:1}.fsu-cards-lea-small~.playStyle,.ut-squad-pitch-view:not(.sbc) .fsu-cards-lea-small{display:none !important}.specials .fsu-cards-lea-small{bottom:10%}.fsu-cards-accele-large,.fsu-cards-meta,.fsu-cards-price{width:auto !important;padding:0 0.2rem;left:50%;-webkit-transform:translateX(-50%) !important;transform:translateX(-50%) !important;white-space:nowrap;background-color:#13151d;border:1px solid;border-radius:5px}.fsu-cards-accele-large,.fsu-cards-meta{bottom:0;top:auto !important}.fsu-cards-price{color:#fff;top:0 !important}.ut-squad-pitch-view:not(.sbc) .fsu-cards-lea-small~.playStyle{display:block !important}            .fsu-cards-attr,.fsu-cards-pos{position:absolute;z-index:2;font-family:UltimateTeamCondensed,sans-serif;font-weight:300;text-align:center;top:25%;display:flex;flex-direction:column;gap:2px;transform: scale(0.9);}                .large.player~.fsu-cards-attr,.large.player .fsu-cards-attr,.ut-tactics-instruction-menu-view  .fsu-cards-attr{left:calc(50% + 61px);font-size:14px;gap:4px;transform: scale(1);}           .large.player~.fsu-cards-attr > div,.large.player .fsu-cards-attr > div,.large.player~.fsu-cards-pos > div,.large.player .fsu-cards-pos > div{width:28px;height:16px;line-height:17px}       .small.player~.fsu-cards-attr{left:70px;font-size:12px;top:50%;transform:translateY(-50%) scale(0.9);}.small.player~.fsu-cards-attr > .fsu-bodytype{font-size:11px}                         .reward.small .small.player~.fsu-cards-attr{left:calc(50% + 42px);top:20%}.reward.small .small.player~.fsu-cards-pos{left:calc(50% - 66px);top:20%;font-size:12px}             .ut-squad-slot-view .small.player~.fsu-cards-attr{left:auto;right:-4px}              .large.player~.fsu-cards-pos,.large.player .fsu-cards-pos,.ut-tactics-instruction-menu-view  .fsu-cards-pos{left:calc(50% - 90px);font-size:14px;gap:4px;transform: scale(1);}                  .ut-squad-slot-view .small.player~.fsu-cards-pos{flex-direction:row;font-size:12px;top:auto;bottom:-1.6rem;left:50%;transform:translate(-50%,0)}                   .ut-squad-slot-dock-view .ut-squad-slot-view .small.player~.fsu-cards-pos{bottom:-.6rem}.ut-store-xray-pack-details-view .large.player~.fsu-cards-attr{left:calc(50% + 42px)}.large.player .fsu-cards-attr{right:0;left:auto;}.large.player .fsu-cards-pos{right:auto;left:0;}       .fsu-akb .ut-toggle-cell-view>.ut-toggle-control .ut-toggle-control--grip,.fsu-akb-title .ut-toggle-cell-view>.ut-toggle-control .ut-toggle-control--grip{font-family:UltimateTeam-Icons,sans-serif;font-style:normal;font-variant:normal;font-weight:400;text-transform:none;flex-shrink:0;font-size:1em;text-decoration:none;text-align:center;line-height:1.5rem;transition:color .3s,bottom .3s,top .3s}.fsu-akb .ut-toggle-cell-view>.ut-toggle-control .ut-toggle-control--grip::before,.fsu-akb-title .ut-toggle-cell-view>.ut-toggle-control .ut-toggle-control--grip::before{content:'\\E051';color:#3a4755}.fsu-akb .ut-toggle-cell-view>.ut-toggle-control.toggled:not(.disabled) .ut-toggle-control--grip::before,.fsu-akb-title .ut-toggle-cell-view>.ut-toggle-control.toggled:not(.disabled) .ut-toggle-control--grip::before{content:'\\E02F';color:#36b94b}.fsu-akb .ut-toggle-cell-view>.ut-toggle-control.toggled:not(.disabled) .ut-toggle-control--track,.fsu-akb-title .ut-toggle-cell-view>.ut-toggle-control.toggled:not(.disabled) .ut-toggle-control--track{background-color:#36b94b}.fsu-akb .ut-toggle-cell-view>.ut-toggle-cell-view--label{display:none}.fsu-akb .ut-toggle-cell-view{position:absolute;z-index:10;transform:scale(0.7);padding:0 1rem 1rem 0;cursor:pointer}.fsu-akb-title{align-items:center;background-color:#2b3540;display:flex;justify-content:space-between;padding:.75rem .5rem;border-top:solid 1px #556c95}.fsu-akb-left{display:flex;align-items:center}.fsu-akb-title .ut-toggle-cell-view>.ut-toggle-control .ut-toggle-control--grip{transition:color .3s,left .3s,right .3s}.fsu-akb-left>div{padding:0 .675rem 0 0}.fsu-akb-left>div:last-child{padding-right:0}                  body.landscape.futweb{min-height: 38rem;}                                                         html[dir=ltr] .listFUTItem .entityContainer>.name.fsulocked.locked,html[dir=ltr] .listFUTItem .entityContainer>.name.fsulocked.untradeable{padding-right:2.7em}html[dir=ltr] .listFUTItem .entityContainer>.name.fsulocked.locked::before,html[dir=ltr] .listFUTItem .entityContainer>.name.fsulocked.untradeable::before{right:1.4em}                                    .filter-btn.fsu-eligibilitysearch{height:1.8rem;width:1.8rem;position:absolute;right:0}.ut-image-button-control.filter-btn.fsu-eligibilitysearch::after{font-size:1rem;content:'\\E09D'}                  .item.player>.fsu-cards-rating{position:absolute;left:50%;top:50%;font-size:5rem;transform:translate(-50%,-50%)}.large.item.player>.fsu-cards-rating{font-size:7rem}.item.player.ut-item-loading>.fsu-cards-rating{opacity:1}.item.player.ut-item-loaded>.fsu-cards-rating{opacity:0}                        .fsu-chemistryfilter{position:absolute;right:.5rem;top:.5rem;}                          .ut-list-active-tag-view .label-container.fsu-inclubtag{background-color:#0b96ff}.ut-list-active-tag-view .label-container.fsu-inclubtag::after{border-color:#0b96ff}                                           .fsu-optionbest{position:relative}.fsu-optionbest > span,.fsu-optionbest > .player-pick-option,.fsu-optionbest > .fsu-pickspc{position:relative;z-index:1}.fsu-optionbest >.no-favorites-tile{position:absolute;max-width:100%;height:120%;width:100%;margin:-15% 0 0 0;z-index:0;top:0px;right:0px;padding:0;background-image: url(https://www.ea.com/ea-sports-fc/ultimate-team/web-app/content/25E4CDAE-799B-45BE-B257-667FDCDE8044/2025/fut/dynamicObjectives/groups/f4c231d9-a38c-44a4-a932-87af2136cca5/group_background.png);}.fsu-optionbest > .no-favorites-tile::before{font-size:2.2rem;height:2.2rem;width:2.2rem;line-height:2.2rem;}.fsu-optionbest > .player-pick-option.selected ~ .no-favorites-tile::before{display:none}                      .fsu-navsbc{height:80%;justify-content:flex-end;margin-right:1rem;flex: 0 0 auto;}.fsu-navsbc button{margin:-0.25rem;width:60px;}.phone .fsu-navsbc{margin-right:.25rem}.phone .fsu-navsbc button{margin:-.1rem}    .fsu-shownavsbc .ut-navigation-button-control{width:3rem}.fsu-shownavsbc .title{flex:1 0;position:relative !important;width:auto !important;text-align:left !important;padding:0 0 0 0.5rem !important}.fsu-shownavsbc .fsu-navsbc{height:3rem}.fsu-shownavsbc .ut-iteminfochange-button-control{display:none}.fsu-shownavsbc .fsu-navsbc button{width:2.6rem}        .phone .fsu-optionbest > .no-favorites-tile{height:108%;margin:-4% 0 0 0;border-radius:10px}.phone .fsu-optionbest > .no-favorites-tile::before{font-size:1rem;height:1rem;width:1rem;line-height:1rem;margin:.25rem}                .fsu-cards-attr div.fsu-academytips{display:flex;align-content:center;justify-content:center;background:linear-gradient(to bottom,#00A7CC 0,#007D99 100%);color:#0f1010;box-shadow:0 1px 1px 0 rgba(0,0,0,.5);border:none}.fsu-academytips-icon{height:0;width:10px;margin-left:-2px;}                              .fsu-academytips-icon::before,.ut-store-pack-details-view--description.fsu-packprice:before,.fsu-cards-price.fsu-unassigned:before{font-family:UltimateTeam-Icons,sans-serif;font-style:normal;font-variant:normal;font-weight:400;text-decoration:none;text-transform:none}.fsu-academytips-icon::before{content:'\\E001'}.ut-store-pack-details-view--description.fsu-packprice:before{color:#f7b702;display:inline-block;content:'\\E096';margin-right:.25rem}.fsu-cards-price.fsu-unassigned:before{content:'\\E0C4';display:inline-block;margin-right:.3em;vertical-align:middle;color:#f7b702}                                      .fsu-cards-meta{padding:0;display:flex;font-family:UltimateTeam,sans-serif;font-size:.8rem;height:1rem;align-items:center;z-index:5;cursor:pointer;}.fsu-cards-meta > div{margin-right:.2rem}.fsu-cards-meta > div:first-child{border-radius:4px 0 0 4px;height:1rem;width:1.6rem;font-weight:900;}                                button.currency.call-to-action.fsu-challengefastbtn{height:2.6rem;line-height:1.4rem;padding:0px 1rem;font-size:1rem}button.currency.call-to-action.fsu-challengefastbtn > span{display: block !important;}button.currency.call-to-action.fsu-challengefastbtn .subtext{font-size:80%;line-height:1rem;color:#a6a6a6;}.ut-sbc-challenge-table-row-view .fsu-challengefastbtn{width:70%}@media (min-width:768px){.ut-sbc-challenge-table-row-view .fsu-challengefastbtn{width:60%}}.ut-sbc-challenge-table-row-view.selected button.currency.call-to-action.fsu-challengefastbtn{background-color:#222426;color:#fcfcf7}.ut-sbc-challenge-table-row-view.selected button.currency.call-to-action.fsu-challengefastbtn.hover{background-color:#575753}.ut-sbc-challenge-table-row-view button.currency.call-to-action.fsu-challengefastbtn.disabled{background-color:#575753;color:#30312f}                                     .fsu-navsbccount{padding:.2em 0;margin-right:.5rem;align-items:center;display:flex;justify-content:flex-end}.fsu-navsbccount::after{background-position:right top;content:'';background-repeat:no-repeat;background-size:100%;display:inline-block;height:1em;vertical-align:middle;width:1em;background-image:url(https://www.ea.com/ea-sports-fc/ultimate-team/web-app/images/sbc/logo_SBC_home_tile.png);margin-top:-.15em;margin-left:.3em}                                .ut-image-button-control.filter-btn.fsu-transfer::after{content:'\\E0E5';font-size:1.6rem}.ut-image-button-control.filter-btn.fsu-club::after{content:'\\E052';font-size:1.6rem}.ut-image-button-control.filter-btn.fsu-swap::after{content:'\\E0E4';font-size:1.4rem}.ut-image-button-control.filter-btn.fsu-refresh::after{content:'\\E0C4';font-size:1.4rem}.ut-image-button-control.filter-btn.fsu-storage::after{content:'\\E0C9';font-size:1.4rem}.filter-btn.fsu-swap,.filter-btn.fsu-transfer,.filter-btn.fsu-club,.filter-btn.fsu-storage,.filter-btn.fsu-refresh{margin-left:1rem;width:3rem;height:3rem}                                            .ut-club-hub-view .tile.fsu-storage .tileContent:before { content:'\\E0C9'; }                          .ut-list-active-tag-view .label-container.fsu-instoragetag,.listFUTItem.hover .ut-list-active-tag-view .label-container.fsu-instoragetag{background-color:#f19be6}.ut-list-active-tag-view .label-container.fsu-instoragetag::after,.listFUTItem.hover .ut-list-active-tag-view .label-container.fsu-instoragetag::after{border-top-color:#f19be6}                                                                                                                                      .ut-player-picks-view .carousel-indicator-dots.fsu-pickbest li{width:16px;height:16px;text-align:center;overflow:hidden}.ut-player-picks-view .carousel-indicator-dots.fsu-pickbest li.active{transform:scale(1.4)}.ut-player-picks-view .carousel-indicator-dots.fsu-pickbest li.best::after{content:'\\E0D4';font-family:UltimateTeam-Icons,sans-serif;font-style:normal;font-variant:normal;font-weight:400;text-decoration:none;text-transform:none;color:#07f468;font-size:1rem;line-height:1.1rem}.ut-player-picks-view .carousel-indicator-dots.fsu-pickbest li.best.active::after{color:#fd4821}                                     .ut-button-group button.more.fsu-open::after{-webkit-transform:rotate(0deg) !important;transform:rotate(0deg) !important}                                                                .fsu-sbcNeedsBody,.fsu-realProdBody{height:30vh;overflow-y:auto}.fsu-sbcNeedsTitle,.fsu-sbcNeedsBodyItem,.fsu-realProdTitle,.fsu-realProdBodyItem{display:flex}.fsu-sbcNeedsTitle,.fsu-realProdTitle{padding:.5rem 1rem;background-color:#30312f;font-size:1rem}.fsu-sbcNeedsBodyItem,.fsu-realProdBodyItem{padding:.75rem 1rem;align-items:center;background-color:#18191b;font-size:1em}.fsu-sbcNeedsBodyItem:nth-of-type(even),.fsu-realProdBodyItem:nth-of-type(even){background-color:#212224}.fsu-sbcNeedsTitle div,.fsu-sbcNeedsBodyItem div{width:18%}.fsu-realProdTitle div,.fsu-realProdBodyItem div{width:20%}.fsu-sbcNeedsTitle div:last-child,.fsu-sbcNeedsBodyItem div:last-child{width:28%;text-align:right}.fsu-realProdTitle div:first-child,.fsu-realProdBodyItem div:first-child{width:40%}                                    .fsu-price-reward::after{font-family:UltimateTeam-Icons,sans-serif;content:'\\E0C9';font-size:94%;color:#fae8e6}.small.player .fsu-price-box{font-size:90%}.large.player .fsu-price-box{font-size:1rem}.small.player .fsu-price-box,.large.player .fsu-price-box{display:flex;justify-content:center;align-items:center}.fsu-price-box.old{background-color:#0f1417;color:#a4a9b4;border:0}.fsu-price-val[data-value='0'][data-type='1']{display:none !important}.fsu-cards-price::after{margin-left:.2em !important;margin-top:0}.large.player .fsu-cards-price.currency-coins::after{margin-top:-.15em}.fsu-price-box.right>div .value{font-size:1.2rem;margin-top:.5rem;line-height:1.2rem;display:flex;justify-content:center;align-items:center}.fsu-price-val .fsu-price-reward::after{margin-left:.3em;font-size:80%;margin-top:-.15em}                              .fsu-cards-foot{position:relative}.fsu-cards-foot::after{content:'';height:3px;width:3px;background-color:var(--fsu-cards-foot-color);display:block;position:absolute;bottom:0px;border-radius:2px}.fsu-cards-foot.l::after{left:0px}.fsu-cards-foot.r::after{right:0px}                    .fsu-cards-attr div,.fsu-cards-pos div{border:1px solid;border-color:inherit;line-height:100%;border-radius:5px;color:var(--fsu-cards-color);background:var(--fsu-cards-background);width:22px;white-space:nowrap;height: 13px;line-height: 15px;}                        .fsu-lockbtn{padding:0 8px !important;min-height:30px !important;position:absolute;right:64px;bottom:0;font-size:0.75rem !important;z-index:2;display:flex;align-items:center}.fsu-lockbtn.lock::before{content:'\\E09C'}.fsu-lockbtn.unlock::before{content:'\\E09C'}.fsu-lockbtn::before{font-family:UltimateTeam-Icons,sans-serif;padding-right:.2rem;content:'';display:block}.fsu-lockbtn.unlock{background-color:#fcfcf7;color:#151616}.fsu-lockbtn.unlock::after{content:'';display:block;position:absolute;left:18px;top:10px;width:2px;height:16px;background:#ff4c4c;transform:rotate(45deg);transform-origin:top center}.ut-club-hub-view .tile.fsu-lock .tileContent:before { content:'\\E09C'; }html[dir=ltr] .listFUTItem .entityContainer>.name.fsulocked::after{font-family:UltimateTeam-Icons,sans-serif;color:#d31332;margin-top:2px;position:absolute;width:1.1em;content:'\\E09C';right:0}html[dir=ltr] .listFUTItem .entityContainer>.name.fsulocked{padding-right:1.4em}html[dir=ltr] :not(.phone) .listFUTItem .entityContainer>.name.fsulocked.untradeable { max-width: 42%; }.fsu-cardlock{position:absolute;height:.9rem;width:.9rem;right:0;bottom:5%;z-index:2;background-color:#222426;border:1px solid #333d47;border-radius:100%;text-align:center;box-shadow:0 1px 3px #000;font-size:10.8px}.fsu-cardlock::before{font-family:UltimateTeam-Icons,sans-serif;content:'\\E09C';display:inline-block;vertical-align:middle;background-size:100% auto;color:#d31332;background-repeat:no-repeat}                                  .listfilter-btn{padding:0;width:100%;height:1.6rem;line-height:1.8rem;border-radius:.4rem;font-size:.9rem;min-height:1.6rem}                                      .ut-squad-building-set-status-label-view.refresh.sbccount{display:flex;align-items:center;gap:4px;opacity:0.5}.ut-squad-building-set-status-label-view.refresh.sbccount::before{content:'\\E0C2';color:#36b84b;font-size:14px;line-height:17px}                                                           .fsu-trypack-box{position:absolute;right:0}.landscape button.currency.fsu-trypack{padding:.25rem .5rem;width:auto;color:#f2f2f2;background:#556c95;border-radius:.6rem;align-items:center;display:flex;font-family:UltimateTeam-Icons,sans-serif;min-height:36px}.landscape button.currency.fsu-trypack .text{font-size:1rem;font-weight:600}.landscape button.currency.fsu-trypack::after{content:'\\E0A2';font-size:110%;padding-left:.2rem}.landscape button.currency.fsu-trypack.hover{background:#9e9e99}.phone .fsu-trypack-box{position:relative;}                                .fsu-player-other>div{background:#3B4754;color:#a4a9b4;padding:0.1rem 0.3rem;text-align:center;border-radius:20px;font-size:inherit;line-height:1.5;margin-right:0.5rem;height:1rem;white-space:nowrap}.fsu-player-other>div.swap{background:#36b84b;color:#201e20}.fsu-player-other>div.not{background:#8A6E2C;color:#201e20}.fsu-player-other>div.storage{background:#f6b803;color:#201e20}.fsu-player-other>div.yes{background:#264A35;color:#201e20}.large.player+.fsu-player-other{justify-content:center}.large.player+.fsu-player-other>div{margin-right:0rem}.fsu-player-other .currency-coins::after{font-size:.875rem;margin-top:-3px;margin-left:2px !important}@media (max-width:1130px){.has-auction-data .fsu-player-other{margin-top:5rem !important}.has-auction-data .fsu-price-box.trf{margin-top:5rem !important;left:auto;right:3%}}                                                                                     /*商店数量标识*/.ut-store-hub-view .storehub-tile.packs-tile.highlight[data-num]::after{content:attr(data-num);top:22px;padding:2px 6px;border-radius:4px;line-height:1.2rem;font-size:1.2rem;color:#0c0d0d;height:16px;width:auto}@media (min-width:768px){.ut-store-hub-view .storehub-tile.packs-tile.highlight[data-num]::after{height:20px;font-size:1.4rem;line-height:1.4rem;top:26px;padding:2px 8px}}                         /*旧卡样式去除边框*/.fsu-cards.old div{border:none}                                 /*阵容价值部分*/.fsu-squad-pValue{font-family:UltimateTeamCondensed,sans-serif;font-weight:400;font-size:.875rem;text-overflow:ellipsis;white-space:nowrap}.fsu-squad-pValue.currency-coins::after{font-size:.875rem;margin-left:.2em !important;margin-top:-.2em !important}.fsu-squad-pTitle .plus{color:#36b84b;padding-left:.1rem}.fsu-squad-pTitle .minus{color:#d21433;padding-left:.1rem}                                    /*弹窗球员列表显示优化*/.fsu-popupItemList{display:flex;flex-direction:column;gap:12px}.fsu-popupItemList > .listFUTItem{margin:0 !important}                                           /*改变为公共新标识*/.fsu-newtips{background-color: #ee2208;z-index:2;position:absolute;left:0;top:20px;transform:rotate(-45deg);transform-origin:0 100%;height:36px;line-height:42px;width:80px;text-align:center;font-weight:bold}            /*调整配色*/.fsu-task{display: flex;justify-content: space-between;padding: 0.5rem;background-color: #ee2208;}.fsu-task.no{background-color: #b1570c;}.task-expire{background-color: #b1570c;height: 2rem;line-height: 2rem;text-align: center;}.fsu-sbc-info{padding: 0.5rem;background-color: #2f4a5b;display: flex;font-family: UltimateTeamCondensed,sans-serif;justify-content: space-between;font-size: 1rem;}                        /*导航栏计数标识*/.fsu-tab-count{font-size:14px;align-self:center;padding:4px 6px;background-color: #575753;color:#a6a6a1;line-height:1;border-radius:4px;margin-left:6px}.selected > .fsu-tab-count{background-color: #ee2208;color:#fcfcfc}.selected > .fsu-tab-count.expire{background-color: #aa540c}.phone .fsu-tab-count{padding:2px 3px;font-size:12px;border-radius:3px}                           /*挑选包预览*/.fsu-popupItemList .listFUTItem .entityContainer>.name{padding-top:10px;padding-bottom:0px}html[dir=ltr] .fsu-popupItemList .listFUTItem .entityContainer .item{margin-right:14px}.fsu-popupItemOther{font-size:26px;display:flex;color:#ffffff;width:100%;justify-content:space-between;align-items:center;padding:8px;background-color:#2f4a5b;box-sizing:border-box;gap:12px}.fsu-popupItemOther .btn-standard{width:auto;flex:0;min-width:120px;margin-bottom:0}.fsu-popupItemTrait{display:flex;gap:8px}.phone .fsu-popupItemOther{flex-direction:column}.phone .fsu-popupItemOther .btn-standard{width:100%}.fsu-traitIcon.fut_icon.icon{color:#ffc91f}.fsu-traitIcon.fut_icon.icon_basetrait16{position:relative}.fsu-traitIcon.fut_icon.icon_basetrait16:before{content:'\\E074';z-index:1;position:relative;top:2px;background:#2f4a5b;clip-path:inset(5px 5px 10px 5px)}.fsu-traitIcon.fut_icon.icon_basetrait16::after{content:'\\E031';position:absolute;left:0;z-index:0}.fsu-popupItemList .listFUTItem .rowContent{border-radius:10px}                              /*卡片状态标识配色*/.fsu-cards-buyerror,.fsu-cards-storage,.fsu-cards-unassigned{left:auto !important;right:1% !important;background-color:#5b167d !important;border-color:#7c319e !important;color:#fae8e6 !important}.fsu-cards-buyerror{background-color:#d31332 !important;border-color:#d6675d !important;color:#fae8e6 !important}.fsu-cards-unassigned{background-color:#d19a01 !important;border-color:#DEBA43 !important;color:#FCFBF0 !important}                                             /*未分配快速任务标签*/.fsu-unassigned-fastsbcbox{display:flex;padding:6px 16px;gap:12px;overflow-x:auto}.fsu-unassigned-fastsbcbox .btn-standard{overflow:visible;position:relative;padding:3px 6px;border-radius:6px}.fsu-unassigned-fastsbcinfo{display:flex;align-items:flex-start;justify-content:center;flex-direction:column;max-width:10rem;overflow:hidden}.fsu-unassigned-fastsbcdot{position:absolute;top:-6px;right:-6px;background:#0ff;height:14px;width:14px;line-height:14px}.fsu-unassigned-fastsbctext{line-height:20px;max-width:10rem;font-size:14px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}.fsu-unassigned-fastsbctsub{line-height:12px;max-width:10rem;font-size:12px;color:rgb(166,166,166)}.fsu-unassigned-fastsbctsub span{margin:0px 2px}                                                                   /*可开球员tile和特殊品质tile*/.fsu-showPlayerstile header p{padding-top:4px;color:#a6a6a1}.fsu-showPlayerstile .img-box{text-align:center;height:160px}.fsu-showPlayerstile .img-box img{height:auto;width:80%}.fsu-showPlayerstile.fsu-specialTile .img-box img{height:80%;width:auto}.fsu-showPlayerstile.fsu-specialTile .img-box img:first-child{height:70%}.fsu-showPlayerstile.fsu-specialTile .img-box img:last-child{height:70%}.fsu-showPlayerstile .ut-label-view{margin-top:-32px}                               /*包内球员*/.fsu-showPlayers{}.fsu-showPlayersList{grid-template-columns:repeat(auto-fill,300px);display:grid;justify-content:center;gap:30px;padding:48px}.fsu-showPlayersItem{background-color:#2d2c36;border-radius:16px;color:#fcfcfc;padding:16px 16px 48px 16px;overflow:clip;position:relative}.phone .fsu-showPlayersList{padding:8px;gap:8px;grid-template-columns:1fr 1fr}.phone .fsu-showPlayersItem{zoom:0.6}.fsu-showPlayersTrais{display:flex;gap:8px;justify-content:center;font-size:24px;margin:8px 0;padding:8px 0;opacity:0.6;flex-wrap: wrap;}.fsu-showPlayersCard{display:grid;justify-content:center}.fsu-showPlayersBtn{width:100%;margin:0 -16px;border-radius:0;border:none;line-height:32px;position:absolute;bottom:0}.fsu-showPlayersLabel{position:absolute;left:0;top:0;line-height:32px;font-size:14px;color:#0f0f0f;background-color:#0b96ff;padding:0 20px;border-radius:0 0 16px 0}                               /*移除部分界面name的内间距*/.fsu-removeNamePadding ~ div.name{padding-top:14px !important;padding-bottom:0px !important}                                            /*卡组展示*/.fsu-showPlayersItem.fsu-showRarity{display:flex;flex-direction:column;font-size:14px;line-height:14px}.fsu-showRarityCard{display:grid;text-align:center;position:relative;margin-top:-16px}.fsu-showRarityCard img{height:200px;margin:auto}.fsu-showRarityCount{position:absolute;top:138px;width:100%;line-height:32px;font-size:32px;font-family:UltimateTeamCondensed,sans-serif;font-weight:bold}.fsu-showRarityBtns{display:flex;position:absolute;bottom:0;width:100%;margin:0 -16px;gap:1px;background-color:rgba(222,222,216,.25)}.fsu-showRarityBtns > button{flex:1;border:0;border-radius:0;line-height:32px}.fsu-showRarityBtns > button.btn-standard.disabled{background-color:#6a6a65}.fsu-showRarityTips{padding:0 16px;background-color:#0b96ff;color:#0f0f0f;height:32px;line-height:32px;position:absolute;top:0;left:0;border-bottom-right-radius:19px}.fsu-showRarityInfo{padding:16px 0;display:flex;flex-direction:column;gap:4px;font-size:12px;line-height:12px}.fsu-showRarityAttrs,.fsu-showRarityExpiry{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap}.fsu-showRarityExpiry{gap:6px}.fsu-showRarityExpiry i{color:#f7b702}.fsu-showRarityAttrs div{padding:4px 8px;background-color:rgba(7,244,104,.4);border-radius:20px}                          /*新SBC右侧快捷列表*/.fsu-substitutionBox{margin:0 16px;padding:12px;display:flex;flex-direction:column;gap:6px}.fsu-substitutionTitle{font-size:12px;line-height:14px}.fsu-substitutionBtns{background:#6a696d;display:flex;justify-content:space-around;font-size:14px;line-height:14px;gap:1px;border-radius:12px;overflow:clip;align-items:center}.fsu-substitutionBtns > button{flex:1;text-align:center;padding:12px 0;background:#504f52;font-size:inherit;line-height:inherit;border-radius:0;border:0;min-height:auto;}.fsu-substitutionTitle:not(:first-of-type) {margin-top: 12px;}                                                    /*新排序筛选*/.fsu-SortFilterBox{display:flex;gap:8px;margin:0px 16px 8px 16px}.fsu-SortFilterItem{flex:1;min-width:0}.fsu-SortFilterTitle{font-size:12px;line-height:14px;margin-bottom:4px;color:#a6a6a1}.fsu-SortFilterBtn{border:none;border-radius:8px;width:100%;min-height:auto;font-size:14px;background:#504f52;padding:8px 0px;white-space:nowrap;line-height:14px;overflow:hidden}.fsu-SortFilterBtn.priority{background: #786735;}                                   /*新阵容价值*/.fsu-SquadValue{position:absolute;right:20px;top:20px;font-family:UltimateTeamCondensed,sans-serif;font-weight:400}.fsu-SquadValueItem{background:#4e4f4dcc;font-size:17px;line-height:18px;padding:8px 10px 6px 10px;border-radius:4px;display:flex;align-items:center;gap:8px;color:#fcfcfc;justify-content:space-between;margin-bottom:10px}.fsu-SquadValueTitle{font-size:14px}.fsu-SquadValuePrice{}.phone .fsu-SquadValue{right:auto;left:14px;top:auto;bottom:62px;text-shadow:2px 2px 3px rgba(0,0,0,.5)}.phone .fsu-SquadValueItem{font-size:15px;line-height:16px;padding:0px;margin-bottom:0px;background:none;margin-top:8px}.phone .fsu-SquadValueTitle{font-size:13px}                               /*新价格显示框*/.fsu-PriceBar{position:absolute;transform:translateX(-50%) scale(0.9) !important;left:50%;z-index:2;font-family:UltimateTeamCondensed,sans-serif;display:flex;gap:8px}.fsu-PriceBarItem{display:flex;align-items:stretch;justify-content:center;background-color:#13151d;border:1px solid #3f444b;font-size:15px;border-radius:4px;overflow:hidden;height:17px;box-shadow:0px 1px 3px rgb(63 68 75 / 40%)}.fsu-PriceBarItem .fsu-PriceValue{display:flex;align-items:center;padding:3px 4px 0px 4px;color:#f7b702}.fsu-PriceBarItem .fsu-PriceType{display:flex;align-items:center;padding:2px 3px 0 1.6px;background-color:#2b3036;color:#a0a0a0;font-size:11px;font-weight:700;font-style:italic;letter-spacing:.4px;text-transform:uppercase}.large.player .fsu-PriceBar{transform:translateX(-50%) scale(1.2) !important;top:4px}.fsu-PriceRightBox{position:absolute;right:16px;z-index:2;transform:translateY(-50%) !important;top:50%;display:flex;gap:16px;font-family:UltimateTeamCondensed,sans-serif}.fsu-PriceRightItem{background-color:#3b4754;border-radius:8px;padding:8px 6px;color:#a4a9b4;display:flex;flex-direction:column;gap:8px;align-items:center}.fsu-PriceRightBox.top{top:16px}.fsu-PriceRightBox.top .fsu-PriceRightItem{flex-direction:row;padding:4px 6px 2px}.fsu-PriceRightBoxTitle{font-size:14px;text-align:center;line-height:14px}.fsu-PriceRightBoxBar{display:flex;justify-content:center;align-items:center}.fsu-PriceRightItem .fsu-PriceValue{font-size:22px;line-height:18px;color:#f7b702}.fsu-PriceRightItem .fsu-PriceType{text-transform:uppercase;font-size:14px;font-weight:500;padding:3px 4px 2.2px 1.6px;background-color:#2b3036;color:#a0a0a0;font-style:italic;margin-left:4px;border-radius:4px;margin-top:-3px}.fsu-PriceBarItem[data-show='0'],.fsu-PriceRightItem[data-show='0']{display:none !important}.fsu-PriceBarItem.tradable .fsu-PriceValue,.fsu-PriceRightItem.tradable .fsu-PriceValue{color:#fcfcfc}.fsu-PriceType[data-content='ut']{font-size:0}.fsu-PriceType[data-content='ut']::after{background-position:right top;content:'';background-repeat:no-repeat;background-size:100%;display:inline-block;height:12px;vertical-align:middle;width:12px;background-image:url(../web-app/images/coinIcon.png);margin-top:-2px;margin-right:-1px}.fsu-PriceBarItem.precious .fsu-PriceType{background-color:#fd7254}.fsu-PriceBarItem.precious{background:#ee2208;border-color:#fd7254}.fsu-PriceRightBoxBar .fsu-PriceType[data-content='ut']{height:16px;width:16px}.fsu-PriceRightBoxBar .fsu-PriceType[data-content='ut']::after{margin-top:0.5px;margin-right:0px;margin-left:2px;height:14px;width:14px}                                /*进化增加属性展示*/.fsu-academyAttribute{font-family:UltimateTeam-Icons,sans-serif;font-size:14px;line-height:16px;color:#80807a}.fsu-academyAttributeIncrease{padding-left:8px;padding-right:4px}.fsu-academyAttributeIncrease span{color:#07f468}.fsu-academyAttributeValue{font-weight:bold;font-size:16px}.fsu-academyAttributeValue.added{color:#0b96ff}.fsu-academyAttributeValue.addedMain{color:#fd4821}                                    /*进化属性显示*/.academieBtn{background:#2d2c36;border-radius:8px;padding:8px 12px 6px 12px;cursor:pointer;margin-bottom:8px;font-family:UltimateTeamCondensed,sans-serif;border:1px solid #2d2c36}.academieBtn.not{opacity:0.5}.academieBtn:hover{border-color:#1fc3c1}.academieBtnTitle{display:flex;align-items:center;justify-content:space-between;line-height:14px;margin-bottom:6px}.academieBtnName{color:#b5b9c3;font-size:14px}.academieBtnTime{font-size:12px;color:#9e9e9a}.academyBoostsBox{display:flex;gap:4px;font-size:12px;line-height:11px;text-transform:uppercase;flex-wrap:wrap;flex-direction:row}.academyBoostsItem{padding:4px 4px 1px 4px;border-radius:4px;font-weight:500;background:#3a4652;color:#d4d8de}.academyBoostsItem span{color:#07f468;font-size:16px;padding-left:2px;font-weight:100}.academyBoostsTips{flex:100%;padding-top:6px;color:#9e9e9a}.academyBtnTips{color:#fd7254;padding:8px 4px;font-size:14px;text-align:center}.academyViewBox{background:#191820;border-radius:8px;padding:8px 12px 6px 12px;margin-bottom:8px;font-family:UltimateTeamCondensed,sans-serif}.academyViewBox .academyBoostsBox{gap:8px;justify-content:center}.academyViewBox .academyBoostsTips{text-align:center}.academyViewBox.itemList{padding:24px 8px 8px;margin:-32px 16px 16px}.academyViewBox.itemList .academyBoostsBox{gap:4px}.academyViewBox.itemList .academyBoostsBox > *{zoom:0.8}                                    /*进化需求按钮*/.fsu-substitutionBtns>button.fsu-substitutionReqBtn{display:flex;align-items:center;justify-content:center;gap:4px;position:relative;height:36px}.fsu-substitutionReqBtn>img{height:24px;width:auto}.fsu-substitutionReqBtn>img.small{height:20px;width:20px}.fsu-substitutionReqBtn>div{position:absolute;right:0;bottom:0;padding:3px 4px 0px;background:rgb(253 114 84 / 70%);font-size:14px;line-height:12px;border-top-left-radius:4px}.fsu-substitutionReqBtn.state-meet>div{background:rgb(38 133 53 / 70%)} */                                                     /*CSS*/"
-
+        info.base.sytle += `
+            .ut-club-hub-view .tile.fsu-clubplayers .tileContent:before{content:'\\E052'}
+            .fsu-clubPlayersDashboard{min-height:100%;background:#191820;color:#fcfcfc;font-family:UltimateTeam,sans-serif}
+            .fsu-clubPlayersToolbar{position:sticky;top:0;z-index:20;padding:16px 20px;background:rgba(25,24,32,.97);border-bottom:1px solid #3f444b;box-shadow:0 10px 24px rgba(0,0,0,.18)}
+            .fsu-clubPlayersToolbarTop{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+            .fsu-clubPlayersSummary{display:flex;align-items:center;gap:10px;min-width:0}
+            .fsu-clubPlayersResult{font-family:UltimateTeamCondensed,sans-serif;font-size:18px;font-weight:600;white-space:nowrap}
+            .fsu-clubPlayersScope{padding:5px 9px 3px;border-radius:999px;background:#2f4a5b;color:#b9d9e7;font-family:UltimateTeamCondensed,sans-serif;font-size:12px;line-height:14px;white-space:nowrap}
+            .fsu-clubPlayersActions{display:flex;align-items:center;gap:10px}
+            .fsu-clubPlayersColumns{display:flex;align-items:center;gap:6px}
+            .fsu-clubPlayersColumnsLabel{color:#a6a6a1;font-family:UltimateTeamCondensed,sans-serif;font-size:12px}
+            .fsu-clubPlayersColumnButton,.fsu-clubPlayersReset,.fsu-clubPlayersLoadMore{min-height:0;border:1px solid #575753;background:#30312f;color:#fcfcfc;border-radius:7px;cursor:pointer;font-family:UltimateTeamCondensed,sans-serif}
+            .fsu-clubPlayersColumnButton{min-width:32px;height:30px;padding:0 8px;font-size:14px}
+            .fsu-clubPlayersColumnButton[aria-pressed="true"]{border-color:#07f468;background:#264a35;color:#fff}
+            .fsu-clubPlayersColumnButton:hover,.fsu-clubPlayersReset:hover,.fsu-clubPlayersLoadMore:hover{border-color:#a6a6a1;background:#3b4754}
+            .fsu-clubPlayersReset{height:32px;padding:0 12px;font-size:13px;white-space:nowrap}
+            .fsu-clubPlayersFilters{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:9px}
+            .fsu-clubPlayersControl{display:flex;min-width:0;flex-direction:column;gap:4px}
+            .fsu-clubPlayersControl--search{grid-column:span 2}
+            .fsu-clubPlayersControl>label,.fsu-clubPlayersPrimaryLabel{color:#a6a6a1;font-family:UltimateTeamCondensed,sans-serif;font-size:12px;line-height:14px}
+            .fsu-clubPlayersControl input:not([type="checkbox"]),.fsu-clubPlayersControl select{box-sizing:border-box;width:100%;height:36px;margin:0;border:1px solid #4d535b;border-radius:7px;outline:none;background:#242933;color:#fcfcfc;padding:0 10px;font-family:UltimateTeamCondensed,sans-serif;font-size:14px}
+            .fsu-clubPlayersControl input:focus,.fsu-clubPlayersControl select:focus{border-color:#1fc3c1;box-shadow:0 0 0 2px rgba(31,195,193,.15)}
+            .fsu-clubPlayersControl select option{background:#242933;color:#fcfcfc}
+            .fsu-clubPlayersPositionRow{display:flex;align-items:center;gap:8px}
+            .fsu-clubPlayersPositionRow select{flex:1;min-width:0}
+            .fsu-clubPlayersPrimaryLabel{display:flex;align-items:center;gap:4px;color:#c6c9cc;white-space:nowrap;cursor:pointer}
+            .fsu-clubPlayersPrimaryLabel input{accent-color:#07f468}
+            .fsu-clubPlayersGrid{--fsu-club-player-columns:3;display:grid;grid-template-columns:repeat(var(--fsu-club-player-columns),minmax(0,1fr));gap:20px;max-width:1320px;margin:0 auto;padding:24px}
+            .fsu-clubPlayersItem{display:flex;min-width:0;flex-direction:column;align-items:stretch;overflow:hidden;border:1px solid #3f444b;border-radius:14px;background:#2d2c36;box-shadow:0 8px 22px rgba(0,0,0,.18)}
+            .fsu-clubPlayersCard{display:grid;min-height:260px;place-items:center;padding:12px 8px 0}
+            .fsu-clubPlayersMeta{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:10px;border-top:1px solid rgba(255,255,255,.07);background:#25242c}
+            .fsu-clubPlayersBadge{padding:4px 8px 2px;border-radius:999px;background:#3b4754;color:#d4d8de;font-family:UltimateTeamCondensed,sans-serif;font-size:12px;line-height:14px;white-space:nowrap}
+            .fsu-clubPlayersBadge--storage{background:#604b12;color:#ffd870}
+            .fsu-clubPlayersBadge--tradeable{background:#264a35;color:#8ff5a0}
+            .fsu-clubPlayersBadge--untradeable{background:#4b3035;color:#ffb7b7}
+            .fsu-clubPlayersFooter{display:flex;flex-direction:column;align-items:center;gap:10px;padding:0 24px 28px}
+            .fsu-clubPlayersVisible{color:#a6a6a1;font-family:UltimateTeamCondensed,sans-serif;font-size:13px}
+            .fsu-clubPlayersLoadMore{min-width:180px;height:38px;padding:0 20px;background:#fcfcf7;color:#151616;font-size:15px;font-weight:600}
+            .fsu-clubPlayersEmpty{display:none;max-width:640px;margin:64px auto;padding:28px;border:1px dashed #575753;border-radius:12px;color:#a6a6a1;text-align:center;font-family:UltimateTeamCondensed,sans-serif;font-size:18px}
+            .fsu-clubPlayersDashboard.is-empty .fsu-clubPlayersEmpty{display:block}
+            .fsu-clubPlayersDashboard.is-empty .fsu-clubPlayersGrid,.fsu-clubPlayersDashboard.is-empty .fsu-clubPlayersFooter{display:none}
+            @media (max-width:1300px){.fsu-clubPlayersFilters{grid-template-columns:repeat(4,minmax(120px,1fr))}}
+            @media (max-width:900px){.fsu-clubPlayersFilters{grid-template-columns:repeat(3,minmax(110px,1fr))}}
+            .phone .fsu-clubPlayersToolbar{position:relative;padding:10px 8px}
+            .phone .fsu-clubPlayersToolbarTop{align-items:flex-start;flex-direction:column}
+            .phone .fsu-clubPlayersActions{width:100%;justify-content:space-between}
+            .phone .fsu-clubPlayersFilters{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+            .phone .fsu-clubPlayersControl--search{grid-column:span 2}
+            .phone .fsu-clubPlayersPositionRow{align-items:flex-start;flex-direction:column;gap:4px}
+            .phone .fsu-clubPlayersPrimaryLabel{height:18px}
+            .phone .fsu-clubPlayersGrid{gap:7px;padding:8px}
+            .phone .fsu-clubPlayersItem{border-radius:9px}
+            .phone .fsu-clubPlayersCard{min-height:250px;padding:6px 2px 0;zoom:.58}
+            .phone .fsu-clubPlayersGrid[data-columns="3"] .fsu-clubPlayersCard{zoom:.43}
+            .phone .fsu-clubPlayersGrid[data-columns="4"] .fsu-clubPlayersCard{zoom:.34}
+            .phone .fsu-clubPlayersMeta{gap:3px;padding:6px 3px}
+            .phone .fsu-clubPlayersBadge{max-width:100%;overflow:hidden;padding:3px 4px 1px;font-size:10px;text-overflow:ellipsis}
+        `;
 
         //24.18 修改请求fut链接报错提示
         events.getFutbinUrl = async (url) => {
@@ -11241,6 +11341,28 @@
                 this.addTileStats(this._fsuLockTile,_.size(events.getItemBy(1,{"id":info.lock})));
                 this.getRootElement().querySelector("div.grid").appendChild(this._fsuLockTile.getRootElement());
             }
+
+            const clubPlayerCount = events.getClubPlayerDashboardRecords().length;
+            if("_fsuClubPlayersTile" in this){
+                this.addTileStats(this._fsuClubPlayersTile,clubPlayerCount);
+            }else{
+                let clubPlayersTile = new UTTileView();
+                clubPlayersTile.getRootElement().classList.add("col-1-2");
+                clubPlayersTile.getRootElement().classList.add("ut-tile-view--with-gfx");
+                clubPlayersTile.getRootElement().classList.add("fsu-clubplayers");
+                clubPlayersTile.init();
+                clubPlayersTile.title = fy("clubplayers.tile.title");
+                clubPlayersTile.getRootElement().setAttribute("title",fy("clubplayers.tile.desc"));
+                clubPlayersTile._parent = this;
+                this._fsuClubPlayersTile = clubPlayersTile;
+                this._fsuClubPlayersTile.addTarget(this,
+                    () => {
+                        events.goToClubPlayers()
+                    },EventType.TAP)
+                this._fsuClubPlayersTile.setInteractionState(true);
+                this.addTileStats(this._fsuClubPlayersTile,clubPlayerCount);
+                this.getRootElement().querySelector("div.grid").appendChild(this._fsuClubPlayersTile.getRootElement());
+            }
         }
 
         //25.01 SBC仓库页面
@@ -11272,6 +11394,12 @@
                     controller._listController._fsuLock = true;
                 }
                 nav.pushViewController(controller);
+            }
+        }
+        events.goToClubPlayers = () => {
+            let nav = cntlr.current().getNavigationController();
+            if(nav){
+                nav.pushViewController(new clubPlayersController());
             }
         }
 
@@ -13496,6 +13624,643 @@
         };
         inPacksController.prototype.getNavigationTitle = function () {
             return fy("inpacktile.title") + `(${info.inpacks.players.length})`;
+        };
+
+        //26.09.1 俱乐部球员仪表盘
+        events.normalizeClubPlayerSearchText = (value) => {
+            return String(value ?? "")
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLocaleLowerCase();
+        }
+        events.getClubPlayerQuality = (player) => {
+            if(player?.isSpecial?.()){
+                return "special";
+            }
+            if(player?.isBronzeRating?.()){
+                return "bronze";
+            }
+            if(player?.isSilverRating?.()){
+                return "silver";
+            }
+            if(player?.isGoldRating?.()){
+                return "gold";
+            }
+            const rating = Number(player?.rating ?? 0);
+            return rating <= 64 ? "bronze" : rating <= 74 ? "silver" : "gold";
+        }
+        events.getClubPlayerDashboardRecords = () => {
+            const records = [];
+            const seen = new Set();
+            const sources = [
+                {
+                    location: "club",
+                    items: repositories.Item?.club?.items?.values?.() ?? []
+                },
+                {
+                    location: "storage",
+                    items: repositories.Item?.getStorageItems?.() ?? repositories.Item?.storage?.values?.() ?? []
+                }
+            ];
+
+            _.forEach(sources, source => {
+                _.forEach(source.items, (player, index) => {
+                    if(!player?.isPlayer?.() || player.concept){
+                        return;
+                    }
+                    const itemKey = player.id !== undefined && player.id !== null
+                        ? String(player.id)
+                        : `${source.location}-${player.definitionId}-${index}`;
+                    if(seen.has(itemKey)){
+                        return;
+                    }
+                    seen.add(itemKey);
+
+                    let staticData = player._staticData;
+                    if(!staticData && player.getStaticData){
+                        staticData = player.getStaticData();
+                    }
+                    const name = String(staticData?.name ?? player.name ?? player.definitionId ?? "");
+                    const positions = Array.isArray(player.possiblePositions)
+                        ? player.possiblePositions.slice()
+                        : [];
+                    if(player.preferredPosition !== undefined && player.preferredPosition !== null && !positions.includes(player.preferredPosition)){
+                        positions.unshift(player.preferredPosition);
+                    }
+
+                    records.push({
+                        item: player,
+                        itemKey,
+                        location: source.location,
+                        name,
+                        searchName: events.normalizeClubPlayerSearchText(name),
+                        rating: Number(player.rating ?? 0),
+                        position: player.preferredPosition,
+                        positions,
+                        nation: player.nationId,
+                        league: player.leagueId,
+                        club: player.teamId,
+                        rarity: player.rareflag,
+                        quality: events.getClubPlayerQuality(player),
+                        skillMoves: Number(player.getSkillMoves?.() ?? 0),
+                        weakFoot: Number(player.getWeakFoot?.() ?? 0),
+                        foot: player.isLeftFoot?.() ? "left" : "right",
+                        gender: Number(player.gender ?? 0) === 1 ? "female" : "male",
+                        tradeable: Number(player.untradeableCount ?? 0) === 0
+                    });
+                })
+            })
+            return records;
+        }
+        events.filterClubPlayerDashboardRecords = (records, state) => {
+            const query = events.normalizeClubPlayerSearchText(state.query);
+            const minRating = state.minRating === "" ? null : Math.max(0, Math.min(99, Number(state.minRating)));
+            const maxRating = state.maxRating === "" ? null : Math.max(0, Math.min(99, Number(state.maxRating)));
+            const filtered = records.filter(record => {
+                if(query && !record.searchName.includes(query)){
+                    return false;
+                }
+                if(minRating !== null && record.rating < minRating){
+                    return false;
+                }
+                if(maxRating !== null && record.rating > maxRating){
+                    return false;
+                }
+                if(state.position){
+                    const positions = state.primaryOnly ? [record.position] : record.positions;
+                    if(!positions.some(position => String(position) === state.position)){
+                        return false;
+                    }
+                }
+                if(state.nation && String(record.nation) !== state.nation){
+                    return false;
+                }
+                if(state.league && String(record.league) !== state.league){
+                    return false;
+                }
+                if(state.club && String(record.club) !== state.club){
+                    return false;
+                }
+                if(state.rarity && String(record.rarity) !== state.rarity){
+                    return false;
+                }
+                if(state.quality && record.quality !== state.quality){
+                    return false;
+                }
+                if(state.skillMoves && String(record.skillMoves) !== state.skillMoves){
+                    return false;
+                }
+                if(state.weakFoot && String(record.weakFoot) !== state.weakFoot){
+                    return false;
+                }
+                if(state.foot && record.foot !== state.foot){
+                    return false;
+                }
+                if(state.gender && record.gender !== state.gender){
+                    return false;
+                }
+                if(state.location && record.location !== state.location){
+                    return false;
+                }
+                if(state.tradeable === "yes" && !record.tradeable){
+                    return false;
+                }
+                if(state.tradeable === "no" && record.tradeable){
+                    return false;
+                }
+                return true;
+            });
+
+            const nameCompare = (a, b) => a.name.localeCompare(b.name);
+            filtered.sort((a, b) => {
+                if(state.sort === "rating-asc"){
+                    return a.rating - b.rating || nameCompare(a, b);
+                }
+                if(state.sort === "name-asc"){
+                    return nameCompare(a, b) || b.rating - a.rating;
+                }
+                if(state.sort === "name-desc"){
+                    return nameCompare(b, a) || b.rating - a.rating;
+                }
+                return b.rating - a.rating || Number(b.rarity ?? 0) - Number(a.rarity ?? 0) || nameCompare(a, b);
+            });
+            return filtered;
+        }
+
+        const clubPlayersControllerView = function (t) {
+            EAView.call(this);
+        };
+        JSUtils.inherits(clubPlayersControllerView, EAView);
+        clubPlayersControllerView.prototype._disposePlayerCards = function () {
+            if(!this._fsu){
+                return;
+            }
+            _.forEach(this._fsu.itemViews, itemView => {
+                itemView?.dealloc?.();
+            })
+            this._fsu.itemViews = [];
+            if(this._fsu.listBox){
+                this._fsu.listBox.innerHTML = "";
+            }
+        }
+        clubPlayersControllerView.prototype._renderNextBatch = function () {
+            const state = this._fsu.state;
+            const start = state.visible;
+            const end = Math.min(start + state.pageSize, state.filtered.length);
+            const batch = state.filtered.slice(start, end);
+
+            _.forEach(batch, record => {
+                const itemViewBox = events.createElementWithConfig("article", {
+                    classList: "fsu-clubPlayersItem",
+                    attributes: {
+                        "data-player-id": record.itemKey
+                    }
+                });
+                const itemViewCard = events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersCard"
+                });
+                const itemView = UTItemViewFactory.createLargeItem(record.item);
+                itemView.init();
+                itemView.render(record.item);
+                this._fsu.itemViews.push(itemView);
+                itemViewCard.appendChild(itemView.getRootElement());
+                itemViewBox.appendChild(itemViewCard);
+
+                const meta = events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersMeta"
+                });
+                meta.appendChild(events.createElementWithConfig("span", {
+                    classList: ["fsu-clubPlayersBadge", record.location === "storage" ? "fsu-clubPlayersBadge--storage" : "fsu-clubPlayersBadge--club"],
+                    textContent: fy(`clubplayers.location.${record.location}`)
+                }));
+                meta.appendChild(events.createElementWithConfig("span", {
+                    classList: ["fsu-clubPlayersBadge", record.tradeable ? "fsu-clubPlayersBadge--tradeable" : "fsu-clubPlayersBadge--untradeable"],
+                    textContent: fy(record.tradeable ? "clubplayers.tradeable.yes" : "clubplayers.tradeable.no")
+                }));
+                itemViewBox.appendChild(meta);
+                this._fsu.listBox.appendChild(itemViewBox);
+            })
+
+            state.visible = end;
+            this._fsu.visibleText.textContent = fy(["clubplayers.visible", state.visible, state.filtered.length]);
+            this._fsu.loadMore.hidden = state.visible >= state.filtered.length;
+            if(batch.length){
+                events.loadPlayerInfo(_.map(batch, "item"));
+            }
+        }
+        clubPlayersControllerView.prototype._applyFilters = function () {
+            this._disposePlayerCards();
+            const state = this._fsu.state;
+            state.filtered = events.filterClubPlayerDashboardRecords(state.records, state);
+            state.visible = 0;
+            state.pageSize = state.columns * 6;
+            this._fsu.resultText.textContent = fy(["clubplayers.results", state.filtered.length, state.records.length]);
+            this._fsu.root.classList.toggle("is-empty", state.filtered.length === 0);
+            if(state.filtered.length){
+                this._renderNextBatch();
+            }else{
+                this._fsu.visibleText.textContent = fy(["clubplayers.visible", 0, 0]);
+                this._fsu.loadMore.hidden = true;
+            }
+        }
+        clubPlayersControllerView.prototype._setColumns = function (columns) {
+            const value = Math.max(2, Math.min(4, Number(columns) || 3));
+            this._fsu.state.columns = value;
+            this._fsu.state.pageSize = value * 6;
+            this._fsu.listBox.dataset.columns = String(value);
+            this._fsu.listBox.style.setProperty("--fsu-club-player-columns", value);
+            _.forEach(this._fsu.columnButtons, button => {
+                button.setAttribute("aria-pressed", String(Number(button.dataset.columns) === value));
+            })
+            GM_setValue("clubplayers.columns", value);
+        }
+        clubPlayersControllerView.prototype._generate = function _generate() {
+            if (!this._generated) {
+                const savedColumns = Math.max(2, Math.min(4, Number(GM_getValue("clubplayers.columns", 3)) || 3));
+                const state = {
+                    records: events.getClubPlayerDashboardRecords(),
+                    filtered: [],
+                    visible: 0,
+                    pageSize: savedColumns * 6,
+                    columns: savedColumns,
+                    query: "",
+                    minRating: "",
+                    maxRating: "",
+                    position: "",
+                    primaryOnly: false,
+                    nation: "",
+                    league: "",
+                    club: "",
+                    rarity: "",
+                    quality: "",
+                    skillMoves: "",
+                    weakFoot: "",
+                    foot: "",
+                    gender: "",
+                    location: "",
+                    tradeable: "",
+                    sort: "rating-desc"
+                };
+                this._fsu = {
+                    state,
+                    itemViews: [],
+                    controls: {},
+                    columnButtons: [],
+                    filterTimer: null
+                };
+
+                const root = events.createElementWithConfig("section", {
+                    classList: "fsu-clubPlayersDashboard"
+                });
+                const toolbar = events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersToolbar"
+                });
+                const toolbarTop = events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersToolbarTop"
+                });
+                const summary = events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersSummary"
+                });
+                const resultText = events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersResult",
+                    attributes: {
+                        "aria-live": "polite"
+                    }
+                });
+                summary.appendChild(resultText);
+                summary.appendChild(events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersScope",
+                    textContent: fy("clubplayers.scope")
+                }));
+                toolbarTop.appendChild(summary);
+
+                const actions = events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersActions"
+                });
+                const columnsBox = events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersColumns",
+                    attributes: {
+                        "role": "group",
+                        "aria-label": fy("clubplayers.filter.columns")
+                    }
+                });
+                columnsBox.appendChild(events.createElementWithConfig("span", {
+                    classList: "fsu-clubPlayersColumnsLabel",
+                    textContent: fy("clubplayers.filter.columns")
+                }));
+                _.forEach([2, 3, 4], columns => {
+                    const button = events.createElementWithConfig("button", {
+                        classList: "fsu-clubPlayersColumnButton",
+                        type: "button",
+                        textContent: String(columns),
+                        attributes: {
+                            "data-columns": columns,
+                            "aria-pressed": "false"
+                        }
+                    });
+                    button.addEventListener("click", () => this._setColumns(columns));
+                    this._fsu.columnButtons.push(button);
+                    columnsBox.appendChild(button);
+                })
+                actions.appendChild(columnsBox);
+
+                const resetButton = events.createElementWithConfig("button", {
+                    classList: "fsu-clubPlayersReset",
+                    type: "button",
+                    textContent: fy("clubplayers.reset")
+                });
+                actions.appendChild(resetButton);
+                toolbarTop.appendChild(actions);
+                toolbar.appendChild(toolbarTop);
+
+                const filters = events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersFilters"
+                });
+                const allOption = () => [{ value: "", label: fy("clubplayers.select.all") }];
+                const getLocalizedLabel = (type, value) => {
+                    try {
+                        if(type === "position"){
+                            return UTLocalizationUtil.positionIdToName(value, services.Localization) || String(value);
+                        }
+                        if(type === "nation"){
+                            return UTLocalizationUtil.nationIdToName(value, services.Localization) || String(value);
+                        }
+                        if(type === "league"){
+                            return UTLocalizationUtil.leagueIdToName(value, services.Localization) || String(value);
+                        }
+                        if(type === "club"){
+                            return UTLocalizationUtil.teamIdToAbbr15(value, services.Localization) || String(value);
+                        }
+                        if(type === "rarity"){
+                            return services.Localization.localize(`item.raretype${value}`) || String(value);
+                        }
+                    } catch(error) {
+                        return String(value);
+                    }
+                    return String(value);
+                };
+                const distinctOptions = (property, type) => {
+                    const values = new Map();
+                    _.forEach(state.records, record => {
+                        const candidates = Array.isArray(record[property]) ? record[property] : [record[property]];
+                        _.forEach(candidates, value => {
+                            if(value !== undefined && value !== null && !values.has(String(value))){
+                                values.set(String(value), getLocalizedLabel(type, value));
+                            }
+                        })
+                    })
+                    return Array.from(values, ([value, label]) => ({ value, label }))
+                        .sort((a, b) => a.label.localeCompare(b.label));
+                };
+                const createControl = (label, extraClass) => {
+                    const control = events.createElementWithConfig("div", {
+                        classList: extraClass ? ["fsu-clubPlayersControl", extraClass] : "fsu-clubPlayersControl"
+                    });
+                    control.appendChild(events.createElementWithConfig("label", {
+                        textContent: label
+                    }));
+                    return control;
+                };
+                const scheduleFilter = () => {
+                    clearTimeout(this._fsu.filterTimer);
+                    this._fsu.filterTimer = setTimeout(() => this._applyFilters(), 180);
+                };
+                const addInput = (label, key, config, extraClass) => {
+                    const control = createControl(label, extraClass);
+                    const input = events.createElementWithConfig("input", {
+                        type: config.type,
+                        value: "",
+                        placeholder: config.placeholder ?? "",
+                        min: config.min ?? "",
+                        max: config.max ?? "",
+                        inputMode: config.inputMode ?? "",
+                        attributes: {
+                            "aria-label": label,
+                            "autocomplete": "off"
+                        }
+                    });
+                    input.addEventListener("input", () => {
+                        state[key] = input.value;
+                        scheduleFilter();
+                    });
+                    this._fsu.controls[key] = input;
+                    control.appendChild(input);
+                    filters.appendChild(control);
+                    return input;
+                };
+                const addSelect = (label, key, options) => {
+                    const control = createControl(label);
+                    const select = events.createElementWithConfig("select", {
+                        attributes: {
+                            "aria-label": label
+                        }
+                    });
+                    _.forEach(options, option => {
+                        select.appendChild(events.createElementWithConfig("option", {
+                            value: String(option.value),
+                            textContent: option.label
+                        }));
+                    })
+                    select.addEventListener("change", () => {
+                        state[key] = select.value;
+                        this._applyFilters();
+                    });
+                    this._fsu.controls[key] = select;
+                    control.appendChild(select);
+                    filters.appendChild(control);
+                    return select;
+                };
+
+                addInput(fy("clubplayers.search"), "query", {
+                    type: "search",
+                    placeholder: fy("clubplayers.search")
+                }, "fsu-clubPlayersControl--search");
+                addInput(fy("clubplayers.filter.minovr"), "minRating", {
+                    type: "number",
+                    placeholder: "0",
+                    min: 0,
+                    max: 99,
+                    inputMode: "numeric"
+                });
+                addInput(fy("clubplayers.filter.maxovr"), "maxRating", {
+                    type: "number",
+                    placeholder: "99",
+                    min: 0,
+                    max: 99,
+                    inputMode: "numeric"
+                });
+
+                const positionControl = createControl(fy("clubplayers.filter.position"));
+                const positionRow = events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersPositionRow"
+                });
+                const positionSelect = events.createElementWithConfig("select", {
+                    attributes: {
+                        "aria-label": fy("clubplayers.filter.position")
+                    }
+                });
+                _.forEach(allOption().concat(distinctOptions("positions", "position")), option => {
+                    positionSelect.appendChild(events.createElementWithConfig("option", {
+                        value: String(option.value),
+                        textContent: option.label
+                    }));
+                })
+                positionSelect.addEventListener("change", () => {
+                    state.position = positionSelect.value;
+                    this._applyFilters();
+                });
+                this._fsu.controls.position = positionSelect;
+                positionRow.appendChild(positionSelect);
+                const primaryLabel = events.createElementWithConfig("label", {
+                    classList: "fsu-clubPlayersPrimaryLabel"
+                });
+                const primaryCheckbox = events.createElementWithConfig("input", {
+                    type: "checkbox",
+                    attributes: {
+                        "aria-label": fy("clubplayers.filter.primary")
+                    }
+                });
+                primaryCheckbox.addEventListener("change", () => {
+                    state.primaryOnly = primaryCheckbox.checked;
+                    this._applyFilters();
+                });
+                this._fsu.controls.primaryOnly = primaryCheckbox;
+                primaryLabel.appendChild(primaryCheckbox);
+                primaryLabel.appendChild(document.createTextNode(fy("clubplayers.filter.primary")));
+                positionRow.appendChild(primaryLabel);
+                positionControl.appendChild(positionRow);
+                filters.appendChild(positionControl);
+
+                addSelect(fy("clubplayers.filter.quality"), "quality", allOption().concat([
+                    { value: "bronze", label: fy("clubplayers.quality.bronze") },
+                    { value: "silver", label: fy("clubplayers.quality.silver") },
+                    { value: "gold", label: fy("clubplayers.quality.gold") },
+                    { value: "special", label: fy("clubplayers.quality.special") }
+                ]));
+                addSelect(fy("clubplayers.filter.nation"), "nation", allOption().concat(distinctOptions("nation", "nation")));
+                addSelect(fy("clubplayers.filter.league"), "league", allOption().concat(distinctOptions("league", "league")));
+                addSelect(fy("clubplayers.filter.club"), "club", allOption().concat(distinctOptions("club", "club")));
+                addSelect(fy("clubplayers.filter.rarity"), "rarity", allOption().concat(distinctOptions("rarity", "rarity")));
+                const starOptions = allOption().concat(_.map(_.range(1, 6), value => ({ value, label: `${value} ★` })));
+                addSelect(fy("clubplayers.filter.skills"), "skillMoves", starOptions);
+                addSelect(fy("clubplayers.filter.weakfoot"), "weakFoot", starOptions);
+                addSelect(fy("clubplayers.filter.foot"), "foot", allOption().concat([
+                    { value: "left", label: fy("clubplayers.foot.left") },
+                    { value: "right", label: fy("clubplayers.foot.right") }
+                ]));
+                addSelect(fy("clubplayers.filter.gender"), "gender", allOption().concat([
+                    { value: "male", label: fy("clubplayers.gender.male") },
+                    { value: "female", label: fy("clubplayers.gender.female") }
+                ]));
+                addSelect(fy("clubplayers.filter.location"), "location", allOption().concat([
+                    { value: "club", label: fy("clubplayers.location.club") },
+                    { value: "storage", label: fy("clubplayers.location.storage") }
+                ]));
+                addSelect(fy("clubplayers.filter.tradeable"), "tradeable", allOption().concat([
+                    { value: "yes", label: fy("clubplayers.tradeable.yes") },
+                    { value: "no", label: fy("clubplayers.tradeable.no") }
+                ]));
+                addSelect(fy("clubplayers.filter.sort"), "sort", [
+                    { value: "rating-desc", label: fy("clubplayers.sort.ratingdesc") },
+                    { value: "rating-asc", label: fy("clubplayers.sort.ratingasc") },
+                    { value: "name-asc", label: fy("clubplayers.sort.nameasc") },
+                    { value: "name-desc", label: fy("clubplayers.sort.namedesc") }
+                ]);
+                toolbar.appendChild(filters);
+                root.appendChild(toolbar);
+
+                const listBox = events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersGrid"
+                });
+                root.appendChild(listBox);
+                root.appendChild(events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersEmpty",
+                    textContent: fy("clubplayers.empty")
+                }));
+
+                const footer = events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersFooter"
+                });
+                const visibleText = events.createElementWithConfig("div", {
+                    classList: "fsu-clubPlayersVisible",
+                    attributes: {
+                        "aria-live": "polite"
+                    }
+                });
+                const loadMore = events.createElementWithConfig("button", {
+                    classList: "fsu-clubPlayersLoadMore",
+                    type: "button",
+                    textContent: fy("clubplayers.loadmore")
+                });
+                loadMore.addEventListener("click", () => this._renderNextBatch());
+                footer.appendChild(visibleText);
+                footer.appendChild(loadMore);
+                root.appendChild(footer);
+
+                this._fsu.root = root;
+                this._fsu.resultText = resultText;
+                this._fsu.listBox = listBox;
+                this._fsu.visibleText = visibleText;
+                this._fsu.loadMore = loadMore;
+                this._fsu.resetButton = resetButton;
+                resetButton.addEventListener("click", () => {
+                    clearTimeout(this._fsu.filterTimer);
+                    const defaults = {
+                        query: "",
+                        minRating: "",
+                        maxRating: "",
+                        position: "",
+                        primaryOnly: false,
+                        nation: "",
+                        league: "",
+                        club: "",
+                        rarity: "",
+                        quality: "",
+                        skillMoves: "",
+                        weakFoot: "",
+                        foot: "",
+                        gender: "",
+                        location: "",
+                        tradeable: "",
+                        sort: "rating-desc"
+                    };
+                    Object.assign(state, defaults);
+                    _.forEach(this._fsu.controls, (control, key) => {
+                        if(key === "primaryOnly"){
+                            control.checked = false;
+                        }else{
+                            control.value = defaults[key] ?? "";
+                        }
+                    })
+                    this._applyFilters();
+                });
+
+                this.__root = root;
+                this._setColumns(savedColumns);
+                this._applyFilters();
+                this._generated = !0;
+            }
+        }
+        clubPlayersControllerView.prototype.dealloc = function () {
+            if(this._fsu?.filterTimer){
+                clearTimeout(this._fsu.filterTimer);
+            }
+            this._disposePlayerCards();
+            events.fsuDispose(this, "_fsu");
+            this.__root = null;
+        }
+        const clubPlayersController = function (t) {
+            EAViewController.call(this);
+        };
+        JSUtils.inherits(clubPlayersController, EAViewController);
+        clubPlayersController.prototype._getViewInstanceFromData = function () {
+            return new clubPlayersControllerView();
+        };
+        clubPlayersController.prototype.viewDidAppear = function () {
+            this.getNavigationController().setNavigationVisibility(true, true);
+        };
+        clubPlayersController.prototype.getNavigationTitle = function () {
+            return fy("clubplayers.tile.title") + ` (${events.getClubPlayerDashboardRecords().length})`;
         };
 
         //26.04 特殊品质界面创建
