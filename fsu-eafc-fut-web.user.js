@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.09.9
+// @version      26.09.10
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -10587,56 +10587,228 @@
             }
             return [];
         }
+        events.getFastSBCPlanObserverOwner = () => {
+            const current = events.getCurrent?.();
+            if(current){
+                return current;
+            }
+            return getAppMain?.()?.getRootViewController?.() ?? services.SBC;
+        }
+        events.releaseFastSBCPlanObserver = (token, owner) => {
+            try {
+                token?.unobserve?.(owner);
+            } catch(error) {
+                console.warn("[FSU] Fast SBC observer cleanup failed", error);
+            }
+        }
+        events.getFastSBCPlanCollectionValues = (collection) => {
+            if(!collection){
+                return [];
+            }
+            if(_.isArray(collection)){
+                return collection;
+            }
+            if(typeof collection.values === "function"){
+                const values = collection.values();
+                return _.isArray(values) ? values : Array.from(values ?? []);
+            }
+            if(collection._collection){
+                return _.isArray(collection._collection)
+                    ? collection._collection
+                    : _.values(collection._collection);
+            }
+            return [];
+        }
+        events.getFastSBCPlanRepositorySet = (setId) => {
+            const repository = services.SBC?.repository;
+            if(!repository?.getSetById){
+                return null;
+            }
+            return (
+                repository.getSetById(setId) ??
+                repository.getSetById(Number(setId)) ??
+                repository.getSetById(String(setId)) ??
+                null
+            );
+        }
+        events.getFastSBCPlanResponseChallenges = (response) => {
+            const sources = [
+                response?.data?.challenges,
+                response?.response?.challenges,
+                response?.challenges,
+                _.isArray(response?.data) ? response.data : null,
+                _.isArray(response?.response) ? response.response : null
+            ];
+            return _.uniqBy(
+                _.flatten(_.map(sources, events.getFastSBCPlanCollectionValues)),
+                challenge => String(challenge?.id ?? "")
+            );
+        }
+        events.findFastSBCPlanChallenge = (
+            setEntity,
+            challengeId,
+            preferred = [],
+            preferReady = false
+        ) => {
+            const targetId = String(challengeId);
+            let repositoryChallenge = null;
+            try {
+                repositoryChallenge =
+                    setEntity?.getChallenge?.(challengeId) ??
+                    setEntity?.getChallenge?.(Number(challengeId)) ??
+                    setEntity?.getChallenge?.(String(challengeId)) ??
+                    null;
+            } catch(error) {
+                console.warn("[FSU] Fast SBC repository challenge lookup failed", error);
+            }
+            const candidates = _.concat(
+                preferred,
+                repositoryChallenge ? [repositoryChallenge] : [],
+                events.getFastSBCPlanCollectionValues(setEntity?.challenges),
+                events.getFastSBCPlanCollectionValues(setEntity?._challenges)
+            );
+            const matches = _.filter(
+                candidates,
+                challenge => String(challenge?.id) === targetId
+            );
+            if(preferReady){
+                return _.find(matches, challenge => challenge?.squad) ?? matches[0] ?? null;
+            }
+            return matches[0] ?? null;
+        }
         events.requestFastSBCPlanSet = (setId) => {
-            const existingSet = services.SBC.repository.getSetById(setId);
+            const existingSet = events.getFastSBCPlanRepositorySet(setId);
             if(existingSet){
                 return Promise.resolve(existingSet);
             }
-            const owner = events.getCurrent();
+            const owner = events.getFastSBCPlanObserverOwner();
             return new Promise((resolve, reject) => {
-                services.SBC.requestSets().observe(owner, (token, response) => {
-                    token.unobserve(owner);
-                    const setEntity = services.SBC.repository.getSetById(setId);
-                    if(response.success && setEntity){
-                        resolve(setEntity);
-                    }else{
-                        reject(new Error(`SBC set ${setId} could not be loaded`));
+                try {
+                    const request = services.SBC.requestSets();
+                    if(!request?.observe){
+                        reject(new Error(`SBC set ${setId} request is unavailable`));
+                        return;
                     }
-                })
+                    request.observe(owner, (token, response) => {
+                        events.releaseFastSBCPlanObserver(token, owner);
+                        const setEntity = events.getFastSBCPlanRepositorySet(setId);
+                        // 일부 Web App 응답은 success를 생략해도 repository는 정상 갱신된다.
+                        if(setEntity){
+                            resolve(setEntity);
+                        }else{
+                            reject(new Error(
+                                `SBC set ${setId} could not be loaded (${response?.status ?? "unknown"})`
+                            ));
+                        }
+                    })
+                } catch(error) {
+                    reject(error);
+                }
             });
         }
-        events.loadFastSBCPlanChallenge = async(setId, challengeId) => {
-            const owner = events.getCurrent();
+        events.loadFastSBCPlanChallenge = async(
+            setId,
+            challengeId,
+            { preferCached = true, allowCachedFallback = true } = {}
+        ) => {
             const setEntity = await events.requestFastSBCPlanSet(setId);
+            const cachedChallenge = events.findFastSBCPlanChallenge(setEntity, challengeId);
+            if(preferCached && cachedChallenge?.squad){
+                return { setEntity, challenge: cachedChallenge };
+            }
+
+            const owner = events.getFastSBCPlanObserverOwner();
             const challenge = await new Promise((resolve, reject) => {
-                services.SBC.requestChallengesForSet(setEntity).observe(owner, (token, response) => {
-                    token.unobserve(owner);
-                    if(!response.success || !response.data?.challenges?.length){
-                        reject(new Error(`SBC challenges for set ${setId} could not be loaded`));
+                const useCachedOrReject = (error) => {
+                    const fallback = events.findFastSBCPlanChallenge(setEntity, challengeId);
+                    if(allowCachedFallback && fallback?.squad){
+                        console.warn("[FSU] Fast SBC challenge request used cached data", error);
+                        resolve(fallback);
+                    }else{
+                        reject(error);
+                    }
+                };
+                const initializeChallenge = (matched) => {
+                    if(matched?.squad){
+                        resolve(matched);
                         return;
                     }
-                    const matched = response.data.challenges.find(
-                        item => Number(item.id) === Number(challengeId)
-                    );
-                    if(!matched){
-                        reject(new Error(`SBC challenge ${challengeId} could not be found`));
-                        return;
-                    }
-                    services.SBC.loadChallenge(matched).observe(owner, (loadToken, loadResponse) => {
-                        loadToken.unobserve(owner);
-                        if(!loadResponse.success){
-                            reject(new Error(`SBC challenge ${challengeId} could not be initialized`));
+
+                    try {
+                        const loadRequest = services.SBC.loadChallenge(matched);
+                        if(!loadRequest?.observe){
+                            useCachedOrReject(
+                                new Error(`SBC challenge ${challengeId} initialization is unavailable`)
+                            );
                             return;
                         }
-                        const repositoryChallenge = setEntity.getChallenge(challengeId);
-                        if(repositoryChallenge && !repositoryChallenge.squad){
-                            repositoryChallenge.update(matched);
+                        loadRequest.observe(owner, (loadToken, loadResponse) => {
+                            events.releaseFastSBCPlanObserver(loadToken, owner);
+                            const refreshedChallenge = events.findFastSBCPlanChallenge(
+                                setEntity,
+                                challengeId,
+                                [matched],
+                                true
+                            );
+                            if(refreshedChallenge && !refreshedChallenge.squad && matched?.squad){
+                                try {
+                                    refreshedChallenge.update?.(matched);
+                                } catch(error) {
+                                    console.warn("[FSU] Fast SBC challenge update failed", error);
+                                }
+                            }
+                            const readyChallenge = refreshedChallenge?.squad
+                                ? refreshedChallenge
+                                : matched?.squad
+                                    ? matched
+                                    : null;
+                            if(readyChallenge && loadResponse?.success !== false){
+                                resolve(readyChallenge);
+                            }else{
+                                useCachedOrReject(
+                                    new Error(
+                                        `SBC challenge ${challengeId} could not be initialized ` +
+                                        `(${loadResponse?.status ?? "unknown"})`
+                                    )
+                                );
+                            }
+                        })
+                    } catch(error) {
+                        useCachedOrReject(error);
+                    }
+                };
+
+                try {
+                    const challengeRequest = services.SBC.requestChallengesForSet(setEntity);
+                    if(!challengeRequest?.observe){
+                        useCachedOrReject(
+                            new Error(`SBC challenges for set ${setId} request is unavailable`)
+                        );
+                        return;
+                    }
+                    challengeRequest.observe(owner, (token, response) => {
+                        events.releaseFastSBCPlanObserver(token, owner);
+                        const responseChallenges = events.getFastSBCPlanResponseChallenges(response);
+                        const matched = events.findFastSBCPlanChallenge(
+                            setEntity,
+                            challengeId,
+                            responseChallenges
+                        );
+                        // success 필드가 없는 정상 응답과 repository-only 갱신도 허용한다.
+                        if(!matched || response?.success === false){
+                            useCachedOrReject(
+                                new Error(
+                                    `SBC challenge ${challengeId} could not be found ` +
+                                    `(${response?.status ?? "unknown"})`
+                                )
+                            );
+                            return;
                         }
-                        // loadChallenge가 갱신한 최신 인스턴스를 사용한다. 반복형 SBC에서는
-                        // repositoryChallenge가 직전 제출의 completed 상태를 잠시 유지할 수 있다.
-                        resolve(matched);
+                        initializeChallenge(matched);
                     })
-                })
+                } catch(error) {
+                    useCachedOrReject(error);
+                }
             });
             return { setEntity, challenge };
         }
@@ -10973,10 +11145,22 @@
             requestAnimationFrame(syncPopupLayer);
         }
         events.buildFastSBCPlanSession = async(setId, challengeId) => {
-            const loaded = await events.loadFastSBCPlanChallenge(setId, challengeId);
             const requirements = info.base.fastsbc[`${challengeId}#${setId}`];
             if(!requirements){
                 throw new Error(`Fast SBC requirements ${challengeId}#${setId} are unavailable`);
+            }
+            let loaded;
+            try {
+                loaded = await events.loadFastSBCPlanChallenge(setId, challengeId);
+            } catch(error) {
+                // 미리보기 생성에는 서버 challenge 객체가 필수가 아니다. 저장된 조건과
+                // 로컬 선수 캐시로 계획을 만들고 실제 제출 직전에 다시 서버 검증한다.
+                console.warn("[FSU] Fast SBC plan preview is using local SBC data", error);
+                const setEntity = events.getFastSBCPlanRepositorySet(setId);
+                loaded = {
+                    setEntity,
+                    challenge: events.findFastSBCPlanChallenge(setEntity, challengeId)
+                };
             }
             const requiredCount = Number(
                 loaded.challenge?.squad?.getNumOfRequiredPlayers?.() ??
@@ -10995,7 +11179,10 @@
                 setId: Number(setId),
                 challengeId: Number(challengeId),
                 setName: loaded.setEntity?.name ?? "",
-                challengeName: loaded.challenge?.name ?? loaded.setEntity?.name ?? "",
+                challengeName:
+                    loaded.challenge?.name ??
+                    loaded.setEntity?.name ??
+                    fy("fastsbc.plan.title"),
                 requiredCount,
                 estimatedCount,
                 plans,
@@ -11211,7 +11398,11 @@
             try {
                 const loaded = await events.loadFastSBCPlanChallenge(
                     session.setId,
-                    session.challengeId
+                    session.challengeId,
+                    {
+                        preferCached: false,
+                        allowCachedFallback: true
+                    }
                 );
                 const players = events.resolveFastSBCPlanPlayers(plan);
                 if(!players || players.length !== session.requiredCount){
