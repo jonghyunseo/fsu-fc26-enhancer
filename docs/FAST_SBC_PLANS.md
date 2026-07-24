@@ -150,7 +150,7 @@ FastSbcPlanSession
   ├─ submitting
   └─ plans[]
        ├─ number
-       ├─ status: ready | submitting | submitted | invalid
+       ├─ status: ready | filling | submitting | submitted | invalid
        ├─ itemIds[]
        ├─ players[]
        └─ snapshots[]
@@ -171,6 +171,14 @@ FastSbcPlanSession
 
 선수가 이동·소모되어 찾을 수 없거나 요구사항이 바뀌면 해당 안은 `invalid`가 되고 제출 버튼이 비활성화된다. `Regenerate Plans`로 현재 재고에서 다시 계산할 수 있다. 제출 요청 중에는 좌우 이동, 재생성, 제출 버튼을 모두 비활성화해 이중 탭을 막는다.
 
+## Fill Plan과 Submit Plan
+
+`Fill Plan`은 현재 후보를 SBC 스쿼드에 배치만 하고 제출하지 않는다. 버튼을 누르면 제출과 같은 방식으로 저장된 `item.id`, 회차 내부 중복, 최신 Challenge 요구사항을 다시 검사한다.
+
+검증을 통과하면 후보 목록 순서를 Challenge 슬롯 순서로 유지한 채 기존 `playerListFillSquad()` 저장 경로를 호출한다. 이 경로에서는 `submitChallenge()`를 호출하지 않는다. 스쿼드가 정상적으로 채워지면 후보 팝업을 닫고 현재 SBC 화면으로 돌아가므로, 사용자는 선수 배치와 요구사항을 직접 확인한 다음 EA의 제출 버튼을 누를 수 있다.
+
+최신 재고나 요구사항이 달라졌다면 스쿼드를 채우지 않고 해당 후보를 `invalid`로 전환하며 팝업을 유지한다. 채우기 또는 제출 처리 중에는 좌우 이동, 재생성, `Fill Plan`, `Submit Plan`을 모두 비활성화해 중복 실행을 막는다.
+
 ## UI 구조
 
 ```text
@@ -190,10 +198,11 @@ FastSbcPlanSession
 │ ...                              │
 ├──────────────────────────────────┤
 │ [ Regenerate Plans ]             │
-│ [       Submit Plan 1       ]    │
+│ [ Fill Plan 1 ][ Submit Plan 1 ] │
 └──────────────────────────────────┘
 ```
 
+- `Fill Plan`은 `Submit Plan` 바로 왼쪽에 배치한다.
 - 각 행의 왼쪽에는 EA 네이티브 선수 카드를 축소한 썸네일을 표시한다.
 - 행 순번은 표시하지 않고 제목은 `OVR  선수 이름` 순서와 명확한 간격으로 표시한다.
 - 각 행은 카드, OVR, 이름, 포지션, 희귀도, 거래 상태, 저장 위치를 표시한다.
@@ -228,8 +237,8 @@ FastSbcPlanSession
 - EA Web App 버전에 따라 Challenge 목록이 `data.challenges`, `response.challenges`, 최상위 `challenges` 또는 배열로 반환되는 경우를 모두 처리한다.
 - 목록 응답의 `success` 필드가 생략되더라도 SBC repository가 정상 갱신됐다면 성공으로 처리한다.
 - 네트워크 재조회가 실패해도 저장된 빠른 SBC 조건과 로컬 선수 캐시가 있으면 미리보기 제출안을 생성한다.
-- 실제 제출 직전에는 Challenge를 다시 요청하고, 실패 시 현재 repository의 완전히 초기화된 Challenge만 대체 경로로 사용한다.
-- 최종 제출 전 `challenge.canSubmit()` 검증은 항상 수행한다.
+- 실제 채우기 또는 제출 직전에는 Challenge를 다시 요청하고, 실패 시 현재 repository의 완전히 초기화된 Challenge만 대체 경로로 사용한다.
+- 최종 채우기와 제출 전 `challenge.canSubmit()` 검증은 항상 수행한다.
 - 열기 실패 알림에는 설치 버전, `build`·`generate`·`render` 등 실패 단계와 오류 이름을 함께 표시하고 마지막 진단값을 Tampermonkey 저장소에 보관한다.
 
 ## 검증
@@ -257,9 +266,12 @@ FastSbcPlanSession
 - EA의 `createElementWithConfig()` 동작 그대로 복수 버튼 클래스를 개별 `DOMTokenList` 토큰으로 등록하는 경로
 - 설정 객체가 필요한 DOM 생성 헬퍼를 빈 설정 객체와 함께 호출하는지 검사
 - 제출안 좌우 이동과 제출 버튼 클릭
+- `Fill Plan`이 후보 순서를 유지하는 배치 모드로 호출되고 제출 API를 호출하지 않는지 검사
+- 최신 요구사항 검증 실패 시 스쿼드를 채우거나 팝업을 닫지 않는지 검사
+- 정상 배치 시 후보 상태를 복구하고 팝업을 닫는지 검사
 - 닫기 버튼, 바깥 영역 탭, `Escape` 키 닫기
 - 360×720, 412×915, 1024×800 시스템 Edge 오버레이 렌더링
-- 모든 검사 화면에서 가로 넘침과 목록·하단 버튼 겹침 없음
+- 모든 검사 화면에서 `Fill Plan`이 `Submit Plan` 왼쪽에 있고 가로 넘침과 목록·하단 버튼 겹침 없음
 - 평점 84, 조직력 30, 특정 리그 1명, 희귀 그룹 2명 조건을 함께 파싱
 - 포지션별 후보 110명으로 10개의 완전한 제출안 생성
 - 10개 제출안의 실물 `item.id` 110개가 모두 고유한지 검사
