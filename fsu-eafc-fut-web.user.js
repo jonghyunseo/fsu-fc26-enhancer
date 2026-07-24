@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.10.03
+// @version      26.10.04
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1925,23 +1925,20 @@
             .fsu-fastSBCPlan[data-state="filling"] .fsu-fastSBCPlanStatus,
             .fsu-fastSBCPlan[data-state="submitting"] .fsu-fastSBCPlanStatus{color:#f7d36a}
             .fsu-fastSBCPlan[data-state="invalid"] .fsu-fastSBCPlanStatus{color:#ff9e91}
-            .fsu-fastSBCPlanList{min-height:0;flex:1 1 auto;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:8px 12px;background:#191820;scrollbar-color:#575753 #23232b;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+            .fsu-fastSBCPlanList{display:grid;min-height:0;flex:1 1 auto;grid-template-columns:repeat(4,minmax(0,1fr));align-content:start;gap:10px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:10px 12px;background:#191820;scrollbar-color:#575753 #23232b;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
             .fsu-fastSBCPlanList::-webkit-scrollbar{width:7px}
             .fsu-fastSBCPlanList::-webkit-scrollbar-track{background:#23232b}
             .fsu-fastSBCPlanList::-webkit-scrollbar-thumb{border:2px solid #23232b;border-radius:7px;background:#575753}
-            .fsu-fastSBCPlanPlayer{display:grid;grid-template-columns:58px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:78px;padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.07)}
-            .fsu-fastSBCPlanPlayer:last-child{border-bottom:0}
-            .fsu-fastSBCPlanPlayerCard{display:grid;width:58px;height:70px;place-items:center;overflow:hidden;pointer-events:none}
-            .fsu-fastSBCPlanPlayerCardView{max-width:none!important;max-height:none!important;pointer-events:none!important;zoom:.22}
-            .fsu-fastSBCPlanPlayerCardFallback{display:grid;width:44px;height:60px;place-items:center;border:1px solid #4b515a;border-radius:7px;background:linear-gradient(145deg,#3b414b,#252831);color:#f7d36a;font-family:UltimateTeam,sans-serif;font-size:15px;font-weight:800;clip-path:polygon(12% 0,88% 0,100% 9%,100% 82%,50% 100%,0 82%,0 9%)}
-            .fsu-fastSBCPlanPlayerBody{min-width:0}
-            .fsu-fastSBCPlanPlayerName{display:flex;min-width:0;align-items:baseline;gap:8px;overflow:hidden;color:#f3f4f5;font-family:UltimateTeam,sans-serif;font-size:14px;font-weight:650;line-height:18px;white-space:nowrap}
-            .fsu-fastSBCPlanPlayerRating{flex:0 0 auto;color:#f7d36a;font-size:16px;font-weight:800}
-            .fsu-fastSBCPlanPlayerNameText{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-            .fsu-fastSBCPlanPlayerMeta{display:flex;min-width:0;align-items:center;gap:5px;margin-top:3px;color:#9299a1;font-size:11px;line-height:14px}
-            .fsu-fastSBCPlanPlayerMeta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-            .fsu-fastSBCPlanPlayerLocation{max-width:104px;padding:4px 7px 2px;border-radius:999px;background:#2e493f;color:#9cf3c2;font-size:11px;line-height:14px;text-align:center;white-space:nowrap}
-            .fsu-fastSBCPlanPlayerLocation--storage{background:#554619;color:#ffe28a}
+            .fsu-fastSBCPlanPlayer{display:grid;min-width:0;min-height:150px;padding:3px 0;place-items:center;overflow:hidden}
+            .fsu-fastSBCPlanPlayerCard{display:grid;width:118px;height:146px;place-items:center;overflow:hidden;pointer-events:none}
+            .fsu-fastSBCPlanPlayerCardView{max-width:none!important;max-height:none!important;pointer-events:none!important;zoom:.43}
+            .fsu-fastSBCPlanPlayerCard .fsu-cards,
+            .fsu-fastSBCPlanPlayerCard .fsu-player-other,
+            .fsu-fastSBCPlanPlayerCard .fsu-cards-attr,
+            .fsu-fastSBCPlanPlayerCard .fsu-cards-pos,
+            .fsu-fastSBCPlanPlayerCard .fsu-cardlock,
+            .fsu-fastSBCPlanPlayerCard .fsu-lockbtn{display:none!important}
+            .fsu-fastSBCPlanPlayerCardFallback{display:grid;width:88px;height:122px;place-items:center;border:1px solid #4b515a;border-radius:10px;background:linear-gradient(145deg,#3b414b,#252831);color:#aeb3ba;font-family:UltimateTeam,sans-serif;font-size:26px;font-weight:700;clip-path:polygon(12% 0,88% 0,100% 9%,100% 82%,50% 100%,0 82%,0 9%)}
             .fsu-fastSBCPlanFooter{display:grid;flex:0 0 auto;grid-template-columns:minmax(0,.9fr) minmax(0,1fr) minmax(0,1.18fr);gap:9px;padding:11px 14px 13px;border-top:1px solid #3f444b;background:#22232b}
             .fsu-fastSBCPlanRegenerate,.fsu-fastSBCPlanFill,.fsu-fastSBCPlanSubmit{box-sizing:border-box!important;width:100%!important;min-height:44px!important;height:44px!important;margin:0!important;padding:0 12px!important;border-radius:9px!important;font-size:14px!important;line-height:42px!important;white-space:nowrap!important}
             .fsu-fastSBCPlanRegenerate{border:1px solid #4b515a!important;background:#30343e!important;color:#e5e7e9!important}
@@ -1954,7 +1951,7 @@
             .fsu-fastSBCPlanSubmit.disabled,.fsu-fastSBCPlanSubmit:disabled{filter:none!important;opacity:.38!important}
             .fsu-fastSBCPlanError{display:none;grid-column:1/-1;padding:8px 10px;border:1px solid #75433f;border-radius:8px;background:#422c2d;color:#ffc1b9;font-size:12px;line-height:16px}
             .fsu-fastSBCPlan[data-state="invalid"] .fsu-fastSBCPlanError{display:block}
-            @media (max-width:620px){.fsu-fastSBCPlanOverlay{padding:6px!important}.fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}.fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}.fsu-fastSBCPlanDialogBody{height:100%!important;min-height:0!important}.fsu-fastSBCPlan{height:100%!important;max-height:none!important}.fsu-fastSBCPlanPlayer{grid-template-columns:50px minmax(0,1fr) auto;gap:7px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanPlayerCard{width:50px;height:68px}.fsu-fastSBCPlanPlayerCardView{zoom:.2}.fsu-fastSBCPlanPlayerLocation{max-width:82px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanFooter{grid-template-columns:repeat(2,minmax(0,1fr))}.fsu-fastSBCPlanRegenerate{grid-column:1/-1}}
+            @media (max-width:620px){.fsu-fastSBCPlanOverlay{padding:6px!important}.fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}.fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}.fsu-fastSBCPlanDialogBody{height:100%!important;min-height:0!important}.fsu-fastSBCPlan{height:100%!important;max-height:none!important}.fsu-fastSBCPlanList{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px 7px}.fsu-fastSBCPlanPlayer{min-height:136px;padding:0}.fsu-fastSBCPlanPlayerCard{width:104px;height:132px}.fsu-fastSBCPlanPlayerCardView{zoom:.39}.fsu-fastSBCPlanPlayerCardFallback{width:82px;height:112px}.fsu-fastSBCPlanFooter{grid-template-columns:repeat(2,minmax(0,1fr))}.fsu-fastSBCPlanRegenerate{grid-column:1/-1}}
             .phone .fsu-fastSBCPlanOverlay{padding:6px!important}
             .phone .fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}
             .phone .fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}
@@ -1963,8 +1960,11 @@
             .phone .fsu-fastSBCPlan{height:100%!important;max-height:none!important}
             .phone .fsu-fastSBCPlanHeader{padding:12px 12px 10px}
             .phone .fsu-fastSBCPlanNavigator{padding:8px 10px}
-            .phone .fsu-fastSBCPlanList{padding:5px 7px}
-            .phone .fsu-fastSBCPlanPlayer{min-height:74px}
+            .phone .fsu-fastSBCPlanList{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px 7px}
+            .phone .fsu-fastSBCPlanPlayer{min-height:136px;padding:0}
+            .phone .fsu-fastSBCPlanPlayerCard{width:104px;height:132px}
+            .phone .fsu-fastSBCPlanPlayerCardView{zoom:.39}
+            .phone .fsu-fastSBCPlanPlayerCardFallback{width:82px;height:112px}
             .phone .fsu-fastSBCPlanFooter{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px 10px 10px}
             .phone .fsu-fastSBCPlanRegenerate{grid-column:1/-1}
         `;
@@ -12351,7 +12351,8 @@
                         const row = events.createElementWithConfig("div", {
                             classList: "fsu-fastSBCPlanPlayer",
                             attributes: {
-                                "title": fy(["fastsbc.plan.itemid", snapshot.itemId])
+                                "role": "img",
+                                "aria-label": snapshot.name
                             }
                         });
                         const card = events.createElementWithConfig("div", {
@@ -12377,7 +12378,7 @@
                             itemView?.dealloc?.();
                             card.appendChild(events.createElementWithConfig("div", {
                                 classList: "fsu-fastSBCPlanPlayerCardFallback",
-                                textContent: snapshot.rating || "—"
+                                textContent: "?"
                             }));
                             console.warn(
                                 "[FSU] Fast SBC player card render failed",
@@ -12386,45 +12387,6 @@
                             );
                         }
                         row.appendChild(card);
-                        const body = events.createElementWithConfig("div", {
-                            classList: "fsu-fastSBCPlanPlayerBody"
-                        });
-                        const name = events.createElementWithConfig("div", {
-                            classList: "fsu-fastSBCPlanPlayerName",
-                            attributes: {
-                                "title": `${snapshot.rating || "—"} ${snapshot.name}`
-                            }
-                        });
-                        name.appendChild(events.createElementWithConfig("span", {
-                            classList: "fsu-fastSBCPlanPlayerRating",
-                            textContent: snapshot.rating || "—"
-                        }));
-                        name.appendChild(events.createElementWithConfig("span", {
-                            classList: "fsu-fastSBCPlanPlayerNameText",
-                            textContent: snapshot.name
-                        }));
-                        body.appendChild(name);
-                        const meta = events.createElementWithConfig("div", {
-                            classList: "fsu-fastSBCPlanPlayerMeta"
-                        });
-                        meta.appendChild(events.createElementWithConfig("span", {
-                            textContent: `${snapshot.position} · ${snapshot.rarity}`
-                        }));
-                        meta.appendChild(events.createElementWithConfig("span", {
-                            textContent: fy(
-                                snapshot.tradeable
-                                    ? "clubplayers.tradeable.yes"
-                                    : "clubplayers.tradeable.no"
-                            )
-                        }));
-                        body.appendChild(meta);
-                        row.appendChild(body);
-                        row.appendChild(events.createElementWithConfig("div", {
-                            classList: snapshot.location === "storage"
-                                ? ["fsu-fastSBCPlanPlayerLocation", "fsu-fastSBCPlanPlayerLocation--storage"]
-                                : "fsu-fastSBCPlanPlayerLocation",
-                            textContent: fy(`fastsbc.plan.location.${snapshot.location}`)
-                        }));
                         list.appendChild(row);
                     })
                     list.scrollTop = 0;
