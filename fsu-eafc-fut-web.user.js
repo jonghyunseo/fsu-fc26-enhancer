@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.10.02
+// @version      26.10.03
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1405,11 +1405,14 @@
             "fastsbc.plan.summary":["预计可完成 %1 次 · 已生成 %2 个方案","預計可完成 %1 次 · 已生成 %2 個方案","%1 estimated completions · %2 plans created"],
             "fastsbc.plan.counter":["方案 %1 / %2","方案 %1 / %2","Plan %1 of %2"],
             "fastsbc.plan.ready":["可以提交","可以提交","Ready to submit"],
+            "fastsbc.plan.filling":["正在填入阵容","正在填入陣容","Filling squad"],
             "fastsbc.plan.submitting":["正在提交","正在提交","Submitting"],
             "fastsbc.plan.submitted":["已提交","已提交","Submitted"],
             "fastsbc.plan.invalid":["方案已失效","方案已失效","Plan unavailable"],
             "fastsbc.plan.valid":["满足要求 · %1 名球员 · 无重复","滿足要求 · %1 名球員 · 無重複","Requirements met · %1 players · no duplicates"],
             "fastsbc.plan.playercount":["%1 名球员","%1 名球員","%1 players"],
+            "fastsbc.plan.fill":["填入方案 %1","填入方案 %1","Fill Plan %1"],
+            "fastsbc.plan.filled":["方案已填入 SBC 阵容。","方案已填入 SBC 陣容。","Plan filled into the SBC squad."],
             "fastsbc.plan.submit":["提交方案 %1","提交方案 %1","Submit Plan %1"],
             "fastsbc.plan.regenerate":["重新生成方案","重新產生方案","Regenerate Plans"],
             "fastsbc.plan.previous":["上一个方案","上一個方案","Previous plan"],
@@ -1919,6 +1922,7 @@
             .fsu-fastSBCPlanCounter strong{display:block;color:#fcfcfc;font-family:UltimateTeam,sans-serif;font-size:16px;line-height:20px}
             .fsu-fastSBCPlanStatus{display:inline-flex;align-items:center;gap:5px;margin-top:3px;color:#8ff5a0;font-size:12px;line-height:15px}
             .fsu-fastSBCPlan[data-state="submitted"] .fsu-fastSBCPlanStatus{color:#7ce0df}
+            .fsu-fastSBCPlan[data-state="filling"] .fsu-fastSBCPlanStatus,
             .fsu-fastSBCPlan[data-state="submitting"] .fsu-fastSBCPlanStatus{color:#f7d36a}
             .fsu-fastSBCPlan[data-state="invalid"] .fsu-fastSBCPlanStatus{color:#ff9e91}
             .fsu-fastSBCPlanList{min-height:0;flex:1 1 auto;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:8px 12px;background:#191820;scrollbar-color:#575753 #23232b;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
@@ -1938,16 +1942,19 @@
             .fsu-fastSBCPlanPlayerMeta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
             .fsu-fastSBCPlanPlayerLocation{max-width:104px;padding:4px 7px 2px;border-radius:999px;background:#2e493f;color:#9cf3c2;font-size:11px;line-height:14px;text-align:center;white-space:nowrap}
             .fsu-fastSBCPlanPlayerLocation--storage{background:#554619;color:#ffe28a}
-            .fsu-fastSBCPlanFooter{display:grid;flex:0 0 auto;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);gap:9px;padding:11px 14px 13px;border-top:1px solid #3f444b;background:#22232b}
-            .fsu-fastSBCPlanRegenerate,.fsu-fastSBCPlanSubmit{box-sizing:border-box!important;width:100%!important;min-height:44px!important;height:44px!important;margin:0!important;padding:0 12px!important;border-radius:9px!important;font-size:14px!important;line-height:42px!important;white-space:nowrap!important}
+            .fsu-fastSBCPlanFooter{display:grid;flex:0 0 auto;grid-template-columns:minmax(0,.9fr) minmax(0,1fr) minmax(0,1.18fr);gap:9px;padding:11px 14px 13px;border-top:1px solid #3f444b;background:#22232b}
+            .fsu-fastSBCPlanRegenerate,.fsu-fastSBCPlanFill,.fsu-fastSBCPlanSubmit{box-sizing:border-box!important;width:100%!important;min-height:44px!important;height:44px!important;margin:0!important;padding:0 12px!important;border-radius:9px!important;font-size:14px!important;line-height:42px!important;white-space:nowrap!important}
             .fsu-fastSBCPlanRegenerate{border:1px solid #4b515a!important;background:#30343e!important;color:#e5e7e9!important}
             .fsu-fastSBCPlanRegenerate:hover,.fsu-fastSBCPlanRegenerate:active{border-color:#1fc3c1!important;background:#39414c!important}
+            .fsu-fastSBCPlanFill{border:1px solid #1fc3c1!important;background:#29424a!important;color:#dfffff!important;font-family:UltimateTeam,sans-serif!important;font-weight:700!important}
+            .fsu-fastSBCPlanFill:hover,.fsu-fastSBCPlanFill:active{background:#31535d!important;filter:brightness(1.08)}
             .fsu-fastSBCPlanSubmit{border:0!important;background:linear-gradient(135deg,#1fc3c1,#5471d8)!important;color:#fff!important;font-family:UltimateTeam,sans-serif!important;font-weight:700!important}
             .fsu-fastSBCPlanSubmit:hover,.fsu-fastSBCPlanSubmit:active{filter:brightness(1.12)}
+            .fsu-fastSBCPlanFill.disabled,.fsu-fastSBCPlanFill:disabled,
             .fsu-fastSBCPlanSubmit.disabled,.fsu-fastSBCPlanSubmit:disabled{filter:none!important;opacity:.38!important}
             .fsu-fastSBCPlanError{display:none;grid-column:1/-1;padding:8px 10px;border:1px solid #75433f;border-radius:8px;background:#422c2d;color:#ffc1b9;font-size:12px;line-height:16px}
             .fsu-fastSBCPlan[data-state="invalid"] .fsu-fastSBCPlanError{display:block}
-            @media (max-width:620px){.fsu-fastSBCPlanOverlay{padding:6px!important}.fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}.fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}.fsu-fastSBCPlanDialogBody{height:100%!important;min-height:0!important}.fsu-fastSBCPlan{height:100%!important;max-height:none!important}.fsu-fastSBCPlanPlayer{grid-template-columns:50px minmax(0,1fr) auto;gap:7px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanPlayerCard{width:50px;height:68px}.fsu-fastSBCPlanPlayerCardView{zoom:.2}.fsu-fastSBCPlanPlayerLocation{max-width:82px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanFooter{grid-template-columns:1fr}}
+            @media (max-width:620px){.fsu-fastSBCPlanOverlay{padding:6px!important}.fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}.fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}.fsu-fastSBCPlanDialogBody{height:100%!important;min-height:0!important}.fsu-fastSBCPlan{height:100%!important;max-height:none!important}.fsu-fastSBCPlanPlayer{grid-template-columns:50px minmax(0,1fr) auto;gap:7px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanPlayerCard{width:50px;height:68px}.fsu-fastSBCPlanPlayerCardView{zoom:.2}.fsu-fastSBCPlanPlayerLocation{max-width:82px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanFooter{grid-template-columns:repeat(2,minmax(0,1fr))}.fsu-fastSBCPlanRegenerate{grid-column:1/-1}}
             .phone .fsu-fastSBCPlanOverlay{padding:6px!important}
             .phone .fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}
             .phone .fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}
@@ -1958,7 +1965,8 @@
             .phone .fsu-fastSBCPlanNavigator{padding:8px 10px}
             .phone .fsu-fastSBCPlanList{padding:5px 7px}
             .phone .fsu-fastSBCPlanPlayer{min-height:74px}
-            .phone .fsu-fastSBCPlanFooter{padding:9px 10px 10px}
+            .phone .fsu-fastSBCPlanFooter{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px 10px 10px}
+            .phone .fsu-fastSBCPlanRegenerate{grid-column:1/-1}
         `;
 
         //24.18 修改请求fut链接报错提示
@@ -12249,6 +12257,16 @@
                 () => events.regenerateFastSBCPlanSession(session),
                 "fsu-fastSBCPlanRegenerate"
             );
+            const fillControl = events.createFastSBCPlanButton(
+                "",
+                () => {
+                    const plan = session.plans[session.currentIndex];
+                    if(plan){
+                        events.fillFastSBCPlan(session, plan);
+                    }
+                },
+                "fsu-fastSBCPlanFill"
+            );
             const submitControl = events.createFastSBCPlanButton(
                 "",
                 () => {
@@ -12264,6 +12282,7 @@
             });
             footer.append(
                 regenerateControl.getRootElement(),
+                fillControl.getRootElement(),
                 submitControl.getRootElement(),
                 errorText
             );
@@ -12283,7 +12302,13 @@
             const view = {
                 root,
                 list,
-                controls: [previousControl, nextControl, regenerateControl, submitControl],
+                controls: [
+                    previousControl,
+                    nextControl,
+                    regenerateControl,
+                    fillControl,
+                    submitControl
+                ],
                 render: () => {
                     const plan = session.plans[session.currentIndex];
                     if(!plan){
@@ -12303,6 +12328,7 @@
                     ]);
                     const statusKeys = {
                         ready: "fastsbc.plan.ready",
+                        filling: "fastsbc.plan.filling",
                         submitting: "fastsbc.plan.submitting",
                         submitted: "fastsbc.plan.submitted",
                         invalid: "fastsbc.plan.invalid"
@@ -12408,7 +12434,12 @@
                         !session.submitting && session.currentIndex < session.plans.length - 1
                     );
                     regenerateControl.setInteractionState(!session.submitting);
+                    fillControl.setInteractionState(!session.submitting && plan.status === "ready");
                     submitControl.setInteractionState(!session.submitting && plan.status === "ready");
+                    events.setFastSBCPlanControlText(
+                        fillControl,
+                        fy(["fastsbc.plan.fill", plan.number])
+                    );
                     events.setFastSBCPlanControlText(
                         submitControl,
                         fy(["fastsbc.plan.submit", plan.number])
@@ -12823,6 +12854,92 @@
             }
             events.SBCListInsertToFront(setEntity.id, 1);
             events.notice("fastsbc.success", 0);
+        }
+        events.fillFastSBCPlan = async(session, plan) => {
+            if(session.submitting || plan.status !== "ready"){
+                return;
+            }
+            const initialPlayers = events.resolveFastSBCPlanPlayers(plan);
+            if(!initialPlayers || initialPlayers.length !== session.requiredCount){
+                events.setFastSBCPlanSubmitFailure(
+                    session,
+                    plan,
+                    "fastsbc.plan.changed",
+                    true
+                );
+                return;
+            }
+
+            session.submitting = true;
+            plan.status = "filling";
+            plan.error = "";
+            session.view?.render?.();
+            events.showLoader();
+            const controller = events.getCurrent();
+            controller?.getView?.()?.setInteractionState?.(false);
+
+            try {
+                const loaded = await events.loadFastSBCPlanChallenge(
+                    session.setId,
+                    session.challengeId,
+                    {
+                        preferCached: false,
+                        allowCachedFallback: true
+                    }
+                );
+                const players = events.resolveFastSBCPlanPlayers(plan);
+                if(!players || players.length !== session.requiredCount){
+                    events.setFastSBCPlanSubmitFailure(
+                        session,
+                        plan,
+                        "fastsbc.plan.changed",
+                        true
+                    );
+                    return;
+                }
+
+                const validation = events.validateFastSBCChallengeCandidate(
+                    loaded.challenge,
+                    players
+                );
+                if(!validation.valid){
+                    events.setFastSBCPlanSubmitFailure(
+                        session,
+                        plan,
+                        "fastsbc.plan.requirements",
+                        true
+                    );
+                    return;
+                }
+
+                // type 2 preserves the candidate order that was validated against
+                // the Challenge slots. Saving is handled by the existing SBC fill path.
+                events.playerListFillSquad(loaded.challenge, players, 2);
+                if(!loaded.challenge.canSubmit()){
+                    events.setFastSBCPlanSubmitFailure(
+                        session,
+                        plan,
+                        "fastsbc.plan.requirements",
+                        true
+                    );
+                    return;
+                }
+
+                session.submitting = false;
+                plan.status = "ready";
+                plan.error = "";
+                session.view?.render?.();
+                events.closeFastSBCPlanPopup();
+                controller?.getView?.()?.setInteractionState?.(true);
+                events.notice("fastsbc.plan.filled", 0);
+            } catch(error) {
+                console.error("[FSU] Fast SBC plan fill failed", error);
+                events.setFastSBCPlanSubmitFailure(
+                    session,
+                    plan,
+                    "fastsbc.plan.loaderror"
+                );
+            }
         }
         events.submitFastSBCPlan = async(session, plan) => {
             if(session.submitting || plan.status !== "ready"){
