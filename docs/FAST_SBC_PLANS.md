@@ -141,6 +141,18 @@ FastSbcPlanSession
 
 미할당 중복 선수 화면의 빠른 작업 버튼은 기존 즉시 처리 경로를 유지한다. 이 버튼은 특정 중복 선수를 처리하기 위한 별도 흐름이며 `Completion` 미리보기 진입점이 아니다.
 
+## SBC 데이터 로딩
+
+제출안 미리보기와 실제 제출의 데이터 로딩 책임을 분리한다.
+
+- 미리보기는 현재 화면에 이미 로드된 Challenge를 우선 사용한다.
+- 캐시된 Challenge가 없으면 EA의 Challenge 목록과 상세 데이터를 요청한다.
+- EA Web App 버전에 따라 Challenge 목록이 `data.challenges`, `response.challenges`, 최상위 `challenges` 또는 배열로 반환되는 경우를 모두 처리한다.
+- 목록 응답의 `success` 필드가 생략되더라도 SBC repository가 정상 갱신됐다면 성공으로 처리한다.
+- 네트워크 재조회가 실패해도 저장된 빠른 SBC 조건과 로컬 선수 캐시가 있으면 미리보기 제출안을 생성한다.
+- 실제 제출 직전에는 Challenge를 다시 요청하고, 실패 시 현재 repository의 완전히 초기화된 Challenge만 대체 경로로 사용한다.
+- 최종 제출 전 `challenge.canSubmit()` 검증은 항상 수행한다.
+
 ## 검증
 
 2026-07-24 구현 시 다음 검증을 수행했다.
@@ -157,5 +169,10 @@ FastSbcPlanSession
 - 세 화면 모두 가로 넘침 없음
 - 좁은 모바일에서 선수 목록만 세로 스크롤
 - 하단 제출 버튼과 상단 닫기·화살표가 목록과 겹치지 않음
+- 이미 로드된 Challenge를 네트워크 요청 없이 재사용하는 경로
+- `data.challenges`, `response.challenges`, 배열형 Challenge 응답 처리
+- `success`가 생략된 응답과 repository 갱신 처리
+- Challenge 재조회 실패 시 안전한 캐시 대체 경로
+- 네트워크 로딩 실패 시 로컬 조건으로 미리보기를 생성하는 경로
 
 실제 EA 계정에서의 최종 제출은 계정 아이템을 소모하므로 자동 테스트하지 않았다. 설치 후에는 저가 반복 SBC에서 제출안 선수와 실제 제출 선수가 일치하는지 먼저 확인해야 한다.
