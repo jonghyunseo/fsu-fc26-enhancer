@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.09.11
+// @version      26.09.12
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -10856,8 +10856,13 @@
             }
         }
         events.createFastSBCPlanButton = (text, action, classList) => {
+            const classes = Array.isArray(classList)
+                ? classList
+                : String(classList ?? "")
+                    .split(/\s+/)
+                    .filter(Boolean);
             const root = events.createElementWithConfig("button", {
-                classList,
+                classList: classes,
                 textContent: text,
                 attributes: {
                     "type": "button"
@@ -10939,7 +10944,7 @@
             const counter = events.createElementWithConfig("div", {
                 classList: "fsu-fastSBCPlanCounter"
             });
-            const counterText = events.createElementWithConfig("strong");
+            const counterText = events.createElementWithConfig("strong", {});
             const statusText = events.createElementWithConfig("span", {
                 classList: "fsu-fastSBCPlanStatus"
             });
@@ -11099,7 +11104,9 @@
             const overlay = events.createElementWithConfig("div", {
                 classList: "fsu-fastSBCPlanOverlay",
                 attributes: {
-                    "data-fsu-fast-sbc-version": "26.09.11"
+                    "data-fsu-fast-sbc-version": typeof GM_info !== "undefined"
+                        ? GM_info?.script?.version ?? "unknown"
+                        : "unknown"
                 }
             });
             const dialog = events.createElementWithConfig("section", {
