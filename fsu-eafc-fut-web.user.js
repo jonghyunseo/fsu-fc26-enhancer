@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.09.2
+// @version      26.09.3
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1677,6 +1677,7 @@
             .fsu-clubPlayersColumnButton{min-width:32px;height:30px;padding:0 8px;font-size:14px}
             .fsu-clubPlayersColumnButton[aria-pressed="true"]{border-color:#07f468;background:#264a35;color:#fff}
             .fsu-clubPlayersColumnButton:hover,.fsu-clubPlayersReset:hover,.fsu-clubPlayersLoadMore:hover{border-color:#a6a6a1;background:#3b4754}
+            .fsu-clubPlayersColumnButton:disabled,.fsu-clubPlayersReset:disabled,.fsu-clubPlayersLoadMore:disabled{cursor:wait;opacity:.65}
             .fsu-clubPlayersReset{height:32px;padding:0 12px;font-size:13px;white-space:nowrap}
             .fsu-clubPlayersFilters{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:9px}
             .fsu-clubPlayersControl{display:flex;min-width:0;flex-direction:column;gap:4px}
@@ -1692,6 +1693,9 @@
             .fsu-clubPlayersGrid{--fsu-club-player-columns:3;display:grid;grid-template-columns:repeat(var(--fsu-club-player-columns),minmax(0,1fr));gap:20px;max-width:1320px;margin:0 auto;padding:24px}
             .fsu-clubPlayersItem{display:flex;min-width:0;flex-direction:column;align-items:stretch;overflow:hidden;border:1px solid #3f444b;border-radius:14px;background:#2d2c36;box-shadow:0 8px 22px rgba(0,0,0,.18)}
             .fsu-clubPlayersCard{display:grid;min-height:260px;place-items:center;padding:12px 8px 0}
+            .fsu-clubPlayersCardFallback{display:flex;min-height:220px;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px;color:#fcfcfc;text-align:center}
+            .fsu-clubPlayersCardFallback strong{font-family:UltimateTeamCondensed,sans-serif;font-size:28px}
+            .fsu-clubPlayersCardFallback span{color:#c6c9cc;font-family:UltimateTeamCondensed,sans-serif;font-size:14px}
             .fsu-clubPlayersMeta{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:10px;border-top:1px solid rgba(255,255,255,.07);background:#25242c}
             .fsu-clubPlayersBadge{padding:4px 8px 2px;border-radius:999px;background:#3b4754;color:#d4d8de;font-family:UltimateTeamCondensed,sans-serif;font-size:12px;line-height:14px;white-space:nowrap}
             .fsu-clubPlayersBadge--storage{background:#604b12;color:#ffd870}
@@ -13804,47 +13808,80 @@
         }
         clubPlayersControllerView.prototype._renderNextBatch = function () {
             const state = this._fsu.state;
+            if(state.rendering || state.visible >= state.filtered.length){
+                return;
+            }
             const start = state.visible;
             const end = Math.min(start + state.pageSize, state.filtered.length);
             const batch = state.filtered.slice(start, end);
+            const loadedItems = [];
+            state.rendering = true;
+            this._fsu.loadMore.disabled = true;
+            this._fsu.loadMore.setAttribute("aria-busy", "true");
+            this._fsu.loadMoreControl?.setInteractionState?.(false);
 
-            _.forEach(batch, record => {
-                const itemViewBox = events.createElementWithConfig("article", {
-                    classList: "fsu-clubPlayersItem",
-                    attributes: {
-                        "data-player-id": record.itemKey
+            try {
+                _.forEach(batch, record => {
+                    const itemViewBox = events.createElementWithConfig("article", {
+                        classList: "fsu-clubPlayersItem",
+                        attributes: {
+                            "data-player-id": record.itemKey
+                        }
+                    });
+                    const itemViewCard = events.createElementWithConfig("div", {
+                        classList: "fsu-clubPlayersCard"
+                    });
+                    let itemView = null;
+                    try {
+                        itemView = UTItemViewFactory.createLargeItem(record.item);
+                        itemView.init();
+                        itemView.render(record.item);
+                        this._fsu.itemViews.push(itemView);
+                        itemViewCard.appendChild(itemView.getRootElement());
+                        loadedItems.push(record.item);
+                    } catch(error) {
+                        itemView?.dealloc?.();
+                        itemViewCard.appendChild(events.createElementWithConfig("div", {
+                            classList: "fsu-clubPlayersCardFallback",
+                            innerHTML: `<strong>${record.rating || "-"}</strong><span>${_.escape(record.name || record.itemKey)}</span>`
+                        }));
+                        console.warn("[FSU] Club player card render failed", record.itemKey, error);
                     }
-                });
-                const itemViewCard = events.createElementWithConfig("div", {
-                    classList: "fsu-clubPlayersCard"
-                });
-                const itemView = UTItemViewFactory.createLargeItem(record.item);
-                itemView.init();
-                itemView.render(record.item);
-                this._fsu.itemViews.push(itemView);
-                itemViewCard.appendChild(itemView.getRootElement());
-                itemViewBox.appendChild(itemViewCard);
+                    itemViewBox.appendChild(itemViewCard);
 
-                const meta = events.createElementWithConfig("div", {
-                    classList: "fsu-clubPlayersMeta"
-                });
-                meta.appendChild(events.createElementWithConfig("span", {
-                    classList: ["fsu-clubPlayersBadge", record.location === "storage" ? "fsu-clubPlayersBadge--storage" : "fsu-clubPlayersBadge--club"],
-                    textContent: fy(`clubplayers.location.${record.location}`)
-                }));
-                meta.appendChild(events.createElementWithConfig("span", {
-                    classList: ["fsu-clubPlayersBadge", record.tradeable ? "fsu-clubPlayersBadge--tradeable" : "fsu-clubPlayersBadge--untradeable"],
-                    textContent: fy(record.tradeable ? "clubplayers.tradeable.yes" : "clubplayers.tradeable.no")
-                }));
-                itemViewBox.appendChild(meta);
-                this._fsu.listBox.appendChild(itemViewBox);
-            })
+                    const meta = events.createElementWithConfig("div", {
+                        classList: "fsu-clubPlayersMeta"
+                    });
+                    meta.appendChild(events.createElementWithConfig("span", {
+                        classList: ["fsu-clubPlayersBadge", record.location === "storage" ? "fsu-clubPlayersBadge--storage" : "fsu-clubPlayersBadge--club"],
+                        textContent: fy(`clubplayers.location.${record.location}`)
+                    }));
+                    meta.appendChild(events.createElementWithConfig("span", {
+                        classList: ["fsu-clubPlayersBadge", record.tradeable ? "fsu-clubPlayersBadge--tradeable" : "fsu-clubPlayersBadge--untradeable"],
+                        textContent: fy(record.tradeable ? "clubplayers.tradeable.yes" : "clubplayers.tradeable.no")
+                    }));
+                    itemViewBox.appendChild(meta);
+                    this._fsu.listBox.appendChild(itemViewBox);
+                })
 
-            state.visible = end;
-            this._fsu.visibleText.textContent = fy(["clubplayers.visible", state.visible, state.filtered.length]);
-            this._fsu.loadMore.hidden = state.visible >= state.filtered.length;
-            if(batch.length){
-                events.loadPlayerInfo(_.map(batch, "item"));
+                state.visible = end;
+                this._fsu.visibleText.textContent = fy(["clubplayers.visible", state.visible, state.filtered.length]);
+                if(loadedItems.length){
+                    try {
+                        events.loadPlayerInfo(loadedItems)?.catch?.(error => {
+                            console.warn("[FSU] Club player details load failed", error);
+                        });
+                    } catch(error) {
+                        console.warn("[FSU] Club player details load failed", error);
+                    }
+                }
+            } finally {
+                state.rendering = false;
+                const hasMore = state.visible < state.filtered.length;
+                this._fsu.loadMore.hidden = !hasMore;
+                this._fsu.loadMore.disabled = !hasMore;
+                this._fsu.loadMore.setAttribute("aria-busy", "false");
+                this._fsu.loadMoreControl?.setInteractionState?.(hasMore);
             }
         }
         clubPlayersControllerView.prototype._applyFilters = function () {
@@ -13882,6 +13919,7 @@
                     visible: 0,
                     pageSize: savedColumns * 6,
                     columns: savedColumns,
+                    rendering: false,
                     query: "",
                     minRating: "",
                     maxRating: "",
@@ -13903,9 +13941,53 @@
                 this._fsu = {
                     state,
                     itemViews: [],
+                    actionControls: [],
                     controls: {},
                     columnButtons: [],
                     filterTimer: null
+                };
+                const createActionButton = (text, className, handler) => {
+                    const control = events.createButton(
+                        new UTStandardButtonControl(),
+                        text,
+                        handler,
+                        className
+                    );
+                    const element = control.getRootElement();
+                    element.setAttribute("type", "button");
+                    this._fsu.actionControls.push(control);
+                    return { control, element };
+                };
+                const resetDashboardFilters = () => {
+                    clearTimeout(this._fsu.filterTimer);
+                    const defaults = {
+                        query: "",
+                        minRating: "",
+                        maxRating: "",
+                        position: "",
+                        primaryOnly: false,
+                        nation: "",
+                        league: "",
+                        club: "",
+                        rarity: "",
+                        quality: "",
+                        skillMoves: "",
+                        weakFoot: "",
+                        foot: "",
+                        gender: "",
+                        location: "",
+                        tradeable: "",
+                        sort: "rating-desc"
+                    };
+                    Object.assign(state, defaults);
+                    _.forEach(this._fsu.controls, (control, key) => {
+                        if(key === "primaryOnly"){
+                            control.checked = false;
+                        }else{
+                            control.value = defaults[key] ?? "";
+                        }
+                    })
+                    this._applyFilters();
                 };
 
                 const root = events.createElementWithConfig("section", {
@@ -13948,26 +14030,23 @@
                     textContent: fy("clubplayers.filter.columns")
                 }));
                 _.forEach([2, 3, 4], columns => {
-                    const button = events.createElementWithConfig("button", {
-                        classList: "fsu-clubPlayersColumnButton",
-                        type: "button",
-                        textContent: String(columns),
-                        attributes: {
-                            "data-columns": columns,
-                            "aria-pressed": "false"
-                        }
-                    });
-                    button.addEventListener("click", () => this._setColumns(columns));
+                    const button = createActionButton(
+                        String(columns),
+                        "fsu-clubPlayersColumnButton",
+                        () => this._setColumns(columns)
+                    ).element;
+                    button.setAttribute("data-columns", String(columns));
+                    button.setAttribute("aria-pressed", "false");
                     this._fsu.columnButtons.push(button);
                     columnsBox.appendChild(button);
                 })
                 actions.appendChild(columnsBox);
 
-                const resetButton = events.createElementWithConfig("button", {
-                    classList: "fsu-clubPlayersReset",
-                    type: "button",
-                    textContent: fy("clubplayers.reset")
-                });
+                const resetButton = createActionButton(
+                    fy("clubplayers.reset"),
+                    "fsu-clubPlayersReset",
+                    resetDashboardFilters
+                ).element;
                 actions.appendChild(resetButton);
                 toolbarTop.appendChild(actions);
                 toolbar.appendChild(toolbarTop);
@@ -14186,12 +14265,12 @@
                         "aria-live": "polite"
                     }
                 });
-                const loadMore = events.createElementWithConfig("button", {
-                    classList: "fsu-clubPlayersLoadMore",
-                    type: "button",
-                    textContent: fy("clubplayers.loadmore")
-                });
-                loadMore.addEventListener("click", () => this._renderNextBatch());
+                const loadMoreAction = createActionButton(
+                    fy("clubplayers.loadmore"),
+                    "fsu-clubPlayersLoadMore",
+                    () => this._renderNextBatch()
+                );
+                const loadMore = loadMoreAction.element;
                 footer.appendChild(visibleText);
                 footer.appendChild(loadMore);
                 root.appendChild(footer);
@@ -14201,38 +14280,8 @@
                 this._fsu.listBox = listBox;
                 this._fsu.visibleText = visibleText;
                 this._fsu.loadMore = loadMore;
+                this._fsu.loadMoreControl = loadMoreAction.control;
                 this._fsu.resetButton = resetButton;
-                resetButton.addEventListener("click", () => {
-                    clearTimeout(this._fsu.filterTimer);
-                    const defaults = {
-                        query: "",
-                        minRating: "",
-                        maxRating: "",
-                        position: "",
-                        primaryOnly: false,
-                        nation: "",
-                        league: "",
-                        club: "",
-                        rarity: "",
-                        quality: "",
-                        skillMoves: "",
-                        weakFoot: "",
-                        foot: "",
-                        gender: "",
-                        location: "",
-                        tradeable: "",
-                        sort: "rating-desc"
-                    };
-                    Object.assign(state, defaults);
-                    _.forEach(this._fsu.controls, (control, key) => {
-                        if(key === "primaryOnly"){
-                            control.checked = false;
-                        }else{
-                            control.value = defaults[key] ?? "";
-                        }
-                    })
-                    this._applyFilters();
-                });
 
                 this.__root = root;
                 this._setColumns(savedColumns);
@@ -14245,6 +14294,12 @@
                 clearTimeout(this._fsu.filterTimer);
             }
             this._disposePlayerCards();
+            _.forEach(this._fsu?.actionControls, control => {
+                control?.dealloc?.();
+            })
+            if(this._fsu){
+                this._fsu.loadMoreControl = null;
+            }
             events.fsuDispose(this, "_fsu");
             this.__root = null;
         }
