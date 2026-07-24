@@ -4,7 +4,7 @@ GreasyFork에 공개된 `【FSU】EAFC FUT WEB 增强器`를 분석하고, FC26 
 
 ## 프로젝트 상태
 
-- 현재 포크 버전: `26.09.12`
+- 현재 포크 버전: `26.10.00`
 - 원본 기준 버전: `26.09`
 - userscript: [`fsu-eafc-fut-web.user.js`](./fsu-eafc-fut-web.user.js)
 - 원본 SHA-256: `A2E0BEB018921CDD334D68BD4AF9BEE843F9F391A98E01E3B27D67E74D6B9634`
@@ -18,11 +18,13 @@ Club 허브의 `My Players` 대시보드에서는 Club과 SBC Storage의 선수�
 
 SBC의 `Completion(n)`은 즉시 제출 대신 최대 10개의 독립 제출안을 만든다. 좌우 버튼으로 회차별 선수 목록을 확인하고 현재 화면의 제출안만 제출할 수 있으며, 동일한 실물 카드는 여러 제출안에 중복 배정되지 않는다.
 
+팀 평점이나 조직력 때문에 `Completion`이 표시되지 않던 챌린지는 상단의 기존 `Calculate Score` 옆 `Build Plans`에서 보유 선수 제출 후보를 만들 수 있다. 지원되는 선수·평점·조직력 조건을 함께 계산하고, EA의 복제 Challenge가 실제 요구사항을 통과한 조합만 최대 10개까지 보여준다.
+
 ## Edge / Tampermonkey 설치
 
 1. 기존 GreasyFork판 FSU가 설치되어 있다면 먼저 **비활성화**한다.
 2. Edge 주소창에서 [이 저장소의 userscript 설치 링크](https://raw.githubusercontent.com/jonghyunseo/fsu-fc26-enhancer/main/fsu-eafc-fut-web.user.js)를 직접 연다.
-3. Tampermonkey 설치 화면에서 버전이 `26.09.12` 이상인지 확인하고 **설치**를 누른다.
+3. Tampermonkey 설치 화면에서 버전이 `26.10.00` 이상인지 확인하고 **설치**를 누른다.
 4. 같은 이름의 FSU 스크립트가 두 개 동시에 활성화되지 않게 한다.
 
 Tampermonkey의 **도구 → URL에서 가져오기** 화면에서 `디코딩 중` 상태가 오래 지속되면 해당 작업을 취소하고 위 링크를 주소창에서 직접 여는 방식을 먼저 사용한다. 이 포크는 설치 지연을 줄이기 위해 원본에 중복 선언되어 있던 Lodash CDN 의존성 하나를 제거했다.
