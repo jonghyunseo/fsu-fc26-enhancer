@@ -2,18 +2,22 @@
 
 GreasyFork에 공개된 `【FSU】EAFC FUT WEB 增强器`를 분석하고, FC26 환경에서 안전하게 유지보수·개선하기 위한 작업 저장소다.
 
-## 현재 기준선
+## 프로젝트 상태
 
-- 원본 버전: `26.09`
-- 원본 파일: [`fsu-eafc-fut-web.user.js`](./fsu-eafc-fut-web.user.js)
-- SHA-256: `A2E0BEB018921CDD334D68BD4AF9BEE843F9F391A98E01E3B27D67E74D6B9634`
+- 현재 포크 버전: `26.09.1`
+- 원본 기준 버전: `26.09`
+- userscript: [`fsu-eafc-fut-web.user.js`](./fsu-eafc-fut-web.user.js)
+- 원본 SHA-256: `A2E0BEB018921CDD334D68BD4AF9BEE843F9F391A98E01E3B27D67E74D6B9634`
 - 원본 출처: [GreasyFork 코드 페이지](https://greasyfork.org/en/scripts/431044-fsu-eafc-fut-web-%E5%A2%9E%E5%BC%BA%E5%99%A8/code)
 
-현재 `main` 브랜치의 첫 커밋은 내려받은 원본을 수정하지 않은 기준점이다.
+`6e3cc9f` 커밋은 내려받은 원본을 수정하지 않은 기준점이다.
+
+현재 구현된 첫 개선 기능은 Club 허브의 `My Players` 대시보드다. Club과 SBC Storage의 선수를 카드 그리드로 보고, 안정적으로 판별 가능한 속성으로 필터링하며, 열 수를 2~4개로 조절할 수 있다.
 
 ## 문서
 
 - [코드 분석 및 목표 설계](./docs/ANALYSIS.md)
+- [My Players 대시보드 설계](./docs/CLUB_PLAYERS_DASHBOARD.md)
 - [원본 출처 및 라이선스](./docs/UPSTREAM.md)
 
 분석 문서에는 다음 내용이 포함된다.
@@ -30,9 +34,12 @@ GreasyFork에 공개된 `【FSU】EAFC FUT WEB 增强器`를 분석하고, FC26 
 
 ```text
 .
-├─ fsu-eafc-fut-web.user.js  # GreasyFork 26.09 원본 기준선
+├─ fsu-eafc-fut-web.user.js  # GreasyFork 26.09 기반 개선 userscript
 ├─ docs/
-│  └─ ANALYSIS.md            # 분석 및 개선 설계 기준서
+│  ├─ ANALYSIS.md            # 분석 및 개선 설계 기준서
+│  ├─ CLUB_PLAYERS_DASHBOARD.md
+│  └─ UPSTREAM.md            # 원본 출처와 라이선스
+├─ LICENSE
 └─ README.md
 ```
 
