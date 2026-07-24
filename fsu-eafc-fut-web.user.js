@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.11.00
+// @version      26.11.01
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -2605,17 +2605,17 @@
             .fsu-fastSBCPlanList::-webkit-scrollbar{width:7px}
             .fsu-fastSBCPlanList::-webkit-scrollbar-track{background:#23232b}
             .fsu-fastSBCPlanList::-webkit-scrollbar-thumb{border:2px solid #23232b;border-radius:7px;background:#575753}
-            .fsu-fastSBCPlanPlayer{display:grid;min-width:0;min-height:78px;grid-template-columns:58px minmax(0,1fr) auto;align-items:center;gap:10px;padding:4px 8px;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.07)}
+            .fsu-fastSBCPlanPlayer{display:grid;min-width:0;min-height:96px;grid-template-columns:72px minmax(0,1fr) auto;align-items:center;gap:10px;padding:3px 8px;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.07)}
             .fsu-fastSBCPlanPlayer:last-child{border-bottom:0}
-            .fsu-fastSBCPlanPlayerCard{display:grid;width:58px;height:70px;place-items:center;overflow:hidden;pointer-events:none}
-            .fsu-fastSBCPlanPlayerCardView{max-width:none!important;max-height:none!important;pointer-events:none!important;zoom:.22}
+            .fsu-fastSBCPlanPlayerCard{display:grid;width:72px;height:90px;place-items:center;overflow:hidden;pointer-events:none}
+            .fsu-fastSBCPlanPlayerCardView{max-width:none!important;max-height:none!important;pointer-events:none!important;zoom:.27}
             .fsu-fastSBCPlanPlayerCard .fsu-cards,
             .fsu-fastSBCPlanPlayerCard .fsu-player-other,
             .fsu-fastSBCPlanPlayerCard .fsu-cards-attr,
             .fsu-fastSBCPlanPlayerCard .fsu-cards-pos,
             .fsu-fastSBCPlanPlayerCard .fsu-cardlock,
             .fsu-fastSBCPlanPlayerCard .fsu-lockbtn{display:none!important}
-            .fsu-fastSBCPlanPlayerCardFallback{display:grid;width:44px;height:60px;place-items:center;border:1px solid #4b515a;border-radius:7px;background:linear-gradient(145deg,#3b414b,#252831);color:#f7d36a;font-family:UltimateTeam,sans-serif;font-size:15px;font-weight:800;clip-path:polygon(12% 0,88% 0,100% 9%,100% 82%,50% 100%,0 82%,0 9%)}
+            .fsu-fastSBCPlanPlayerCardFallback{display:grid;width:58px;height:80px;place-items:center;border:1px solid #4b515a;border-radius:7px;background:linear-gradient(145deg,#3b414b,#252831);color:#f7d36a;font-family:UltimateTeam,sans-serif;font-size:17px;font-weight:800;clip-path:polygon(12% 0,88% 0,100% 9%,100% 82%,50% 100%,0 82%,0 9%)}
             .fsu-fastSBCPlanPlayerBody{min-width:0}
             .fsu-fastSBCPlanPlayerName{display:flex;min-width:0;align-items:baseline;gap:8px;overflow:hidden;color:#f3f4f5;font-family:UltimateTeam,sans-serif;font-size:14px;font-weight:650;line-height:18px;white-space:nowrap}
             .fsu-fastSBCPlanPlayerRating{flex:0 0 auto;color:#f7d36a;font-size:16px;font-weight:800}
@@ -2643,7 +2643,7 @@
             .fsu-fastSBCPlanSubmit.disabled,.fsu-fastSBCPlanSubmit:disabled{filter:none!important;opacity:.38!important}
             .fsu-fastSBCPlanError{display:none;grid-column:1/-1;padding:8px 10px;border:1px solid #75433f;border-radius:8px;background:#422c2d;color:#ffc1b9;font-size:12px;line-height:16px}
             .fsu-fastSBCPlan[data-state="invalid"] .fsu-fastSBCPlanError{display:block}
-            @media (max-width:620px){.fsu-fastSBCPlanOverlay{padding:6px!important}.fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}.fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}.fsu-fastSBCPlanDialogBody{height:100%!important;min-height:0!important}.fsu-fastSBCPlan{height:100%!important;max-height:none!important}.fsu-fastSBCPlanHeaderMeta{gap:6px}.fsu-fastSBCPlanSummary{font-size:12px}.fsu-fastSBCPlanViewButton{min-width:46px!important;padding:0 7px!important}.fsu-fastSBCPlanList{padding:5px 7px}.fsu-fastSBCPlanPlayer{min-height:74px;grid-template-columns:50px minmax(0,1fr) auto;gap:7px;padding:4px 5px}.fsu-fastSBCPlanPlayerCard{width:50px;height:68px}.fsu-fastSBCPlanPlayerCardView{zoom:.2}.fsu-fastSBCPlanPlayerCardFallback{width:40px;height:56px;font-size:14px}.fsu-fastSBCPlanPlayerLocation{max-width:82px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanList[data-layout="grid"]{grid-template-columns:repeat(3,minmax(0,114px));gap:0;padding:4px 2px}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayer{min-height:144px;grid-template-columns:minmax(0,1fr);gap:0;padding:0;justify-items:center}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCard{width:100%;max-width:114px;height:144px}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardView{zoom:.43}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardFallback{width:86px;height:120px;font-size:26px}.fsu-fastSBCPlanFooter{grid-template-columns:repeat(2,minmax(0,1fr))}.fsu-fastSBCPlanRegenerate{grid-column:1/-1}}
+            @media (max-width:620px){.fsu-fastSBCPlanOverlay{padding:6px!important}.fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}.fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}.fsu-fastSBCPlanDialogBody{height:100%!important;min-height:0!important}.fsu-fastSBCPlan{height:100%!important;max-height:none!important}.fsu-fastSBCPlanHeaderMeta{gap:6px}.fsu-fastSBCPlanSummary{font-size:12px}.fsu-fastSBCPlanViewButton{min-width:46px!important;padding:0 7px!important}.fsu-fastSBCPlanList{padding:5px 7px}.fsu-fastSBCPlanPlayer{min-height:90px;grid-template-columns:66px minmax(0,1fr) auto;gap:7px;padding:3px 5px}.fsu-fastSBCPlanPlayerCard{width:66px;height:84px}.fsu-fastSBCPlanPlayerCardView{zoom:.25}.fsu-fastSBCPlanPlayerCardFallback{width:54px;height:74px;font-size:16px}.fsu-fastSBCPlanPlayerLocation{max-width:82px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanList[data-layout="grid"]{grid-template-columns:repeat(3,minmax(0,114px));gap:0;padding:4px 2px}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayer{min-height:144px;grid-template-columns:minmax(0,1fr);gap:0;padding:0;justify-items:center}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCard{width:100%;max-width:114px;height:144px}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardView{zoom:.43}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardFallback{width:86px;height:120px;font-size:26px}.fsu-fastSBCPlanFooter{grid-template-columns:repeat(2,minmax(0,1fr))}.fsu-fastSBCPlanRegenerate{grid-column:1/-1}}
             .phone .fsu-fastSBCPlanOverlay{padding:6px!important}
             .phone .fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}
             .phone .fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}
@@ -2656,10 +2656,10 @@
             .phone .fsu-fastSBCPlanViewButton{min-width:46px!important;padding:0 7px!important}
             .phone .fsu-fastSBCPlanNavigator{padding:8px 10px}
             .phone .fsu-fastSBCPlanList{padding:5px 7px}
-            .phone .fsu-fastSBCPlanPlayer{min-height:74px;grid-template-columns:50px minmax(0,1fr) auto;gap:7px;padding:4px 5px}
-            .phone .fsu-fastSBCPlanPlayerCard{width:50px;height:68px}
-            .phone .fsu-fastSBCPlanPlayerCardView{zoom:.2}
-            .phone .fsu-fastSBCPlanPlayerCardFallback{width:40px;height:56px;font-size:14px}
+            .phone .fsu-fastSBCPlanPlayer{min-height:90px;grid-template-columns:66px minmax(0,1fr) auto;gap:7px;padding:3px 5px}
+            .phone .fsu-fastSBCPlanPlayerCard{width:66px;height:84px}
+            .phone .fsu-fastSBCPlanPlayerCardView{zoom:.25}
+            .phone .fsu-fastSBCPlanPlayerCardFallback{width:54px;height:74px;font-size:16px}
             .phone .fsu-fastSBCPlanPlayerLocation{max-width:82px;padding-right:5px;padding-left:5px}
             .phone .fsu-fastSBCPlanList[data-layout="grid"]{grid-template-columns:repeat(3,minmax(0,114px));gap:0;padding:4px 2px}
             .phone .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayer{min-height:144px;grid-template-columns:minmax(0,1fr);gap:0;padding:0;justify-items:center}
