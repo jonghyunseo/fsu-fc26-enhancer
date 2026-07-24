@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.09.5
+// @version      26.09.6
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1773,7 +1773,11 @@
             .fsu-clubPlayerDetail::-webkit-scrollbar-thumb{border:2px solid #23232b;border-radius:8px;background:#575753}
             .fsu-clubPlayerDetailHero{position:relative;display:grid;grid-template-columns:260px minmax(0,1fr);gap:26px;padding:24px;background:radial-gradient(circle at 12% 18%,rgba(31,195,193,.18),transparent 32%),linear-gradient(145deg,#252b35 0%,#191820 70%)}
             .fsu-clubPlayerDetailHero:after{position:absolute;right:24px;bottom:0;left:24px;height:1px;background:linear-gradient(90deg,transparent,#4d535b,transparent);content:""}
-            .fsu-clubPlayerDetailCardStage{display:grid;min-height:320px;place-items:center;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.012));box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 18px 36px rgba(0,0,0,.24)}
+            .fsu-clubPlayerDetailCardStage{position:relative;display:grid;min-height:320px;place-items:center;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.012));box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 18px 36px rgba(0,0,0,.24)}
+            .fsu-clubPlayerDetailCardStage>.fsu-lockbtn{box-sizing:border-box!important;top:12px!important;right:12px!important;bottom:auto!important;display:inline-flex!important;width:auto!important;min-width:86px!important;height:36px!important;min-height:36px!important;margin:0!important;padding:0 12px!important;align-items:center!important;justify-content:center!important;border-radius:999px!important;font-size:13px!important;line-height:1!important;transform:none!important;-webkit-transform:none!important;white-space:nowrap!important;z-index:12!important}
+            .fsu-clubPlayerDetailCardStage>.fsu-lockbtn::before{flex:0 0 auto;padding-right:6px!important;font-size:16px!important;line-height:1!important}
+            .fsu-clubPlayerDetailCardStage>.fsu-lockbtn>span{font-size:13px!important;line-height:1!important}
+            .fsu-clubPlayerDetailCardStage>.fsu-lockbtn.unlock::after{top:8px!important;left:19px!important;height:17px!important}
             .fsu-clubPlayerDetailCardFallback{display:flex;flex-direction:column;align-items:center;gap:8px;color:#fcfcfc;text-align:center}
             .fsu-clubPlayerDetailCardFallback strong{font-size:64px;line-height:1}
             .fsu-clubPlayerDetailCardFallback span{max-width:220px;color:#c6c9cc;font-size:20px}
@@ -3184,15 +3188,24 @@
                         }
                         //24.18 修复锁定按钮显示不了的问题
                         if(p.loans == -1 && !p.concept && p.state == ItemState.FREE && !p.isDuplicate() && events.getItemBy(1,{"id":p.id}).length && !isCompare){
+                            const syncLockControl = (control, isLocked) => {
+                                const label = fy(isLocked ? "locked.unlock" : "locked.lock");
+                                const root = control.getRootElement();
+                                control.setText(label);
+                                root.classList.remove("unlock","lock");
+                                root.classList.add(isLocked ? "unlock" : "lock");
+                                root.setAttribute("type", "button");
+                                root.setAttribute("title", label);
+                                root.setAttribute("aria-label", label);
+                                root.setAttribute("aria-pressed", String(isLocked));
+                            };
                             let lockElement = events.createButton(
                                 new UTStandardButtonControl(),
                                 playerLock ? fy("locked.unlock") : fy("locked.lock"),
                                 (e) => {
                                     lock.save(e.id);
                                     let playerLock = info.lock.includes(e.id);
-                                    e.setText(playerLock ? fy("locked.unlock") : fy("locked.lock"));
-                                    e.getRootElement().classList.remove("unlock","lock");
-                                    e.getRootElement().classList.add(playerLock ? "unlock" : "lock");
+                                    syncLockControl(e, playerLock);
                                     if(!isPhone()){
                                         if("_fsuLock" in cntlr.left()){
                                             cntlr.left()._requestItems(false);
@@ -3204,6 +3217,7 @@
                             )
                             this._fsu.lock = lockElement;
                             lockElement.id = p.id;
+                            syncLockControl(lockElement, playerLock);
                             cardParen.insertBefore(lockElement.getRootElement(),cardParen.firstChild)
                         }
                         if(cardParen.querySelectorAll(".player").length > 1){
