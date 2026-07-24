@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.09.6
+// @version      26.09.7
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1603,6 +1603,15 @@
             "clubplayers.detail.face.ref":["反应","反應","Reflexes"],
             "clubplayers.detail.face.spd":["速度","速度","Speed"],
             "clubplayers.detail.face.pos":["站位","站位","Positioning"],
+            "academy.clubplayers.entry":["浏览可进化球员","瀏覽可進化球員","Browse Eligible Players"],
+            "academy.clubplayers.title":["可进化球员 (%1)","可進化球員 (%1)","Eligible Players (%1)"],
+            "academy.clubplayers.scope":["仅俱乐部 · 符合条件","僅球會 · 符合條件","Club · Eligible only"],
+            "academy.clubplayers.eligible":["符合条件","符合條件","Eligible"],
+            "academy.clubplayers.select":["选择 %1 进行进化","選擇 %1 進行進化","Select %1 for this Evolution"],
+            "academy.clubplayers.empty":["俱乐部中没有符合该进化条件的可用球员。","球會中沒有符合該進化條件的可用球員。","No eligible Club players are available for this Evolution."],
+            "academy.clubplayers.notready":["进化球员选择尚未准备好。请重新打开此页面。","進化球員選擇尚未準備好。請重新開啟此頁面。","Evolution player selection is not ready. Reopen this screen and try again."],
+            "academy.clubplayers.changed":["该球员已不再符合此进化条件。","該球員已不再符合此進化條件。","This player no longer meets the Evolution requirements."],
+            "academy.clubplayers.error":["无法打开可进化球员列表。","無法開啟可進化球員列表。","Could not open the eligible-player list."],
             "player.inclub":["已拥有","已擁有","Owned"],
             "player.noclub":["未拥有","未擁有","Not Owned"],
             "specialtile.title":["特殊品质","特殊品質","Special Quality"],
@@ -1732,6 +1741,7 @@
             .fsu-clubPlayersBadge--storage{background:#604b12;color:#ffd870}
             .fsu-clubPlayersBadge--tradeable{background:#264a35;color:#8ff5a0}
             .fsu-clubPlayersBadge--untradeable{background:#4b3035;color:#ffb7b7}
+            .fsu-clubPlayersBadge--eligible{background:#174b40;color:#8ff5cf}
             .fsu-clubPlayersFooter{display:flex;flex-direction:column;align-items:center;gap:10px;padding:0 24px 28px}
             .fsu-clubPlayersVisible{color:#a6a6a1;font-family:UltimateTeamCondensed,sans-serif;font-size:13px}
             .fsu-clubPlayersLoadMore{min-width:180px;height:38px;padding:0 20px;background:#fcfcf7;color:#151616;font-size:15px;font-weight:600}
@@ -1758,6 +1768,13 @@
             .fsu-clubPlayersDetailTap{position:absolute!important;inset:0!important;z-index:8!important;width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:12px!important;background:transparent!important;box-shadow:none!important;color:transparent!important;font-size:0!important;line-height:0!important;cursor:pointer!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
             .fsu-clubPlayersDetailTap.hover,.fsu-clubPlayersDetailTap:active{background:rgba(7,244,104,.08)!important;box-shadow:inset 0 0 0 2px rgba(7,244,104,.55)!important}
             .fsu-clubPlayersDetailTap:focus-visible{outline:2px solid #07f468!important;outline-offset:-3px}
+            .fsu-academyClubPlayersEntryRow{box-sizing:border-box;width:100%;margin-top:10px}
+            .fsu-academyClubPlayersEntry{box-sizing:border-box!important;width:100%!important;min-height:48px!important;margin:0!important;padding:0 18px!important;border:1px solid #1fc3c1!important;border-radius:8px!important;background:linear-gradient(135deg,#253b45,#292b35)!important;box-shadow:0 6px 16px rgba(0,0,0,.18)!important;color:#f4ffff!important;font-family:UltimateTeamCondensed,sans-serif!important;font-size:16px!important;font-weight:600!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
+            .fsu-academyClubPlayersEntry.hover,.fsu-academyClubPlayersEntry:active{border-color:#07f468!important;background:linear-gradient(135deg,#2c4b4a,#303640)!important;color:#fff!important}
+            .fsu-academyClubPlayersEntry:focus-visible{outline:2px solid #07f468!important;outline-offset:2px!important}
+            .fsu-academyClubPlayersSelector .fsu-lockbtn{display:none!important}
+            .phone .fsu-academyClubPlayersEntryRow{margin-top:9px}
+            .phone .fsu-academyClubPlayersEntry{min-height:52px!important;font-size:17px!important}
             .fsu-clubPlayerDetailDialog{position:relative!important;box-sizing:border-box!important;width:min(1040px,calc(100vw - 32px))!important;max-width:calc(100vw - 32px)!important;overflow:hidden!important;color:#fcfcfc}
             .fsu-clubPlayerDetailDialogTitle{box-sizing:border-box!important;max-width:100%!important;padding-right:58px!important;padding-left:58px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
             .fsu-clubPlayerDetailClose{position:absolute!important;z-index:30!important;top:8px!important;right:8px!important;display:grid!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;margin:0!important;padding:0!important;place-items:center!important;border:1px solid rgba(255,255,255,.2)!important;border-radius:50%!important;background:rgba(25,24,32,.9)!important;box-shadow:0 4px 14px rgba(0,0,0,.32)!important;color:#fff!important;font-family:Arial,sans-serif!important;font-size:30px!important;font-weight:300!important;line-height:40px!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
@@ -5047,6 +5064,36 @@
                         value.hide()
                     }
                 });
+                try {
+                    this._fsu ??= {};
+                    if(!this._fsu.academyClubPlayersEntryControl){
+                        const searchView = this;
+                        const entryControl = events.createButton(
+                            new UTStandardButtonControl(),
+                            fy("academy.clubplayers.entry"),
+                            () => events.goToAcademyClubPlayers(searchView),
+                            "fsu-academyClubPlayersEntry"
+                        );
+                        const entryRoot = entryControl.getRootElement();
+                        entryRoot.setAttribute("type", "button");
+                        entryRoot.setAttribute("aria-label", fy("academy.clubplayers.entry"));
+                        const entryRow = events.createElementWithConfig("div", {
+                            classList: "fsu-academyClubPlayersEntryRow"
+                        });
+                        entryRow.appendChild(entryRoot);
+                        const searchButtonRoot = this._searchButton?.getRootElement?.();
+                        const searchButtonContainer = searchButtonRoot?.parentElement;
+                        if(searchButtonContainer){
+                            searchButtonContainer.insertAdjacentElement("afterend", entryRow);
+                            this._fsu.academyClubPlayersEntryControl = entryControl;
+                            this._fsu.academyClubPlayersEntryRow = entryRow;
+                        }else{
+                            entryControl.dealloc?.();
+                        }
+                    }
+                } catch(error) {
+                    console.warn("[FSU] Evolution player-list entry could not be added", error);
+                }
             }, 50);
         }
         //26.02 进化：拦截球员搜索部分代码
@@ -13919,6 +13966,58 @@
             });
             return filtered;
         }
+        events.getAcademyClubSearchController = (searchView) => {
+            const candidates = [];
+            _.forEach(["current", "right", "left"], key => {
+                try {
+                    const controller = cntlr[key]?.();
+                    if(controller && !candidates.includes(controller)){
+                        candidates.push(controller);
+                    }
+                } catch(error) {
+                    // A split-view branch can be absent on the current device.
+                }
+            })
+            const academyControllers = candidates.filter(controller => {
+                return controller instanceof UTAcademyClubSearchViewController;
+            });
+            if(!searchView){
+                return academyControllers[0] ?? null;
+            }
+            return academyControllers.find(controller => {
+                try {
+                    return controller.getView?.() === searchView;
+                } catch(error) {
+                    return false;
+                }
+            }) ?? academyControllers[0] ?? null;
+        }
+        events.isAcademyClubPlayerRecordEligible = (academySlot, record) => {
+            try {
+                const player = record?.item;
+                if(
+                    record?.location !== "club"
+                    || !player?.isPlayer?.()
+                    || player.concept
+                    || player.loans !== -1
+                    || player.endTime != -1
+                    || player.isEnrolledInAcademy?.()
+                    || player.id === undefined
+                    || player.id === null
+                    || typeof academySlot?.meetsRequirements !== "function"
+                ){
+                    return false;
+                }
+                return Boolean(academySlot.meetsRequirements(player));
+            } catch(error) {
+                return false;
+            }
+        }
+        events.getAcademyClubPlayerRecords = (academySlot) => {
+            return events.getClubPlayerDashboardRecords().filter(record => {
+                return events.isAcademyClubPlayerRecordEligible(academySlot, record);
+            });
+        }
 
         events.getClubPlayerSafeLocalized = (keys, fallback) => {
             const candidates = [].concat(keys ?? []);
@@ -14630,7 +14729,8 @@
             }
         }
 
-        const clubPlayersControllerView = function (t) {
+        const clubPlayersControllerView = function (options) {
+            this._fsuOptions = options && typeof options === "object" ? options : {};
             EAView.call(this);
         };
         JSUtils.inherits(clubPlayersControllerView, EAView);
@@ -14691,14 +14791,19 @@
                         }));
                         console.warn("[FSU] Club player card render failed", record.itemKey, error);
                     }
+                    const cardAction = typeof this._fsuOptions.onSelect === "function"
+                        ? () => this._fsuOptions.onSelect(record)
+                        : () => events.openClubPlayerDetail(record);
                     const detailControl = events.createButton(
                         new UTButtonControl(),
                         "",
-                        () => events.openClubPlayerDetail(record),
+                        cardAction,
                         "fsu-clubPlayersDetailTap"
                     );
                     const detailElement = detailControl.getRootElement();
-                    const detailLabel = fy(["clubplayers.detail.open", record.name || record.itemKey]);
+                    const detailLabel = typeof this._fsuOptions.onSelect === "function"
+                        ? fy(["academy.clubplayers.select", record.name || record.itemKey])
+                        : fy(["clubplayers.detail.open", record.name || record.itemKey]);
                     detailElement.setAttribute("type", "button");
                     detailElement.setAttribute("aria-label", detailLabel);
                     detailElement.setAttribute("title", detailLabel);
@@ -14710,8 +14815,17 @@
                         classList: "fsu-clubPlayersMeta"
                     });
                     meta.appendChild(events.createElementWithConfig("span", {
-                        classList: ["fsu-clubPlayersBadge", record.location === "storage" ? "fsu-clubPlayersBadge--storage" : "fsu-clubPlayersBadge--club"],
-                        textContent: fy(`clubplayers.location.${record.location}`)
+                        classList: [
+                            "fsu-clubPlayersBadge",
+                            this._fsuOptions.mode === "academy"
+                                ? "fsu-clubPlayersBadge--eligible"
+                                : record.location === "storage"
+                                    ? "fsu-clubPlayersBadge--storage"
+                                    : "fsu-clubPlayersBadge--club"
+                        ],
+                        textContent: this._fsuOptions.mode === "academy"
+                            ? fy("academy.clubplayers.eligible")
+                            : fy(`clubplayers.location.${record.location}`)
                     }));
                     meta.appendChild(events.createElementWithConfig("span", {
                         classList: ["fsu-clubPlayersBadge", record.tradeable ? "fsu-clubPlayersBadge--tradeable" : "fsu-clubPlayersBadge--untradeable"],
@@ -14771,7 +14885,9 @@
             if (!this._generated) {
                 const savedColumns = Math.max(2, Math.min(4, Number(GM_getValue("clubplayers.columns", 3)) || 3));
                 const state = {
-                    records: events.getClubPlayerDashboardRecords(),
+                    records: Array.isArray(this._fsuOptions.records)
+                        ? this._fsuOptions.records.slice()
+                        : events.getClubPlayerDashboardRecords(),
                     filtered: [],
                     visible: 0,
                     pageSize: savedColumns * 6,
@@ -14849,7 +14965,9 @@
                 };
 
                 const root = events.createElementWithConfig("section", {
-                    classList: "fsu-clubPlayersDashboard"
+                    classList: this._fsuOptions.mode === "academy"
+                        ? ["fsu-clubPlayersDashboard", "fsu-academyClubPlayersSelector"]
+                        : "fsu-clubPlayersDashboard"
                 });
                 const toolbar = events.createElementWithConfig("div", {
                     classList: "fsu-clubPlayersToolbar"
@@ -14869,7 +14987,7 @@
                 summary.appendChild(resultText);
                 summary.appendChild(events.createElementWithConfig("div", {
                     classList: "fsu-clubPlayersScope",
-                    textContent: fy("clubplayers.scope")
+                    textContent: this._fsuOptions.scopeText ?? fy("clubplayers.scope")
                 }));
                 toolbarTop.appendChild(summary);
 
@@ -15088,10 +15206,12 @@
                     { value: "male", label: fy("clubplayers.gender.male") },
                     { value: "female", label: fy("clubplayers.gender.female") }
                 ]));
-                addSelect(fy("clubplayers.filter.location"), "location", allOption().concat([
-                    { value: "club", label: fy("clubplayers.location.club") },
-                    { value: "storage", label: fy("clubplayers.location.storage") }
-                ]));
+                if(!this._fsuOptions.hideLocationFilter){
+                    addSelect(fy("clubplayers.filter.location"), "location", allOption().concat([
+                        { value: "club", label: fy("clubplayers.location.club") },
+                        { value: "storage", label: fy("clubplayers.location.storage") }
+                    ]));
+                }
                 addSelect(fy("clubplayers.filter.tradeable"), "tradeable", allOption().concat([
                     { value: "yes", label: fy("clubplayers.tradeable.yes") },
                     { value: "no", label: fy("clubplayers.tradeable.no") }
@@ -15111,7 +15231,7 @@
                 root.appendChild(listBox);
                 root.appendChild(events.createElementWithConfig("div", {
                     classList: "fsu-clubPlayersEmpty",
-                    textContent: fy("clubplayers.empty")
+                    textContent: this._fsuOptions.emptyText ?? fy("clubplayers.empty")
                 }));
 
                 const footer = events.createElementWithConfig("div", {
@@ -15159,6 +15279,7 @@
                 this._fsu.loadMoreControl = null;
             }
             events.fsuDispose(this, "_fsu");
+            this._fsuOptions = null;
             this.__root = null;
         }
         const clubPlayersController = function (t) {
@@ -15173,6 +15294,99 @@
         };
         clubPlayersController.prototype.getNavigationTitle = function () {
             return fy("clubplayers.tile.title") + ` (${events.getClubPlayerDashboardRecords().length})`;
+        };
+        const academyClubPlayersController = function (viewmodel, academySlot, records) {
+            EAViewController.call(this);
+            this.viewmodel = viewmodel;
+            this.academySlot = academySlot;
+            this.records = Array.isArray(records) ? records : [];
+            this._fsuSelectionPending = false;
+            this._fsuSelectionTimer = null;
+        };
+        JSUtils.inherits(academyClubPlayersController, EAViewController);
+        academyClubPlayersController.prototype._getViewInstanceFromData = function () {
+            return new clubPlayersControllerView({
+                mode: "academy",
+                records: this.records,
+                scopeText: fy("academy.clubplayers.scope"),
+                emptyText: fy("academy.clubplayers.empty"),
+                hideLocationFilter: true,
+                onSelect: record => this.selectAcademyPlayer(record)
+            });
+        };
+        academyClubPlayersController.prototype.viewDidAppear = function () {
+            this.getNavigationController()?.setNavigationVisibility(true, true);
+        };
+        academyClubPlayersController.prototype.getNavigationTitle = function () {
+            return fy(["academy.clubplayers.title", this.records.length]);
+        };
+        academyClubPlayersController.prototype.showTimedWarningPopup = function (...args) {
+            return UTAcademyPlayerFromClubViewController.prototype.showTimedWarningPopup.call(this, ...args);
+        };
+        academyClubPlayersController.prototype.selectAcademyPlayer = function (record) {
+            if(this._fsuSelectionPending){
+                return;
+            }
+            if(!events.isAcademyClubPlayerRecordEligible(this.academySlot, record)){
+                events.notice(fy("academy.clubplayers.changed"), 2);
+                return;
+            }
+            const nativeSelectionHandler = UTAcademyPlayerFromClubViewController.prototype.onCellSelected;
+            if(typeof nativeSelectionHandler !== "function"){
+                events.notice(fy("academy.clubplayers.notready"), 2);
+                return;
+            }
+            this._fsuSelectionPending = true;
+            clearTimeout(this._fsuSelectionTimer);
+            this._fsuSelectionTimer = setTimeout(() => {
+                this._fsuSelectionPending = false;
+                this._fsuSelectionTimer = null;
+            }, 1500);
+            try {
+                nativeSelectionHandler.call(this, null, null, { item: record.item });
+            } catch(error) {
+                this._fsuSelectionPending = false;
+                clearTimeout(this._fsuSelectionTimer);
+                this._fsuSelectionTimer = null;
+                console.error("[FSU] Evolution player selection failed", error);
+                events.notice(fy("academy.clubplayers.error"), 2);
+            }
+        };
+        academyClubPlayersController.prototype.dealloc = function (...args) {
+            clearTimeout(this._fsuSelectionTimer);
+            this._fsuSelectionTimer = null;
+            this.records = [];
+            EAViewController.prototype.dealloc.call(this, ...args);
+        };
+        events.goToAcademyClubPlayers = (searchView) => {
+            const searchController = events.getAcademyClubSearchController(searchView);
+            const viewmodel = searchController?.viewmodel;
+            const academySlot = viewmodel?.getSelectedSlot?.();
+            const navigationController = searchController?.getNavigationController?.();
+            if(
+                !searchController
+                || !viewmodel
+                || !academySlot
+                || !navigationController
+                || typeof academySlot.meetsRequirements !== "function"
+            ){
+                events.notice(fy("academy.clubplayers.notready"), 2);
+                return;
+            }
+            events.showLoader();
+            setTimeout(() => {
+                try {
+                    const records = events.getAcademyClubPlayerRecords(academySlot);
+                    navigationController.pushViewController(
+                        new academyClubPlayersController(viewmodel, academySlot, records)
+                    );
+                } catch(error) {
+                    console.error("[FSU] Eligible Evolution player list failed", error);
+                    events.notice(fy("academy.clubplayers.error"), 2);
+                } finally {
+                    events.hideLoader();
+                }
+            }, 0);
         };
 
         //26.04 特殊品质界面创建
