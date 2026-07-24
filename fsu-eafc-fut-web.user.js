@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.09.8
+// @version      26.09.9
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1397,6 +1397,28 @@
             "fastsbc.success":["快速任务成功，请适度使用切勿过于频繁。","快速任務成功，請適度使用切勿過於頻繁。","The quick SBC is successful, please use it in moderation and not too frequently."],
             "fastsbc.title":["重复球员可快速完成 %1 个SBC","重複球員可快速完成 %1 個SBC","Repeat players can quickly complete %1 SBC"],
             "fastsbc.sbcbtntext":["一键完成(%1)","一鍵完成(%1)","Completion(%1)"],
+            "fastsbc.plan.title":["快速SBC提交方案","快速SBC提交方案","Fast SBC Plans"],
+            "fastsbc.plan.summary":["预计可完成 %1 次 · 已生成 %2 个方案","預計可完成 %1 次 · 已生成 %2 個方案","%1 estimated completions · %2 plans created"],
+            "fastsbc.plan.counter":["方案 %1 / %2","方案 %1 / %2","Plan %1 of %2"],
+            "fastsbc.plan.ready":["可以提交","可以提交","Ready to submit"],
+            "fastsbc.plan.submitting":["正在提交","正在提交","Submitting"],
+            "fastsbc.plan.submitted":["已提交","已提交","Submitted"],
+            "fastsbc.plan.invalid":["方案已失效","方案已失效","Plan unavailable"],
+            "fastsbc.plan.valid":["满足要求 · %1 名球员 · 无重复","滿足要求 · %1 名球員 · 無重複","Requirements met · %1 players · no duplicates"],
+            "fastsbc.plan.playercount":["%1 名球员","%1 名球員","%1 players"],
+            "fastsbc.plan.submit":["提交方案 %1","提交方案 %1","Submit Plan %1"],
+            "fastsbc.plan.regenerate":["重新生成方案","重新產生方案","Regenerate Plans"],
+            "fastsbc.plan.previous":["上一个方案","上一個方案","Previous plan"],
+            "fastsbc.plan.next":["下一个方案","下一個方案","Next plan"],
+            "fastsbc.plan.close":["关闭提交方案","關閉提交方案","Close SBC plans"],
+            "fastsbc.plan.empty":["无法生成完整的提交方案。请检查球员数量、锁定和排除设置。","無法產生完整的提交方案。請檢查球員數量、鎖定和排除設定。","No complete plan could be created. Check player count, locks, and exclusion settings."],
+            "fastsbc.plan.changed":["部分球员已不在俱乐部或SBC仓库中，请重新生成方案。","部分球員已不在俱樂部或SBC倉庫中，請重新產生方案。","Some players are no longer in your Club or SBC Storage. Regenerate the plans."],
+            "fastsbc.plan.requirements":["当前球员组合不再满足SBC要求，请重新生成方案。","目前球員組合不再符合SBC要求，請重新產生方案。","This player selection no longer meets the SBC requirements. Regenerate the plans."],
+            "fastsbc.plan.loaderror":["无法读取SBC信息，请重新打开后再试。","無法讀取SBC資訊，請重新開啟後再試。","Could not load the SBC. Reopen it and try again."],
+            "fastsbc.plan.location.club":["俱乐部","俱樂部","Club"],
+            "fastsbc.plan.location.storage":["SBC仓库","SBC倉庫","SBC Storage"],
+            "fastsbc.plan.location.unknown":["未知位置","未知位置","Unknown"],
+            "fastsbc.plan.itemid":["物品ID %1","物品ID %1","Item ID %1"],
             "players.bodytype_1":["瘦中型","瘦中型","Lean Medium"],
             "players.bodytype_2": ["均衡中型", "均衡中型", "Average Medium"],
             "players.bodytype_3": ["壮中型", "壯中型", "Stocky Medium"],
@@ -1864,6 +1886,68 @@
             .phone .fsu-clubPlayerDetailStyleGroups{grid-template-columns:1fr}
             .phone .fsu-clubPlayerDetailAttributeGrid{grid-template-columns:1fr;gap:9px}
             .phone .fsu-clubPlayerDetailSource{padding:0 12px 16px}
+            body.fsu-fastSBCPlanOpen .fsu-clubPlayersToolbar{z-index:0!important}
+            .view-modal-container.fsu-fastSBCPlanModal{z-index:45!important}
+            .fsu-fastSBCPlanDialog{position:relative!important;box-sizing:border-box!important;width:min(640px,calc(100vw - 28px))!important;max-width:calc(100vw - 28px)!important;overflow:hidden!important;color:#fcfcfc}
+            .fsu-fastSBCPlanDialogTitle{box-sizing:border-box!important;max-width:100%!important;padding-right:58px!important;padding-left:58px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+            .fsu-fastSBCPlanClose{position:absolute!important;z-index:30!important;top:8px!important;right:8px!important;display:grid!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;margin:0!important;padding:0!important;place-items:center!important;border:1px solid rgba(255,255,255,.2)!important;border-radius:50%!important;background:rgba(25,24,32,.94)!important;box-shadow:0 4px 14px rgba(0,0,0,.32)!important;color:#fff!important;font-family:Arial,sans-serif!important;font-size:30px!important;font-weight:300!important;line-height:40px!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
+            .fsu-fastSBCPlanClose>*{margin:0!important;padding:0!important;color:inherit!important;font:inherit!important;line-height:1!important}
+            .fsu-fastSBCPlanClose.hover,.fsu-fastSBCPlanClose:active{border-color:#07f468!important;background:#30353e!important;color:#07f468!important}
+            .fsu-fastSBCPlanClose:focus-visible{outline:2px solid #07f468!important;outline-offset:2px!important}
+            .fsu-fastSBCPlanNativeActions{display:none!important}
+            .fsu-fastSBCPlanDialog .ea-dialog-view--body{min-width:0!important;padding:0!important;overflow:hidden!important;background:#191820}
+            .fsu-fastSBCPlanDialog .fsu-fastSBCPlanMessage{box-sizing:border-box;max-width:none!important;padding:0!important}
+            .fsu-fastSBCPlan{box-sizing:border-box;display:flex;height:min(74vh,700px);max-height:calc(100vh - 150px);flex-direction:column;overflow:hidden;background:#191820;color:#fcfcfc;font-family:UltimateTeamCondensed,sans-serif}
+            .fsu-fastSBCPlanHeader{flex:0 0 auto;padding:16px 18px 13px;border-bottom:1px solid #3f444b;background:linear-gradient(145deg,#252b35 0%,#1d1c25 78%)}
+            .fsu-fastSBCPlanChallenge{overflow:hidden;color:#fcfcfc;font-family:UltimateTeam,sans-serif;font-size:18px;font-weight:700;line-height:22px;text-overflow:ellipsis;white-space:nowrap}
+            .fsu-fastSBCPlanSummary{margin-top:5px;color:#aeb3ba;font-size:13px;line-height:17px}
+            .fsu-fastSBCPlanNavigator{display:grid;flex:0 0 auto;grid-template-columns:48px minmax(0,1fr) 48px;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #353942;background:#22232b}
+            .fsu-fastSBCPlanNav{box-sizing:border-box!important;display:grid!important;width:44px!important;min-width:44px!important;height:40px!important;min-height:40px!important;margin:0!important;padding:0!important;place-items:center!important;border:1px solid #4b515a!important;border-radius:9px!important;background:#30343e!important;color:#f6f7f8!important;font-family:Arial,sans-serif!important;font-size:28px!important;line-height:36px!important;touch-action:manipulation!important}
+            .fsu-fastSBCPlanNav>*{margin:0!important;padding:0!important;color:inherit!important;font:inherit!important;line-height:1!important}
+            .fsu-fastSBCPlanNav.hover,.fsu-fastSBCPlanNav:active{border-color:#1fc3c1!important;background:#39414c!important;color:#7ce0df!important}
+            .fsu-fastSBCPlanNav.disabled{opacity:.35!important}
+            .fsu-fastSBCPlanNav--next{justify-self:end}
+            .fsu-fastSBCPlanCounter{text-align:center}
+            .fsu-fastSBCPlanCounter strong{display:block;color:#fcfcfc;font-family:UltimateTeam,sans-serif;font-size:16px;line-height:20px}
+            .fsu-fastSBCPlanStatus{display:inline-flex;align-items:center;gap:5px;margin-top:3px;color:#8ff5a0;font-size:12px;line-height:15px}
+            .fsu-fastSBCPlan[data-state="submitted"] .fsu-fastSBCPlanStatus{color:#7ce0df}
+            .fsu-fastSBCPlan[data-state="submitting"] .fsu-fastSBCPlanStatus{color:#f7d36a}
+            .fsu-fastSBCPlan[data-state="invalid"] .fsu-fastSBCPlanStatus{color:#ff9e91}
+            .fsu-fastSBCPlanList{min-height:0;flex:1 1 auto;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:8px 12px;background:#191820;scrollbar-color:#575753 #23232b;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+            .fsu-fastSBCPlanList::-webkit-scrollbar{width:7px}
+            .fsu-fastSBCPlanList::-webkit-scrollbar-track{background:#23232b}
+            .fsu-fastSBCPlanList::-webkit-scrollbar-thumb{border:2px solid #23232b;border-radius:7px;background:#575753}
+            .fsu-fastSBCPlanPlayer{display:grid;grid-template-columns:30px 44px minmax(0,1fr) auto;align-items:center;gap:9px;min-height:52px;padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.07)}
+            .fsu-fastSBCPlanPlayer:last-child{border-bottom:0}
+            .fsu-fastSBCPlanPlayerIndex{color:#777e87;font-family:UltimateTeam,sans-serif;font-size:12px;text-align:center}
+            .fsu-fastSBCPlanPlayerRating{display:grid;width:40px;height:36px;place-items:center;border-radius:7px;background:#343944;color:#fff;font-family:UltimateTeam,sans-serif;font-size:17px;font-weight:800}
+            .fsu-fastSBCPlanPlayerBody{min-width:0}
+            .fsu-fastSBCPlanPlayerName{overflow:hidden;color:#f3f4f5;font-family:UltimateTeam,sans-serif;font-size:14px;font-weight:650;line-height:18px;text-overflow:ellipsis;white-space:nowrap}
+            .fsu-fastSBCPlanPlayerMeta{display:flex;min-width:0;align-items:center;gap:5px;margin-top:3px;color:#9299a1;font-size:11px;line-height:14px}
+            .fsu-fastSBCPlanPlayerMeta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+            .fsu-fastSBCPlanPlayerLocation{max-width:104px;padding:4px 7px 2px;border-radius:999px;background:#2e493f;color:#9cf3c2;font-size:11px;line-height:14px;text-align:center;white-space:nowrap}
+            .fsu-fastSBCPlanPlayerLocation--storage{background:#554619;color:#ffe28a}
+            .fsu-fastSBCPlanFooter{display:grid;flex:0 0 auto;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);gap:9px;padding:11px 14px 13px;border-top:1px solid #3f444b;background:#22232b}
+            .fsu-fastSBCPlanRegenerate,.fsu-fastSBCPlanSubmit{box-sizing:border-box!important;width:100%!important;min-height:44px!important;height:44px!important;margin:0!important;padding:0 12px!important;border-radius:9px!important;font-size:14px!important;line-height:42px!important;white-space:nowrap!important}
+            .fsu-fastSBCPlanRegenerate{border:1px solid #4b515a!important;background:#30343e!important;color:#e5e7e9!important}
+            .fsu-fastSBCPlanRegenerate.hover,.fsu-fastSBCPlanRegenerate:active{border-color:#1fc3c1!important;background:#39414c!important}
+            .fsu-fastSBCPlanSubmit{border:0!important;background:linear-gradient(135deg,#1fc3c1,#5471d8)!important;color:#fff!important;font-family:UltimateTeam,sans-serif!important;font-weight:700!important}
+            .fsu-fastSBCPlanSubmit.hover,.fsu-fastSBCPlanSubmit:active{filter:brightness(1.12)}
+            .fsu-fastSBCPlanSubmit.disabled{filter:none!important;opacity:.38!important}
+            .fsu-fastSBCPlanError{display:none;grid-column:1/-1;padding:8px 10px;border:1px solid #75433f;border-radius:8px;background:#422c2d;color:#ffc1b9;font-size:12px;line-height:16px}
+            .fsu-fastSBCPlan[data-state="invalid"] .fsu-fastSBCPlanError{display:block}
+            @media (max-width:620px){.fsu-fastSBCPlanPlayer{grid-template-columns:25px 40px minmax(0,1fr) auto;gap:7px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanPlayerLocation{max-width:82px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanFooter{grid-template-columns:1fr}}
+            .phone .fsu-fastSBCPlanDialog{display:flex!important;width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important;flex-direction:column!important}
+            .phone .fsu-fastSBCPlanDialog>.ea-dialog-view--title,.phone .fsu-fastSBCPlanDialog>header{box-sizing:border-box!important;display:flex!important;min-height:52px!important;height:52px!important;flex:0 0 52px!important;align-items:center!important;justify-content:center!important;margin:0!important;padding:0 58px!important;overflow:hidden!important}
+            .phone .fsu-fastSBCPlanDialog .fsu-fastSBCPlanDialogTitle{box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:hidden!important;font-size:20px!important;line-height:28px!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+            .phone .fsu-fastSBCPlanDialog .ea-dialog-view--body{min-height:0!important;max-height:none!important;flex:1 1 auto!important;margin:0!important}
+            .phone .fsu-fastSBCPlanDialog .fsu-fastSBCPlanMessage{height:100%!important;min-height:0!important}
+            .phone .fsu-fastSBCPlan{height:100%!important;max-height:none!important}
+            .phone .fsu-fastSBCPlanHeader{padding:12px 12px 10px}
+            .phone .fsu-fastSBCPlanNavigator{padding:8px 10px}
+            .phone .fsu-fastSBCPlanList{padding:5px 7px}
+            .phone .fsu-fastSBCPlanPlayer{min-height:49px}
+            .phone .fsu-fastSBCPlanFooter{padding:9px 10px 10px}
         `;
 
         //24.18 修改请求fut链接报错提示
@@ -3695,20 +3779,7 @@
                                 new UTButtonControl(),
                                 fy(["fastsbc.sbcbtntext",qs]),
                                 () => {
-                                    if (info.base.fastsbctips) {
-                                        events.isSBCCache(sId, cId)
-                                    } else {
-                                        events.popup(
-                                            fy("fastsbc.popupt"),
-                                            fy("fastsbc.popupm"),
-                                            (t) => {
-                                                if (t === 2) {
-                                                    info.base.fastsbctips = true;
-                                                    events.isSBCCache(sId, cId)
-                                                }
-                                            }
-                                        )
-                                    }
+                                    events.openFastSBCPlannerEntry(sId, cId);
                                 },
                                 "im"
                             );
@@ -5391,26 +5462,12 @@
                         let fastIds = _.map(_.split(_.keys(fastInfo)[0], '#'),s => parseInt(s));
                         let fastSid = fastIds[1];
                         let fastCid = fastIds[0];
-                        fastCount--;
 
                         e._fsufastsbcbtn = events.createButton(
                             new UTCurrencyButtonControl(),
                             fy(["fastsbc.sbcbtntext",fastCount]),
                             () => {
-                                if (info.base.fastsbctips) {
-                                    events.isSBCCache(fastSid, fastCid)
-                                } else {
-                                    events.popup(
-                                        fy("fastsbc.popupt"),
-                                        fy("fastsbc.popupm"),
-                                        (t) => {
-                                            if (t === 2) {
-                                                info.base.fastsbctips = true;
-                                                events.isSBCCache(fastSid, fastCid)
-                                            }
-                                        }
-                                    )
-                                }
+                                events.openFastSBCPlannerEntry(fastSid, fastCid);
                             },
                             "call-to-action mini fsu-challengefastbtn"
                         )
@@ -5557,20 +5614,7 @@
                                     new UTCurrencyButtonControl(),
                                     fy(["fastsbc.sbcbtntext", fastCount]),
                                     () => {
-                                        if (info.base.fastsbctips) {
-                                            events.isSBCCache(i._fsu.subSet.setId, sId)
-                                        } else {
-                                            events.popup(
-                                                fy("fastsbc.popupt"),
-                                                fy("fastsbc.popupm"),
-                                                (t) => {
-                                                    if (t === 2) {
-                                                        info.base.fastsbctips = true;
-                                                        events.isSBCCache(i._fsu.subSet.setId, sId)
-                                                    }
-                                                }
-                                            )
-                                        }
+                                        events.openFastSBCPlannerEntry(i._fsu.subSet.setId, sId);
                                     },
                                     "call-to-action mini fsu-challengefastbtn"
                                 )
@@ -7814,7 +7858,7 @@
                 gf = events.ignorePlayerToCriteria(gf);
                 let items = y ? events.getItemBy(1,gf,p) : events.getItemBy(1,gf,false,p);
                 let tc = _.size(items);
-                tc = Math.ceil(tc / criteriaNumber);
+                tc = y ? Math.floor(tc / criteriaNumber) : Math.ceil(tc / criteriaNumber);
                 return tc;
             }else{
                 let tempCriterias = _.cloneDeep(o);
@@ -7836,7 +7880,7 @@
                     criteria.lock = false;
                     let items =  y ? events.getItemBy(1,criteria,p) : events.getItemBy(1,criteria,false,p);
                     let tc = _.size(items);
-                    tc = Math.ceil(tc / os.c);
+                    tc = y ? Math.floor(tc / os.c) : Math.ceil(tc / os.c);
                     c.push(tc)
                 })
                 return y ? _.min(c) : _.max(c);
@@ -10273,6 +10317,986 @@
             return gf;
         }
 
+        //26.09.9 快速SBC提交方案：生成最多10个互不重复、可预览的提交阵容
+        events.getFastSBCPlanItemKey = (player) => {
+            if(player?.id !== undefined && player?.id !== null){
+                return String(player.id);
+            }
+            return `${player?.definitionId ?? "unknown"}-${player?.databaseId ?? "unknown"}`;
+        }
+        events.getFastSBCPlanOwnedState = () => {
+            const clubPlayers = repositories.Item?.club?.items?.values?.() ?? [];
+            const storagePlayers = repositories.Item?.getStorageItems?.() ?? repositories.Item?.storage?.values?.() ?? [];
+            const storageIds = new Set(_.map(storagePlayers, events.getFastSBCPlanItemKey));
+            const players = [];
+            const map = new Map();
+            _.forEach(_.concat(clubPlayers, storagePlayers), player => {
+                if(!player?.isPlayer?.()){
+                    return;
+                }
+                const key = events.getFastSBCPlanItemKey(player);
+                if(map.has(key)){
+                    return;
+                }
+                map.set(key, player);
+                players.push(player);
+            })
+            return { players, map, storageIds };
+        }
+        events.getFastSBCPlanPlayerSnapshot = (player, storageIds) => {
+            let staticData = player?._staticData;
+            if(!staticData && player?.getStaticData){
+                staticData = player.getStaticData();
+            }
+            const itemKey = events.getFastSBCPlanItemKey(player);
+            const positionKey = `extendedPlayerInfo.positions.position${player?.preferredPosition}`;
+            const rarityKey = `item.raretype${player?.rareflag}`;
+            let position = services.Localization.localize(positionKey);
+            let rarity = services.Localization.localize(rarityKey);
+            if(!position || position === positionKey){
+                position = String(player?.preferredPosition ?? "—");
+            }
+            if(!rarity || rarity === rarityKey){
+                rarity = String(player?.rareflag ?? "—");
+            }
+            return {
+                itemId: itemKey,
+                databaseId: player?.databaseId,
+                definitionId: player?.definitionId,
+                name: String(staticData?.name ?? player?.name ?? player?.definitionId ?? "—"),
+                rating: Number(player?.rating ?? 0),
+                position,
+                rarity,
+                tradeable: Number(player?.untradeableCount ?? 0) === 0,
+                location: storageIds?.has(itemKey) ? "storage" : "club"
+            };
+        }
+        events.getFastSBCPlanCandidates = (requirement, reservedItemIds, unassignedPlayers, ownedState) => {
+            let criteria = events.ignorePlayerToCriteria(_.cloneDeep(requirement.t));
+            // getItemBy의 firststorage는 databaseId 단위로 중복을 제거한다.
+            // 제출안 간에는 서로 다른 실물 카드 복사본을 사용할 수 있어야 하므로
+            // 이 단계에서는 제거하지 않고 아래에서 item.id와 databaseId를 각각 검사한다.
+            delete criteria.firststorage;
+            criteria.lock = false;
+            let candidates = events.getItemBy(2, criteria);
+            candidates = _.filter(candidates, player => !reservedItemIds.has(events.getFastSBCPlanItemKey(player)));
+
+            const duplicateIds = new Set(
+                _.map(
+                    _.filter(unassignedPlayers, item => item?.isPlayer?.() && item?.isDuplicate?.()),
+                    item => String(item.duplicateId)
+                )
+            );
+            candidates = _.orderBy(
+                candidates,
+                [
+                    player => duplicateIds.has(events.getFastSBCPlanItemKey(player)) ? 0 : 1,
+                    player => info.build.firststorage && ownedState.storageIds.has(events.getFastSBCPlanItemKey(player)) ? 0 : 1
+                ],
+                ["asc", "asc"]
+            );
+            return candidates;
+        }
+        events.generateFastSBCPlans = (requirements, requiredCount, maxPlans = 10) => {
+            const groups = _.filter(
+                _.map(requirements, requirement => ({
+                    t: _.cloneDeep(requirement?.t ?? {}),
+                    c: Number(requirement?.c ?? 0)
+                })),
+                requirement => requirement.c > 0 && !_.isEmpty(requirement.t)
+            );
+            const expectedCount = _.sumBy(groups, "c");
+            if(!groups.length || expectedCount !== Number(requiredCount)){
+                return [];
+            }
+
+            const ownedState = events.getFastSBCPlanOwnedState();
+            const unassignedPlayers = _.filter(
+                repositories.Item.getUnassignedItems(),
+                item => item?.isPlayer?.() && item.duplicateId !== 0
+            );
+            const planLimit = Math.max(0, Math.min(10, Number(maxPlans) || 0));
+            if(planLimit === 0){
+                return [];
+            }
+
+            const groupEntries = _.map(groups, (group, groupIndex) => {
+                const candidates = events.getFastSBCPlanCandidates(
+                    group,
+                    new Set(),
+                    unassignedPlayers,
+                    ownedState
+                );
+                return {
+                    group,
+                    groupIndex,
+                    candidates: _.uniqBy(
+                        candidates,
+                        player => events.getFastSBCPlanItemKey(player)
+                    ),
+                    uniqueDatabaseCount: _.uniqBy(
+                        candidates,
+                        player => String(
+                            player?.databaseId ?? events.getFastSBCPlanItemKey(player)
+                        )
+                    ).length
+                };
+            });
+            if(_.some(groupEntries, entry => entry.candidates.length < entry.group.c)){
+                return [];
+            }
+
+            // 물리 카드 수를 기준으로 가능한 상한을 구한 뒤, 실제 배정이 실패하면
+            // 한 회차씩 낮춰 재시도한다. 따라서 불완전한 마지막 안은 저장되지 않는다.
+            const theoreticalLimit = Math.min(
+                planLimit,
+                ..._.map(
+                    groupEntries,
+                    entry => Math.floor(entry.candidates.length / entry.group.c)
+                )
+            );
+            if(theoreticalLimit <= 0){
+                return [];
+            }
+
+            groupEntries.sort((a, b) => {
+                const ratioA = a.uniqueDatabaseCount / a.group.c;
+                const ratioB = b.uniqueDatabaseCount / b.group.c;
+                if(ratioA !== ratioB){
+                    return ratioA - ratioB;
+                }
+                const keysA = _.size(a.group.t);
+                const keysB = _.size(b.group.t);
+                return keysB - keysA || a.groupIndex - b.groupIndex;
+            });
+
+            const candidateMembership = new Map();
+            _.forEach(groupEntries, entry => {
+                const seenInGroup = new Set();
+                _.forEach(entry.candidates, player => {
+                    const databaseKey = String(
+                        player?.databaseId ?? events.getFastSBCPlanItemKey(player)
+                    );
+                    if(seenInGroup.has(databaseKey)){
+                        return;
+                    }
+                    seenInGroup.add(databaseKey);
+                    candidateMembership.set(
+                        databaseKey,
+                        (candidateMembership.get(databaseKey) ?? 0) + 1
+                    );
+                })
+            })
+
+            const tryBuildPlans = (targetCount) => {
+                const workingPlans = _.times(targetCount, index => ({
+                    index,
+                    players: [],
+                    usedDatabaseIds: new Set()
+                }));
+                const globallyUsedItemIds = new Set();
+
+                for(const entry of groupEntries){
+                    for(let slotIndex = 0; slotIndex < entry.group.c; slotIndex++){
+                        const pendingPlans = workingPlans.slice();
+                        while(pendingPlans.length){
+                            const planOptions = _.map(pendingPlans, plan => {
+                                const available = _.filter(entry.candidates, player => {
+                                    const itemKey = events.getFastSBCPlanItemKey(player);
+                                    const databaseKey = String(player?.databaseId ?? itemKey);
+                                    return (
+                                        !globallyUsedItemIds.has(itemKey) &&
+                                        !plan.usedDatabaseIds.has(databaseKey)
+                                    );
+                                });
+                                return {
+                                    plan,
+                                    available,
+                                    uniqueDatabaseCount: _.uniqBy(
+                                        available,
+                                        player => String(
+                                            player?.databaseId ??
+                                            events.getFastSBCPlanItemKey(player)
+                                        )
+                                    ).length
+                                };
+                            });
+                            planOptions.sort((a, b) =>
+                                a.uniqueDatabaseCount - b.uniqueDatabaseCount ||
+                                a.plan.index - b.plan.index
+                            );
+
+                            const current = planOptions[0];
+                            if(!current || current.uniqueDatabaseCount === 0){
+                                return null;
+                            }
+                            // 현재 조건에만 속하는 선수를 우선 사용해 다른 제한 조건의
+                            // 희귀 후보를 보존한다. 동시에 후보가 가장 적은 회차부터 채워
+                            // 회차별 databaseId 충돌로 마지막 안이 빠지는 것을 줄인다.
+                            const orderedCandidates = _.orderBy(
+                                current.available,
+                                player => candidateMembership.get(
+                                    String(
+                                        player?.databaseId ??
+                                        events.getFastSBCPlanItemKey(player)
+                                    )
+                                ) ?? 1,
+                                "asc"
+                            );
+                            const selected = orderedCandidates[0];
+                            const selectedItemKey = events.getFastSBCPlanItemKey(selected);
+                            const selectedDatabaseKey = String(
+                                selected?.databaseId ?? selectedItemKey
+                            );
+                            current.plan.players.push(selected);
+                            current.plan.usedDatabaseIds.add(selectedDatabaseKey);
+                            globallyUsedItemIds.add(selectedItemKey);
+                            _.remove(
+                                pendingPlans,
+                                plan => plan.index === current.plan.index
+                            );
+                        }
+                    }
+                }
+
+                if(
+                    _.some(
+                        workingPlans,
+                        plan => plan.players.length !== Number(requiredCount)
+                    )
+                ){
+                    return null;
+                }
+                return _.map(workingPlans, (plan, index) => ({
+                    number: index + 1,
+                    status: "ready",
+                    error: "",
+                    itemIds: _.map(plan.players, events.getFastSBCPlanItemKey),
+                    players: plan.players,
+                    snapshots: _.map(plan.players, player =>
+                        events.getFastSBCPlanPlayerSnapshot(player, ownedState.storageIds)
+                    )
+                }));
+            };
+
+            for(let targetCount = theoreticalLimit; targetCount > 0; targetCount--){
+                const plans = tryBuildPlans(targetCount);
+                if(plans){
+                    return plans;
+                }
+            }
+            return [];
+        }
+        events.requestFastSBCPlanSet = (setId) => {
+            const existingSet = services.SBC.repository.getSetById(setId);
+            if(existingSet){
+                return Promise.resolve(existingSet);
+            }
+            const owner = events.getCurrent();
+            return new Promise((resolve, reject) => {
+                services.SBC.requestSets().observe(owner, (token, response) => {
+                    token.unobserve(owner);
+                    const setEntity = services.SBC.repository.getSetById(setId);
+                    if(response.success && setEntity){
+                        resolve(setEntity);
+                    }else{
+                        reject(new Error(`SBC set ${setId} could not be loaded`));
+                    }
+                })
+            });
+        }
+        events.loadFastSBCPlanChallenge = async(setId, challengeId) => {
+            const owner = events.getCurrent();
+            const setEntity = await events.requestFastSBCPlanSet(setId);
+            const challenge = await new Promise((resolve, reject) => {
+                services.SBC.requestChallengesForSet(setEntity).observe(owner, (token, response) => {
+                    token.unobserve(owner);
+                    if(!response.success || !response.data?.challenges?.length){
+                        reject(new Error(`SBC challenges for set ${setId} could not be loaded`));
+                        return;
+                    }
+                    const matched = response.data.challenges.find(
+                        item => Number(item.id) === Number(challengeId)
+                    );
+                    if(!matched){
+                        reject(new Error(`SBC challenge ${challengeId} could not be found`));
+                        return;
+                    }
+                    services.SBC.loadChallenge(matched).observe(owner, (loadToken, loadResponse) => {
+                        loadToken.unobserve(owner);
+                        if(!loadResponse.success){
+                            reject(new Error(`SBC challenge ${challengeId} could not be initialized`));
+                            return;
+                        }
+                        const repositoryChallenge = setEntity.getChallenge(challengeId);
+                        if(repositoryChallenge && !repositoryChallenge.squad){
+                            repositoryChallenge.update(matched);
+                        }
+                        // loadChallenge가 갱신한 최신 인스턴스를 사용한다. 반복형 SBC에서는
+                        // repositoryChallenge가 직전 제출의 completed 상태를 잠시 유지할 수 있다.
+                        resolve(matched);
+                    })
+                })
+            });
+            return { setEntity, challenge };
+        }
+        events.revalidateFastSBCPlanSession = (session) => {
+            const ownedState = events.getFastSBCPlanOwnedState();
+            const readyItemIds = new Set();
+            _.forEach(session.plans, plan => {
+                if(plan.status === "submitted"){
+                    return;
+                }
+                const livePlayers = [];
+                let valid = true;
+                _.forEach(plan.itemIds, itemId => {
+                    if(readyItemIds.has(itemId) || !ownedState.map.has(itemId)){
+                        valid = false;
+                        return;
+                    }
+                    readyItemIds.add(itemId);
+                    livePlayers.push(ownedState.map.get(itemId));
+                })
+                if(!valid || livePlayers.length !== plan.itemIds.length){
+                    plan.status = "invalid";
+                    plan.error = fy("fastsbc.plan.changed");
+                    return;
+                }
+                plan.players = livePlayers;
+                plan.snapshots = _.map(livePlayers, player =>
+                    events.getFastSBCPlanPlayerSnapshot(player, ownedState.storageIds)
+                );
+            })
+            return session;
+        }
+        events.setFastSBCPlanControlText = (control, text) => {
+            if(!control){
+                return;
+            }
+            if(typeof control.setText === "function"){
+                control.setText(text);
+            }else{
+                control.setTitle = text;
+            }
+            if(control.__text){
+                control.__text.textContent = text;
+            }
+        }
+        events.createFastSBCPlanView = (session) => {
+            const root = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlan",
+                attributes: {
+                    "data-state": "ready"
+                }
+            });
+            const header = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlanHeader"
+            });
+            const challengeName = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlanChallenge"
+            });
+            const summary = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlanSummary"
+            });
+            header.append(challengeName, summary);
+            root.appendChild(header);
+
+            const navigator = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlanNavigator"
+            });
+            const previousControl = events.createButton(
+                new UTButtonControl(),
+                "‹",
+                () => {
+                    if(session.currentIndex > 0 && !session.submitting){
+                        session.currentIndex--;
+                        view.render();
+                    }
+                },
+                "fsu-fastSBCPlanNav fsu-fastSBCPlanNav--previous"
+            );
+            const nextControl = events.createButton(
+                new UTButtonControl(),
+                "›",
+                () => {
+                    if(session.currentIndex < session.plans.length - 1 && !session.submitting){
+                        session.currentIndex++;
+                        view.render();
+                    }
+                },
+                "fsu-fastSBCPlanNav fsu-fastSBCPlanNav--next"
+            );
+            previousControl.getRootElement().setAttribute("aria-label", fy("fastsbc.plan.previous"));
+            previousControl.getRootElement().setAttribute("title", fy("fastsbc.plan.previous"));
+            nextControl.getRootElement().setAttribute("aria-label", fy("fastsbc.plan.next"));
+            nextControl.getRootElement().setAttribute("title", fy("fastsbc.plan.next"));
+
+            const counter = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlanCounter"
+            });
+            const counterText = events.createElementWithConfig("strong");
+            const statusText = events.createElementWithConfig("span", {
+                classList: "fsu-fastSBCPlanStatus"
+            });
+            counter.append(counterText, statusText);
+            navigator.append(
+                previousControl.getRootElement(),
+                counter,
+                nextControl.getRootElement()
+            );
+            root.appendChild(navigator);
+
+            const list = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlanList"
+            });
+            root.appendChild(list);
+
+            const footer = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlanFooter"
+            });
+            const regenerateControl = events.createButton(
+                new UTStandardButtonControl(),
+                fy("fastsbc.plan.regenerate"),
+                () => events.regenerateFastSBCPlanSession(session),
+                "fsu-fastSBCPlanRegenerate"
+            );
+            const submitControl = events.createButton(
+                new UTStandardButtonControl(),
+                "",
+                () => {
+                    const plan = session.plans[session.currentIndex];
+                    if(plan){
+                        events.submitFastSBCPlan(session, plan);
+                    }
+                },
+                "call-to-action fsu-fastSBCPlanSubmit"
+            );
+            const errorText = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlanError"
+            });
+            footer.append(
+                regenerateControl.getRootElement(),
+                submitControl.getRootElement(),
+                errorText
+            );
+            root.appendChild(footer);
+
+            const view = {
+                root,
+                list,
+                controls: [previousControl, nextControl, regenerateControl, submitControl],
+                render: () => {
+                    const plan = session.plans[session.currentIndex];
+                    if(!plan){
+                        return;
+                    }
+                    root.setAttribute("data-state", plan.status);
+                    challengeName.textContent = session.challengeName || session.setName || fy("fastsbc.plan.title");
+                    summary.textContent = fy([
+                        "fastsbc.plan.summary",
+                        session.estimatedCount,
+                        session.plans.length
+                    ]);
+                    counterText.textContent = fy([
+                        "fastsbc.plan.counter",
+                        session.currentIndex + 1,
+                        session.plans.length
+                    ]);
+                    const statusKeys = {
+                        ready: "fastsbc.plan.ready",
+                        submitting: "fastsbc.plan.submitting",
+                        submitted: "fastsbc.plan.submitted",
+                        invalid: "fastsbc.plan.invalid"
+                    };
+                    const status = fy(statusKeys[plan.status] ?? "fastsbc.plan.invalid");
+                    statusText.textContent = plan.status === "ready"
+                        ? `${status} · ${fy(["fastsbc.plan.valid", plan.snapshots.length])}`
+                        : status;
+                    errorText.textContent = plan.error || fy("fastsbc.plan.changed");
+                    list.replaceChildren();
+                    _.forEach(plan.snapshots, (snapshot, index) => {
+                        const row = events.createElementWithConfig("div", {
+                            classList: "fsu-fastSBCPlanPlayer",
+                            attributes: {
+                                "title": fy(["fastsbc.plan.itemid", snapshot.itemId])
+                            }
+                        });
+                        row.appendChild(events.createElementWithConfig("div", {
+                            classList: "fsu-fastSBCPlanPlayerIndex",
+                            textContent: String(index + 1).padStart(2, "0")
+                        }));
+                        row.appendChild(events.createElementWithConfig("div", {
+                            classList: "fsu-fastSBCPlanPlayerRating",
+                            textContent: snapshot.rating || "—"
+                        }));
+                        const body = events.createElementWithConfig("div", {
+                            classList: "fsu-fastSBCPlanPlayerBody"
+                        });
+                        body.appendChild(events.createElementWithConfig("div", {
+                            classList: "fsu-fastSBCPlanPlayerName",
+                            textContent: snapshot.name
+                        }));
+                        const meta = events.createElementWithConfig("div", {
+                            classList: "fsu-fastSBCPlanPlayerMeta"
+                        });
+                        meta.appendChild(events.createElementWithConfig("span", {
+                            textContent: `${snapshot.position} · ${snapshot.rarity}`
+                        }));
+                        meta.appendChild(events.createElementWithConfig("span", {
+                            textContent: fy(
+                                snapshot.tradeable
+                                    ? "clubplayers.tradeable.yes"
+                                    : "clubplayers.tradeable.no"
+                            )
+                        }));
+                        body.appendChild(meta);
+                        row.appendChild(body);
+                        row.appendChild(events.createElementWithConfig("div", {
+                            classList: snapshot.location === "storage"
+                                ? ["fsu-fastSBCPlanPlayerLocation", "fsu-fastSBCPlanPlayerLocation--storage"]
+                                : "fsu-fastSBCPlanPlayerLocation",
+                            textContent: fy(`fastsbc.plan.location.${snapshot.location}`)
+                        }));
+                        list.appendChild(row);
+                    })
+                    list.scrollTop = 0;
+
+                    previousControl.setInteractionState(!session.submitting && session.currentIndex > 0);
+                    nextControl.setInteractionState(
+                        !session.submitting && session.currentIndex < session.plans.length - 1
+                    );
+                    regenerateControl.setInteractionState(!session.submitting);
+                    submitControl.setInteractionState(!session.submitting && plan.status === "ready");
+                    events.setFastSBCPlanControlText(
+                        submitControl,
+                        fy(["fastsbc.plan.submit", plan.number])
+                    );
+                },
+                dealloc: () => {
+                    _.forEach(view.controls, control => control?.dealloc?.());
+                }
+            };
+            view.render();
+            return view;
+        }
+        events.closeFastSBCPlanPopup = () => {
+            const popup = events.fastSBCPlanPopup;
+            if(!popup){
+                return;
+            }
+            const nativeClose = popup._fsu?.nativeCloseControl;
+            if(typeof nativeClose?._tapDetected === "function"){
+                nativeClose._tapDetected();
+                return;
+            }
+            popup.onBackButton?.();
+        }
+        events.showFastSBCPlanPopup = (session) => {
+            const currentRoot = events.fastSBCPlanPopup?.getView?.()?.getRootElement?.();
+            if(events.fastSBCPlanPopup && currentRoot?.isConnected){
+                session.view?.render?.();
+                return;
+            }
+            const planView = events.createFastSBCPlanView(session);
+            const popupController = new EADialogViewController({
+                dialogOptions: [{ labelEnum: enums.UIDialogOptions.OK }],
+                message: "",
+                title: fy("fastsbc.plan.title"),
+                type: EADialogView.Type.MESSAGE
+            });
+            popupController.init();
+            popupController.modalDisplayDimensions.width = "640px";
+            popupController.modalDisplayDimensions.minWidth = "300px";
+            const popupView = popupController.getView();
+            const popupRoot = popupView.getRootElement();
+            popupRoot.classList.add("fsu-fastSBCPlanDialog");
+            popupRoot.setAttribute("aria-modal", "true");
+            popupView.__title?.classList.add("fsu-fastSBCPlanDialogTitle");
+            popupView.__msg.classList.add("fsu-fastSBCPlanMessage");
+            popupView.__msg.replaceChildren(planView.root);
+            popupView.__btnContainer?.classList.add("fsu-fastSBCPlanNativeActions");
+
+            const nativeCloseControl = popupView.dialogOptions?.[0];
+            const closeControl = events.createButton(
+                new UTButtonControl(),
+                "×",
+                () => {
+                    if(typeof nativeCloseControl?._tapDetected === "function"){
+                        nativeCloseControl._tapDetected();
+                        return;
+                    }
+                    popupView.__btnContainer?.querySelector("button")?.click?.();
+                },
+                "fsu-fastSBCPlanClose"
+            );
+            const closeRoot = closeControl.getRootElement();
+            closeRoot.setAttribute("type", "button");
+            closeRoot.setAttribute("title", fy("fastsbc.plan.close"));
+            closeRoot.setAttribute("aria-label", fy("fastsbc.plan.close"));
+            popupRoot.appendChild(closeRoot);
+
+            let modalContainer = null;
+            const releasePopupLayer = () => {
+                modalContainer?.classList.remove("fsu-fastSBCPlanModal");
+                document.body?.classList.remove("fsu-fastSBCPlanOpen");
+                modalContainer = null;
+            };
+            popupController._fsu = {
+                planView,
+                closeControl,
+                nativeCloseControl
+            };
+            popupController.onExit.observe(popupController, token => {
+                token.unobserve(popupController);
+                if(events.fastSBCPlanPopup === popupController){
+                    events.fastSBCPlanPopup = null;
+                }
+                session.view = null;
+                releasePopupLayer();
+                planView.dealloc();
+                closeControl.dealloc?.();
+                popupController.dealloc();
+            });
+            session.view = planView;
+            events.fastSBCPlanPopup = popupController;
+            document.body?.classList.add("fsu-fastSBCPlanOpen");
+            gPopupClickShield.setActivePopup(popupController);
+            const syncPopupLayer = () => {
+                if(!popupRoot.isConnected){
+                    return;
+                }
+                modalContainer = popupRoot.closest(".view-modal-container");
+                modalContainer?.classList.add("fsu-fastSBCPlanModal");
+                planView.list.scrollTop = 0;
+            };
+            syncPopupLayer();
+            requestAnimationFrame(syncPopupLayer);
+        }
+        events.buildFastSBCPlanSession = async(setId, challengeId) => {
+            const loaded = await events.loadFastSBCPlanChallenge(setId, challengeId);
+            const requirements = info.base.fastsbc[`${challengeId}#${setId}`];
+            if(!requirements){
+                throw new Error(`Fast SBC requirements ${challengeId}#${setId} are unavailable`);
+            }
+            const requiredCount = Number(
+                loaded.challenge?.squad?.getNumOfRequiredPlayers?.() ??
+                _.sumBy(requirements, requirement => Number(requirement?.c ?? 0))
+            );
+            const unassignedPlayers = _.filter(
+                repositories.Item.getUnassignedItems(),
+                item => item?.isPlayer?.() && item.duplicateId !== 0
+            );
+            const plans = events.generateFastSBCPlans(requirements, requiredCount, 10);
+            const estimatedCount = Math.max(
+                events.fastSBCQuantity(true, unassignedPlayers, requirements),
+                plans.length
+            );
+            return {
+                setId: Number(setId),
+                challengeId: Number(challengeId),
+                setName: loaded.setEntity?.name ?? "",
+                challengeName: loaded.challenge?.name ?? loaded.setEntity?.name ?? "",
+                requiredCount,
+                estimatedCount,
+                plans,
+                currentIndex: 0,
+                submitting: false,
+                view: null
+            };
+        }
+        events.openFastSBCPlanner = async(setId, challengeId, forceRegenerate = false) => {
+            if(events.fastSBCPlanOpening){
+                return;
+            }
+            const activeRoot = events.fastSBCPlanPopup?.getView?.()?.getRootElement?.();
+            if(events.fastSBCPlanPopup && !activeRoot?.isConnected){
+                events.fastSBCPlanPopup = null;
+            }
+            events.fastSBCPlanOpening = true;
+            events.showLoader();
+            try {
+                let session = events.fastSBCPlanSession;
+                const matchesCurrent =
+                    session &&
+                    Number(session.setId) === Number(setId) &&
+                    Number(session.challengeId) === Number(challengeId);
+
+                if(!forceRegenerate && matchesCurrent){
+                    events.revalidateFastSBCPlanSession(session);
+                    const nextReadyIndex = _.findIndex(session.plans, plan => plan.status === "ready");
+                    if(nextReadyIndex !== -1 && session.plans[session.currentIndex]?.status !== "ready"){
+                        session.currentIndex = nextReadyIndex;
+                    }
+                }else{
+                    session = await events.buildFastSBCPlanSession(setId, challengeId);
+                    events.fastSBCPlanSession = session;
+                }
+
+                if(!session.plans.length){
+                    events.notice("fastsbc.plan.empty", 2);
+                    return;
+                }
+                events.showFastSBCPlanPopup(session);
+            } catch(error) {
+                console.error("[FSU] Fast SBC plan opening failed", error);
+                events.notice("fastsbc.plan.loaderror", 2);
+            } finally {
+                events.hideLoader();
+                events.fastSBCPlanOpening = false;
+            }
+        }
+        events.regenerateFastSBCPlanSession = async(session) => {
+            if(session.submitting){
+                return;
+            }
+            session.submitting = true;
+            session.view?.render?.();
+            events.showLoader();
+            try {
+                const nextSession = await events.buildFastSBCPlanSession(
+                    session.setId,
+                    session.challengeId
+                );
+                if(!nextSession.plans.length){
+                    events.notice("fastsbc.plan.empty", 2);
+                    return;
+                }
+                session.setName = nextSession.setName;
+                session.challengeName = nextSession.challengeName;
+                session.requiredCount = nextSession.requiredCount;
+                session.estimatedCount = nextSession.estimatedCount;
+                session.plans = nextSession.plans;
+                session.currentIndex = 0;
+                events.fastSBCPlanSession = session;
+            } catch(error) {
+                console.error("[FSU] Fast SBC plan regeneration failed", error);
+                events.notice("fastsbc.plan.loaderror", 2);
+            } finally {
+                session.submitting = false;
+                session.view?.render?.();
+                events.hideLoader();
+            }
+        }
+        events.openFastSBCPlannerEntry = (setId, challengeId) => {
+            const openPlanner = () => events.openFastSBCPlanner(setId, challengeId);
+            if(info.base.fastsbctips){
+                openPlanner();
+                return;
+            }
+            events.popup(
+                fy("fastsbc.popupt"),
+                fy("fastsbc.popupm"),
+                option => {
+                    if(option === 2){
+                        info.base.fastsbctips = true;
+                        openPlanner();
+                    }
+                }
+            )
+        }
+        events.resolveFastSBCPlanPlayers = (plan) => {
+            const ownedState = events.getFastSBCPlanOwnedState();
+            const players = _.map(plan.itemIds, itemId => ownedState.map.get(itemId));
+            if(players.some(player => !player)){
+                return null;
+            }
+            const itemIds = _.map(players, events.getFastSBCPlanItemKey);
+            const databaseIds = _.map(
+                players,
+                player => String(player?.databaseId ?? events.getFastSBCPlanItemKey(player))
+            );
+            if(_.uniq(itemIds).length !== itemIds.length || _.uniq(databaseIds).length !== databaseIds.length){
+                return null;
+            }
+            plan.players = players;
+            plan.snapshots = _.map(players, player =>
+                events.getFastSBCPlanPlayerSnapshot(player, ownedState.storageIds)
+            );
+            return players;
+        }
+        events.setFastSBCPlanSubmitFailure = (session, plan, messageKey, invalidate = false) => {
+            session.submitting = false;
+            plan.status = invalidate ? "invalid" : "ready";
+            plan.error = fy(messageKey);
+            session.view?.render?.();
+            events.getCurrent()?.getView?.()?.setInteractionState?.(true);
+            events.hideLoader();
+            events.notice(messageKey, 2);
+        }
+        events.finishFastSBCPlanSubmit = (controller, setEntity, challenge, response, session, plan) => {
+            const newChallenge = setEntity.getChallenge(challenge.id);
+            plan.status = "submitted";
+            plan.error = "";
+            session.submitting = false;
+            const nextReadyIndex = _.findIndex(
+                session.plans,
+                (candidate, index) => index > session.currentIndex && candidate.status === "ready"
+            );
+            const wrappedReadyIndex = nextReadyIndex === -1
+                ? _.findIndex(session.plans, candidate => candidate.status === "ready")
+                : nextReadyIndex;
+            if(wrappedReadyIndex !== -1){
+                session.currentIndex = wrappedReadyIndex;
+            }
+            session.view?.render?.();
+            events.closeFastSBCPlanPopup();
+            events.hideLoader();
+            controller.getView?.()?.setInteractionState?.(true);
+
+            const showRewards = () => {
+                if(newChallenge?.awards?.length){
+                    const challengeRewards = new UTGameRewardsViewController(newChallenge.awards);
+                    challengeRewards.init();
+                    challengeRewards.modalDisplayDimensions.width = "24em";
+                    challengeRewards.getView().setSbcChallenge(newChallenge);
+                    gPopupClickShield.setActivePopup(challengeRewards);
+                    challengeRewards.onExit.observe(controller, token => {
+                        token.unobserve(controller);
+                        events.showRewardsView(setEntity);
+                    })
+                }else if(response.data?.setCompleted){
+                    events.showRewardsView(setEntity);
+                }else if(_.some(session.plans, candidate => candidate.status === "ready")){
+                    events.openFastSBCPlanner(session.setId, session.challengeId);
+                }
+            };
+            setTimeout(showRewards, 0);
+
+            services.PIN.sendData(PINEventType.PAGE_VIEW, {
+                type: PIN_PAGEVIEW_EVT_TYPE,
+                pgid: "SBC - Rewards Overlay"
+            });
+            if(_.includes(controller.className, "UTUnassignedItems")){
+                controller._fsuRefreshBtn?._tapDetected?.();
+            }
+            if(_.includes(controller.className, "UTSBCSquad")){
+                controller.getNavigationController()?.popViewController?.();
+            }
+            if(_.includes(controller.className, "UTSBCHub")){
+                if(controller.getView()._interactionState === false){
+                    controller.getView().setInteractionState(true);
+                }
+                controller._requestSBCData();
+            }
+            if(_.includes(controller.className, "UTSBCChallenges")){
+                controller.getView().setSBCSet(controller.sbcViewModel.sbcSet);
+                events.sbcSubPrice(controller.sbcViewModel.sbcSet.id, controller.getView());
+            }
+            events.SBCListInsertToFront(setEntity.id, 1);
+            events.notice("fastsbc.success", 0);
+        }
+        events.submitFastSBCPlan = async(session, plan) => {
+            if(session.submitting || plan.status !== "ready"){
+                return;
+            }
+            const initialPlayers = events.resolveFastSBCPlanPlayers(plan);
+            if(!initialPlayers || initialPlayers.length !== session.requiredCount){
+                events.setFastSBCPlanSubmitFailure(
+                    session,
+                    plan,
+                    "fastsbc.plan.changed",
+                    true
+                );
+                return;
+            }
+
+            session.submitting = true;
+            plan.status = "submitting";
+            plan.error = "";
+            session.view?.render?.();
+            events.showLoader();
+            const controller = events.getCurrent();
+            controller.getView?.()?.setInteractionState?.(false);
+
+            try {
+                const loaded = await events.loadFastSBCPlanChallenge(
+                    session.setId,
+                    session.challengeId
+                );
+                const players = events.resolveFastSBCPlanPlayers(plan);
+                if(!players || players.length !== session.requiredCount){
+                    events.setFastSBCPlanSubmitFailure(
+                        session,
+                        plan,
+                        "fastsbc.plan.changed",
+                        true
+                    );
+                    return;
+                }
+
+                events.playerListFillSquad(loaded.challenge, players, 1);
+                if(!loaded.challenge.canSubmit()){
+                    events.setFastSBCPlanSubmitFailure(
+                        session,
+                        plan,
+                        "fastsbc.plan.requirements",
+                        true
+                    );
+                    return;
+                }
+                if(
+                    !services.Configuration.getFeatureSetting(
+                        UTServerSettingsRepository.KEY.SBC_ALLOW_UNTRADEABLE
+                    ) &&
+                    loaded.challenge.hasUntradeableItems()
+                ){
+                    utils.PopupManager.showAlert(utils.PopupManager.Alerts.SBC_UNTRADEABLE_NOT_ALLOWED);
+                    events.setFastSBCPlanSubmitFailure(
+                        session,
+                        plan,
+                        "fastsbc.plan.requirements"
+                    );
+                    return;
+                }
+
+                TelemetryManager.trackEvent(
+                    TelemetryManager.Sections.SBC,
+                    TelemetryManager.Categories.BUTTON_PRESS,
+                    "SBC - Submit Challenge"
+                );
+                const validationSkip = services.UserSettings.getSBCValidationSkip();
+                services.SBC.submitChallenge(
+                    loaded.challenge,
+                    loaded.setEntity,
+                    validationSkip,
+                    services.Chemistry.isFeatureEnabled()
+                ).observe(controller, (token, response) => {
+                    token.unobserve(controller);
+                    if(response.success && loaded.setEntity.getChallenge(loaded.challenge.id)){
+                        events.finishFastSBCPlanSubmit(
+                            controller,
+                            loaded.setEntity,
+                            loaded.challenge,
+                            response,
+                            session,
+                            plan
+                        );
+                    }else{
+                        if(response.status === 521){
+                            events.setFastSBCPlanSubmitFailure(
+                                session,
+                                plan,
+                                "fastsbc.error_5"
+                            );
+                        }else{
+                            events.setFastSBCPlanSubmitFailure(
+                                session,
+                                plan,
+                                "fastsbc.plan.requirements"
+                            );
+                        }
+                    }
+                })
+            } catch(error) {
+                console.error("[FSU] Fast SBC plan submission failed", error);
+                events.setFastSBCPlanSubmitFailure(
+                    session,
+                    plan,
+                    "fastsbc.plan.loaderror"
+                );
+            }
+        }
+
         //SBC任务是否有缓存检测
         events.isSBCCache = (id,cId) => {
             let SBCSetEntity = services.SBC.repository.getSetById(id);
@@ -10448,15 +11472,31 @@
             let tryAgainBtn;
             const fastInfo = info.base.fastsbc[`${challenge.id}#${set.id}`];
             const controllerType = cntlr.current().className == 'UTSBCHubViewController' ? 1 : (cntlr.current().className.includes('UTUnassignedItems') ? 2 : 0);
-            if(controllerType){
+            if(controllerType && fastInfo){
                 const fastCount = events.fastSBCQuantity(controllerType == 1,_.filter(repositories.Item.getUnassignedItems(), item => item.isPlayer() && item.duplicateId !== 0),fastInfo) - 1;
-                if(fastInfo && fastCount >= 1){
+                const planSession = events.fastSBCPlanSession;
+                const hasReadyPlan =
+                    planSession &&
+                    Number(planSession.setId) === Number(set.id) &&
+                    Number(planSession.challengeId) === Number(challenge.id) &&
+                    _.some(planSession.plans, plan => plan.status === "ready");
+                const readyPlanCount = hasReadyPlan
+                    ? _.filter(planSession.plans, plan => plan.status === "ready").length
+                    : 0;
+                const remainingCount = Math.max(fastCount, readyPlanCount);
+                if(remainingCount >= 1){
                     tryAgainBtn = events.createButton(
                         new UTCurrencyButtonControl(),
-                        fy("trypack.button.again") + `(${fastCount})`,
+                        fy("trypack.button.again") + `(${remainingCount})`,
                         () => {
                             rewardsController.onBackButton();
-                            events.isSBCCache(set.id, challenge.id);
+                            setTimeout(() => {
+                                if(hasReadyPlan){
+                                    events.openFastSBCPlanner(set.id, challenge.id);
+                                }else{
+                                    events.isSBCCache(set.id, challenge.id);
+                                }
+                            }, 0);
                         },
                         "call-to-action fsu-challengefastbtn"
                     )
@@ -15672,20 +16712,7 @@
                         new UTCurrencyButtonControl(),
                         fy(["fastsbc.sbcbtntext", fastCount]),
                         (z) => {
-                            if (info.base.fastsbctips) {
-                                events.isSBCCache(z.setId, z.id)
-                            } else {
-                                events.popup(
-                                    fy("fastsbc.popupt"),
-                                    fy("fastsbc.popupm"),
-                                    (t) => {
-                                        if (t === 2) {
-                                            info.base.fastsbctips = true;
-                                            events.isSBCCache(z.setId, z.id)
-                                        }
-                                    }
-                                )
-                            }
+                            events.openFastSBCPlannerEntry(z.setId, z.id);
                         },
                         "call-to-action mini fsu-challengefastbtn",
                         {
