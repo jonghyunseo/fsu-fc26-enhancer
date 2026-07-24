@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.09.4
+// @version      26.09.5
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1587,7 +1587,9 @@
             "clubplayers.detail.accelerate":["加速类型","加速類型","AcceleRATE"],
             "clubplayers.detail.itemid":["物品 ID","物品 ID","Item ID"],
             "clubplayers.detail.eaid":["EA ID","EA ID","EA ID"],
+            "clubplayers.detail.close":["关闭球员详情","關閉球員詳情","Close player details"],
             "clubplayers.detail.source":["数据来自当前 EA FC Web App 球员物品。FSU 不会向 FUT.GG 上传俱乐部数据。","資料來自目前 EA FC Web App 球員物品。FSU 不會向 FUT.GG 上傳俱樂部資料。","Data comes from the current EA FC Web App player item. FSU does not upload Club data to FUT.GG."],
+            "clubplayers.detail.estimated":["EA 仅提供升级后的主属性时，细项会按 EA 属性权重估算。","EA 僅提供升級後的主屬性時，細項會按 EA 屬性權重估算。","When EA exposes only upgraded face stats, detailed values are estimated with EA's attribute weights."],
             "clubplayers.detail.error":["无法打开该球员的详情。","無法開啟該球員的詳情。","Could not open this player's details."],
             "clubplayers.detail.face.pac":["速度","速度","Pace"],
             "clubplayers.detail.face.sho":["射门","射門","Shooting"],
@@ -1756,7 +1758,13 @@
             .fsu-clubPlayersDetailTap{position:absolute!important;inset:0!important;z-index:8!important;width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:12px!important;background:transparent!important;box-shadow:none!important;color:transparent!important;font-size:0!important;line-height:0!important;cursor:pointer!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
             .fsu-clubPlayersDetailTap.hover,.fsu-clubPlayersDetailTap:active{background:rgba(7,244,104,.08)!important;box-shadow:inset 0 0 0 2px rgba(7,244,104,.55)!important}
             .fsu-clubPlayersDetailTap:focus-visible{outline:2px solid #07f468!important;outline-offset:-3px}
-            .fsu-clubPlayerDetailDialog{box-sizing:border-box!important;width:min(1040px,calc(100vw - 32px))!important;max-width:calc(100vw - 32px)!important;color:#fcfcfc}
+            .fsu-clubPlayerDetailDialog{position:relative!important;box-sizing:border-box!important;width:min(1040px,calc(100vw - 32px))!important;max-width:calc(100vw - 32px)!important;overflow:hidden!important;color:#fcfcfc}
+            .fsu-clubPlayerDetailDialogTitle{box-sizing:border-box!important;max-width:100%!important;padding-right:58px!important;padding-left:58px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+            .fsu-clubPlayerDetailClose{position:absolute!important;z-index:30!important;top:8px!important;right:8px!important;display:grid!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;margin:0!important;padding:0!important;place-items:center!important;border:1px solid rgba(255,255,255,.2)!important;border-radius:50%!important;background:rgba(25,24,32,.9)!important;box-shadow:0 4px 14px rgba(0,0,0,.32)!important;color:#fff!important;font-family:Arial,sans-serif!important;font-size:30px!important;font-weight:300!important;line-height:40px!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
+            .fsu-clubPlayerDetailClose>*{margin:0!important;padding:0!important;color:inherit!important;font:inherit!important;line-height:1!important}
+            .fsu-clubPlayerDetailClose.hover,.fsu-clubPlayerDetailClose:active{border-color:#07f468!important;background:#30353e!important;color:#07f468!important}
+            .fsu-clubPlayerDetailClose:focus-visible{outline:2px solid #07f468!important;outline-offset:2px!important}
+            .fsu-clubPlayerDetailNativeActions{display:none!important}
             .fsu-clubPlayerDetailDialog .ea-dialog-view--body{min-width:0!important;padding:0!important;overflow:hidden!important;background:#191820}
             .fsu-clubPlayerDetailDialog .fsu-clubPlayerDetailMessage{box-sizing:border-box;max-width:none!important;padding:0!important}
             .fsu-clubPlayerDetail{box-sizing:border-box;height:min(76vh,760px);max-height:calc(100vh - 150px);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;background:#191820;color:#fcfcfc;font-family:UltimateTeamCondensed,sans-serif;scrollbar-color:#575753 #23232b;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
@@ -1815,9 +1823,10 @@
             .fsu-clubPlayerDetailSubStatBar:after{display:block;width:var(--fsu-stat-value,0%);height:100%;border-radius:inherit;background:linear-gradient(90deg,#1fc3c1,#07f468);content:""}
             .fsu-clubPlayerDetailSource{padding:0 24px 20px;color:#7f858c;font-size:11px;line-height:15px;text-align:center}
             @media (max-width:900px){.fsu-clubPlayerDetailHero{grid-template-columns:220px minmax(0,1fr);gap:18px;padding:18px}.fsu-clubPlayerDetailCardStage{min-height:290px}.fsu-clubPlayerDetailFactGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.fsu-clubPlayerDetailAttributeGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-            .phone .fsu-clubPlayerDetailDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important}
-            .phone .fsu-clubPlayerDetailDialog .ea-dialog-view--body{max-height:calc(100vh - 76px)!important}
-            .phone .fsu-clubPlayerDetail{height:calc(100vh - 142px);height:calc(100dvh - 142px);max-height:none}
+            .phone .fsu-clubPlayerDetailDialog{display:flex!important;width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important;flex-direction:column!important}
+            .phone .fsu-clubPlayerDetailDialog .ea-dialog-view--body{min-height:0!important;max-height:none!important;flex:1 1 auto!important}
+            .phone .fsu-clubPlayerDetailDialog .fsu-clubPlayerDetailMessage{height:100%!important;min-height:0!important}
+            .phone .fsu-clubPlayerDetail{height:100%!important;max-height:none}
             .phone .fsu-clubPlayerDetailHero{grid-template-columns:1fr;gap:12px;padding:12px}
             .phone .fsu-clubPlayerDetailHero:after{right:12px;left:12px}
             .phone .fsu-clubPlayerDetailCardStage{min-height:270px}
@@ -13905,7 +13914,8 @@
                 }
                 try {
                     const value = services.Localization.localize(key);
-                    if(typeof value === "string" && value.trim() && value !== key && !value.includes(`{${key}}`)){
+                    const localized = typeof value === "string" ? value.trim() : "";
+                    if(localized && !localized.startsWith("*") && localized !== key && !localized.includes(`{${key}}`)){
                         return value;
                     }
                 } catch(error) {
@@ -14050,10 +14060,55 @@
             basic = uniqueStyles(basic.filter(style => !plusIds.has(String(style?.traitId ?? ""))));
             return { plus, basic };
         }
+        events.getClubPlayerDetailStatError = (player, statConfig) => {
+            let error = 0;
+            let compared = 0;
+            let maxError = 0;
+            Object.values(statConfig ?? {}).forEach(config => {
+                const faceValue = events.getClubPlayerStatValue(player, config.id, true);
+                const subValues = (config.list ?? []).map(attributeId => {
+                    return events.getClubPlayerStatValue(player, attributeId);
+                });
+                if(!Number.isFinite(faceValue) || !subValues.length || subValues.some(value => !Number.isFinite(value))){
+                    return;
+                }
+                const weightedValue = subValues.reduce((sum, value, index) => {
+                    return sum + value * Number(config.weight?.[index] ?? 0);
+                }, 0);
+                if(!Number.isFinite(weightedValue)){
+                    return;
+                }
+                const groupError = Math.abs(faceValue - Math.floor(weightedValue + 0.501));
+                error += groupError;
+                maxError = Math.max(maxError, groupError);
+                compared++;
+            });
+            return { error, compared, maxError };
+        }
+        events.getClubPlayerDetailStatSource = (player, statConfig) => {
+            const originalScore = events.getClubPlayerDetailStatError(player, statConfig);
+            if(!originalScore.compared || originalScore.maxError <= 1){
+                return { player, estimated: false, score: originalScore };
+            }
+            try {
+                const estimatedPlayer = events.fgCreateVirtualPlayers?.(player);
+                if(!estimatedPlayer){
+                    return { player, estimated: false, score: originalScore };
+                }
+                const estimatedScore = events.getClubPlayerDetailStatError(estimatedPlayer, statConfig);
+                if(estimatedScore.compared && estimatedScore.error < originalScore.error){
+                    return { player: estimatedPlayer, estimated: true, score: estimatedScore };
+                }
+            } catch(error) {
+                console.warn("[FSU] Club player detail stat reconciliation failed", player?.definitionId, error);
+            }
+            return { player, estimated: false, score: originalScore };
+        }
         events.getClubPlayerDetailData = (record) => {
             const player = record.item;
             const isGK = Boolean(player?.isGK?.());
             const statConfig = isGK ? info.attributesGK : info.attributes;
+            const statSource = events.getClubPlayerDetailStatSource(player, statConfig);
             const subAttributeLabels = events.getClubPlayerSubAttributeLabels();
             const getPositionName = (position) => {
                 if(position === undefined || position === null){
@@ -14097,7 +14152,7 @@
                                 `extendedPlayerInfo.stats.${localizationKey}`,
                                 `extendedPlayerInfo.attributes.${localizationKey}`
                             ], fallback),
-                            value: events.getClubPlayerStatValue(player, attributeId)
+                            value: events.getClubPlayerStatValue(statSource.player, attributeId)
                         };
                     })
                 };
@@ -14161,7 +14216,8 @@
                 rarity,
                 faceStats,
                 facts,
-                playStyles
+                playStyles,
+                statsEstimated: statSource.estimated
             };
         }
         events.createClubPlayerDetailView = (record) => {
@@ -14418,21 +14474,35 @@
             root.appendChild(content);
             root.appendChild(events.createElementWithConfig("div", {
                 classList: "fsu-clubPlayerDetailSource",
-                textContent: fy("clubplayers.detail.source")
+                textContent: data.statsEstimated
+                    ? `${fy("clubplayers.detail.source")} ${fy("clubplayers.detail.estimated")}`
+                    : fy("clubplayers.detail.source")
             }));
             return { root, itemView, data };
         }
-        events.ensureClubPlayerDetailMetadata = (player) => {
+        events.applyClubPlayerDetailMetadata = (player) => {
             const definitionId = player?.definitionId;
+            if(!definitionId || !player?.setMetaData){
+                return false;
+            }
             try {
-                if(definitionId && services.PlayerMetaData?.metaDAO?.metaRepo?.has?.(definitionId)){
-                    return Promise.resolve();
+                const metaData = repositories.PlayerMeta?.get?.(definitionId);
+                if(!metaData){
+                    return false;
                 }
+                player.setMetaData(metaData);
+                return true;
             } catch(error) {
-                // Fall through to the bounded metadata request.
+                console.warn("[FSU] Club player metadata could not be attached", definitionId, error);
+                return false;
+            }
+        }
+        events.ensureClubPlayerDetailMetadata = (player) => {
+            if(events.applyClubPlayerDetailMetadata(player)){
+                return Promise.resolve(true);
             }
             if(!services.PlayerMetaData?.updateItemPlayerMeta || !player){
-                return Promise.resolve();
+                return Promise.resolve(false);
             }
             return new Promise(resolve => {
                 let settled = false;
@@ -14443,7 +14513,7 @@
                     }
                     settled = true;
                     clearTimeout(timeout);
-                    resolve();
+                    resolve(events.applyClubPlayerDetailMetadata(player));
                 };
                 const timeout = setTimeout(finish, 2500);
                 try {
@@ -14488,12 +14558,36 @@
                 popupController.modalDisplayDimensions.width = "1040px";
                 popupController.modalDisplayDimensions.minWidth = "300px";
                 const popupView = popupController.getView();
-                popupView.getRootElement().classList.add("fsu-clubPlayerDetailDialog");
+                const popupRoot = popupView.getRootElement();
+                popupRoot.classList.add("fsu-clubPlayerDetailDialog");
+                popupRoot.setAttribute("aria-modal", "true");
+                popupView.__title?.classList.add("fsu-clubPlayerDetailDialogTitle");
                 popupView.__msg.classList.add("fsu-clubPlayerDetailMessage");
                 popupView.__msg.replaceChildren(detailView.root);
                 const primaryButton = popupView.__btnContainer?.querySelector("button");
                 primaryButton?.classList.remove("text");
                 primaryButton?.classList.add("primary", "mini");
+                popupView.__btnContainer?.classList.add("fsu-clubPlayerDetailNativeActions");
+                const nativeCloseControl = popupView.dialogOptions?.[0];
+                const closeControl = events.createButton(
+                    new UTButtonControl(),
+                    "×",
+                    () => {
+                        if(typeof nativeCloseControl?._tapDetected === "function"){
+                            nativeCloseControl._tapDetected();
+                            return;
+                        }
+                        primaryButton?.click?.();
+                    },
+                    "fsu-clubPlayerDetailClose"
+                );
+                popupController._fsu.closeControl = closeControl;
+                const closeRoot = closeControl.getRootElement();
+                const closeLabel = fy("clubplayers.detail.close");
+                closeRoot.setAttribute("type", "button");
+                closeRoot.setAttribute("title", closeLabel);
+                closeRoot.setAttribute("aria-label", closeLabel);
+                popupRoot.appendChild(closeRoot);
                 popupController.onExit.observe(popupController, (token) => {
                     token.unobserve(popupController);
                     if(events.clubPlayerDetailPopup === popupController){
