@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.09.12
+// @version      26.10.00
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1397,6 +1397,10 @@
             "fastsbc.success":["快速任务成功，请适度使用切勿过于频繁。","快速任務成功，請適度使用切勿過於頻繁。","The quick SBC is successful, please use it in moderation and not too frequently."],
             "fastsbc.title":["重复球员可快速完成 %1 个SBC","重複球員可快速完成 %1 個SBC","Repeat players can quickly complete %1 SBC"],
             "fastsbc.sbcbtntext":["一键完成(%1)","一鍵完成(%1)","Completion(%1)"],
+            "fastsbc.challenge.btn":["生成方案","產生方案","Build Plans"],
+            "fastsbc.challenge.unsupported":["当前SBC包含尚不支持自动生成的条件。","目前SBC包含尚不支援自動產生的條件。","This SBC contains conditions that are not supported by automatic plan generation yet."],
+            "fastsbc.challenge.empty":["无法从当前俱乐部和SBC仓库生成满足评分、默契及球员条件的方案。","無法從目前俱樂部和SBC倉庫產生符合評分、默契及球員條件的方案。","No plan satisfying the rating, chemistry, and player conditions could be built from the current Club and SBC Storage."],
+            "fastsbc.challenge.metrics":["评分 %1 · 默契 %2","評分 %1 · 默契 %2","Rating %1 · Chemistry %2"],
             "fastsbc.plan.title":["快速SBC提交方案","快速SBC提交方案","Fast SBC Plans"],
             "fastsbc.plan.summary":["预计可完成 %1 次 · 已生成 %2 个方案","預計可完成 %1 次 · 已生成 %2 個方案","%1 estimated completions · %2 plans created"],
             "fastsbc.plan.counter":["方案 %1 / %2","方案 %1 / %2","Plan %1 of %2"],
@@ -1887,6 +1891,9 @@
             .phone .fsu-clubPlayerDetailStyleGroups{grid-template-columns:1fr}
             .phone .fsu-clubPlayerDetailAttributeGrid{grid-template-columns:1fr;gap:9px}
             .phone .fsu-clubPlayerDetailSource{padding:0 12px 16px}
+            .phone .fsu-quick.top{box-sizing:border-box;justify-content:flex-start;padding:0 4px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+            .phone .fsu-quick.top::-webkit-scrollbar{display:none}
+            .phone .fsu-quick.top>.fsu-quick-list{flex:0 0 auto}
             body.fsu-fastSBCPlanOpen .fsu-clubPlayersToolbar{z-index:0!important}
             body.fsu-fastSBCPlanOpen{overflow:hidden!important}
             .fsu-fastSBCPlanOverlay{position:fixed!important;z-index:2147483000!important;inset:0!important;box-sizing:border-box!important;display:grid!important;padding:14px!important;place-items:center!important;overflow:hidden!important;background:rgba(0,0,0,.76)!important;overscroll-behavior:contain!important}
@@ -3767,10 +3774,10 @@
                 }
 
                 //25.10 判断是否可以快速完成并插入按钮
-                if(_.size(info.base.fastsbc) > 0 && this._fsu?.quickOther){
-                    let sId = this._set.id,
-                        cId = this._challenge.id,
-                        q = info.base.fastsbc[`${cId}#${sId}`];
+                let sId = this._set.id,
+                    cId = this._challenge.id,
+                    q = info.base.fastsbc[`${cId}#${sId}`];
+                if(q && this._fsu?.quickOther){
                     if(q){
 
                         let qs = events.fastSBCQuantity(true,_.filter(repositories.Item.getUnassignedItems(), item => item.isPlayer() && item.duplicateId !== 0),q);
@@ -3788,6 +3795,18 @@
                             this._fsu?.quickOther.append(this._fsu.quicklyBtn.getRootElement());
                         }
                     }
+                }
+                if(!q && this._fsu?.quickOther && events.canGenerateFastSBCChallengePlans?.(this._challenge)){
+                    this._fsu.challengePlanBtn = events.createButton(
+                        new UTButtonControl(),
+                        fy("fastsbc.challenge.btn"),
+                        () => {
+                            events.openFastSBCPlannerEntry(sId, cId);
+                        },
+                        "im"
+                    );
+                    this._fsu.challengePlanBtn.getRootElement().style.fontSize = "90%";
+                    this._fsu?.quickOther.append(this._fsu.challengePlanBtn.getRootElement());
                 }
 
 
@@ -10398,6 +10417,873 @@
             );
             return candidates;
         }
+        events.getFastSBCChallengeRequirementValues = (requirement, key) => {
+            let value;
+            try {
+                value = requirement?.getValue?.(key);
+            } catch(error) {
+                console.warn("[FSU] SBC requirement value lookup failed", error);
+            }
+            if(value === undefined){
+                try {
+                    value = requirement?.getFirstValue?.(key);
+                } catch(error) {
+                    console.warn("[FSU] SBC requirement first value lookup failed", error);
+                }
+            }
+            const flatten = input => {
+                if(input === undefined || input === null){
+                    return [];
+                }
+                if(Array.isArray(input)){
+                    return _.flatMap(input, flatten);
+                }
+                if(
+                    typeof input !== "string" &&
+                    typeof input?.values === "function"
+                ){
+                    return _.flatMap(Array.from(input.values()), flatten);
+                }
+                return [input?.id ?? input];
+            };
+            return _.uniq(flatten(value));
+        }
+        events.getFastSBCChallengeSlots = (challenge) => {
+            const squad = challenge?.squad;
+            let formation = squad?.getFormation?.();
+            if(!formation){
+                formation = repositories.Squad?.getFormation?.(challenge?.formation);
+            }
+            const positions = formation?.generalPositions ?? [];
+            const brickIndices = new Set(
+                squad?.getAllBrickIndices?.() ??
+                squad?.simpleBrickIndices ??
+                []
+            );
+            return _.chain(_.range(0, 11))
+                .filter(index => {
+                    const slot = squad?.getSlot?.(index);
+                    return !brickIndices.has(index) && !slot?.isBrick?.();
+                })
+                .map(index => ({
+                    slotIndex: index,
+                    position: Number(positions[index] ?? -1)
+                }))
+                .value();
+        }
+        events.getFastSBCChallengeSpec = (challenge) => {
+            if(!challenge?.eligibilityRequirements?.length || !challenge?.squad){
+                return {
+                    supported: false,
+                    requiredCount: 0,
+                    individual: [],
+                    unsupportedKeys: []
+                };
+            }
+            const supportedKeys = new Set(_.filter([
+                SBCEligibilityKey.TEAM_RATING,
+                SBCEligibilityKey.CHEMISTRY_POINTS,
+                SBCEligibilityKey.ALL_PLAYERS_CHEMISTRY_POINTS,
+                SBCEligibilityKey.CLUB_ID,
+                SBCEligibilityKey.LEAGUE_ID,
+                SBCEligibilityKey.NATION_ID,
+                SBCEligibilityKey.PLAYER_EXACT_OVR,
+                SBCEligibilityKey.PLAYER_LEVEL,
+                SBCEligibilityKey.PLAYER_MIN_OVR,
+                SBCEligibilityKey.PLAYER_QUALITY,
+                SBCEligibilityKey.PLAYER_RARITY,
+                SBCEligibilityKey.PLAYER_RARITY_GROUP
+            ], key => key !== undefined));
+            const slots = events.getFastSBCChallengeSlots(challenge);
+            const requiredCount = slots.length;
+            const individual = [];
+            const unsupportedKeys = [];
+            let targetRating = 0;
+            let targetChemistry = 0;
+            let minPlayerChemistry = 0;
+
+            _.forEach(challenge.eligibilityRequirements, (requirement, index) => {
+                let key;
+                try {
+                    key = requirement?.getFirstKey?.();
+                } catch(error) {
+                    console.warn("[FSU] SBC requirement key lookup failed", error);
+                }
+                if(!supportedKeys.has(key)){
+                    unsupportedKeys.push(key ?? `unknown-${index}`);
+                    return;
+                }
+                const values = events.getFastSBCChallengeRequirementValues(requirement, key);
+                if(values.length === 0){
+                    unsupportedKeys.push(`${key}-empty`);
+                    return;
+                }
+                const numericValues = _.map(values, Number).filter(Number.isFinite);
+                const firstValue = numericValues[0] ?? 0;
+                if(key === SBCEligibilityKey.TEAM_RATING){
+                    targetRating = Math.max(targetRating, firstValue);
+                    return;
+                }
+                if(key === SBCEligibilityKey.CHEMISTRY_POINTS){
+                    targetChemistry = Math.max(targetChemistry, firstValue);
+                    return;
+                }
+                if(key === SBCEligibilityKey.ALL_PLAYERS_CHEMISTRY_POINTS){
+                    minPlayerChemistry = Math.max(minPlayerChemistry, firstValue);
+                    return;
+                }
+                const rawCount = Number(requirement?.count ?? 0);
+                const count = rawCount === -1
+                    ? requiredCount
+                    : Math.max(0, Math.min(requiredCount, rawCount));
+                if(count > 0){
+                    individual.push({
+                        key,
+                        values: numericValues.length ? numericValues : values,
+                        count,
+                        source: requirement
+                    });
+                }
+            })
+
+            return {
+                supported: unsupportedKeys.length === 0 && requiredCount > 0,
+                requiredCount,
+                slots,
+                targetRating,
+                targetChemistry,
+                minPlayerChemistry,
+                individual,
+                unsupportedKeys,
+                isChallengePlan:
+                    targetRating > 0 ||
+                    targetChemistry > 0 ||
+                    minPlayerChemistry > 0 ||
+                    individual.length > 0
+            };
+        }
+        events.canGenerateFastSBCChallengePlans = (challenge) => {
+            const spec = events.getFastSBCChallengeSpec(challenge);
+            return Boolean(spec.supported && spec.isChallengePlan);
+        }
+        events.getFastSBCChallengeLinkedTeamId = teamId => {
+            return repositories.TeamConfig?.teamLinks?.get?.(teamId) ?? teamId;
+        }
+        events.matchesFastSBCChallengeRequirement = (player, requirement) => {
+            if(!player || !requirement){
+                return false;
+            }
+            const values = requirement.values ?? [];
+            const includes = value => _.some(values, candidate => String(candidate) === String(value));
+            switch(requirement.key){
+                case SBCEligibilityKey.CLUB_ID: {
+                    const linkedPlayerTeam = events.getFastSBCChallengeLinkedTeamId(player.teamId);
+                    return _.some(values, value =>
+                        String(value) === String(player.teamId) ||
+                        String(events.getFastSBCChallengeLinkedTeamId(value)) === String(linkedPlayerTeam)
+                    );
+                }
+                case SBCEligibilityKey.LEAGUE_ID:
+                    return includes(player.leagueId);
+                case SBCEligibilityKey.NATION_ID:
+                    return includes(player.nationId);
+                case SBCEligibilityKey.PLAYER_EXACT_OVR:
+                    return includes(Number(player.rating));
+                case SBCEligibilityKey.PLAYER_MIN_OVR:
+                    return Number(player.rating) >= Math.max(..._.map(values, Number));
+                case SBCEligibilityKey.PLAYER_RARITY:
+                    return includes(player.rareflag);
+                case SBCEligibilityKey.PLAYER_RARITY_GROUP:
+                    return _.every(values, value => _.includes(player.groups ?? [], Number(value)));
+                case SBCEligibilityKey.PLAYER_QUALITY:
+                case SBCEligibilityKey.PLAYER_LEVEL: {
+                    const regular =
+                        !player.isSpecial?.() ||
+                        player.leagueId === 1003 ||
+                        player.leagueId === 1014;
+                    return _.some(values, value => {
+                        switch(Number(value)){
+                            case 1:
+                                return player.isBronzeRating?.() && regular;
+                            case 2:
+                                return player.isSilverRating?.() && regular;
+                            case 3:
+                                return player.isGoldRating?.() && regular;
+                            default:
+                                return false;
+                        }
+                    });
+                }
+                default:
+                    return false;
+            }
+        }
+        events.getFastSBCChallengeRequirementCriteria = requirement => {
+            const values = requirement.values ?? [];
+            switch(requirement.key){
+                case SBCEligibilityKey.CLUB_ID:
+                    return { teamId: values };
+                case SBCEligibilityKey.LEAGUE_ID:
+                    return { leagueId: values };
+                case SBCEligibilityKey.NATION_ID:
+                    return { nationId: values };
+                case SBCEligibilityKey.PLAYER_EXACT_OVR:
+                    return { rating: values };
+                case SBCEligibilityKey.PLAYER_MIN_OVR:
+                    return { GTrating: Math.max(..._.map(values, Number)) };
+                case SBCEligibilityKey.PLAYER_RARITY:
+                    return { rareflag: values };
+                case SBCEligibilityKey.PLAYER_RARITY_GROUP:
+                    return { groups: values };
+                case SBCEligibilityKey.PLAYER_QUALITY:
+                case SBCEligibilityKey.PLAYER_LEVEL:
+                    return values.length === 1 ? { rs: Number(values[0]) - 1 } : {};
+                default:
+                    return {};
+            }
+        }
+        events.getFastSBCChallengePlayerPool = (spec, reservedItemIds = new Set()) => {
+            const query = criteria => {
+                const protectedCriteria = events.ignorePlayerToCriteria({
+                    ...criteria,
+                    lock: false
+                });
+                // A challenge may use different physical copies of the same card
+                // in separate plans. Duplicate databaseIds are rejected per plan below.
+                delete protectedCriteria.firststorage;
+                return events.getItemBy(2, protectedCriteria);
+            };
+            let players = query({ GTrating: 0 });
+            _.forEach(spec.individual, requirement => {
+                players = _.concat(
+                    players,
+                    query(events.getFastSBCChallengeRequirementCriteria(requirement))
+                );
+            })
+            players = _.uniqBy(players, events.getFastSBCPlanItemKey);
+            players = _.filter(
+                players,
+                player => !reservedItemIds.has(events.getFastSBCPlanItemKey(player))
+            );
+
+            const duplicateIds = new Set(
+                _.map(
+                    _.filter(
+                        repositories.Item.getUnassignedItems(),
+                        item => item?.isPlayer?.() && item?.isDuplicate?.()
+                    ),
+                    item => String(item.duplicateId)
+                )
+            );
+            const ownedState = events.getFastSBCPlanOwnedState();
+            return _.orderBy(
+                players,
+                [
+                    player => duplicateIds.has(events.getFastSBCPlanItemKey(player)) ? 0 : 1,
+                    player => info.build.firststorage && ownedState.storageIds.has(events.getFastSBCPlanItemKey(player)) ? 0 : 1,
+                    player => Number(player.untradeableCount ?? 0) > 0 ? 0 : 1,
+                    player => Number(player.rating ?? 0)
+                ],
+                ["asc", "asc", "asc", "asc"]
+            );
+        }
+        events.fastSBCChallengePlayerFitsPosition = (player, position) => {
+            if(Number(position) === -1){
+                return true;
+            }
+            const positions = player?.basePossiblePositions ?? player?.possiblePositions ?? [];
+            return _.includes(positions, Number(position));
+        }
+        events.getFastSBCChallengeConstraintCounts = (players, spec) => {
+            return _.map(spec.individual, requirement =>
+                _.filter(
+                    players,
+                    player => events.matchesFastSBCChallengeRequirement(player, requirement)
+                ).length
+            );
+        }
+        events.fastSBCChallengeConstraintsMet = (players, spec) => {
+            const counts = events.getFastSBCChallengeConstraintCounts(players, spec);
+            return _.every(
+                spec.individual,
+                (requirement, index) => counts[index] >= requirement.count
+            );
+        }
+        events.getFastSBCChallengeConstraintSurplus = (players, spec) => {
+            const counts = events.getFastSBCChallengeConstraintCounts(players, spec);
+            return _.sumBy(
+                spec.individual,
+                (requirement, index) =>
+                    requirement.count < spec.requiredCount
+                        ? Math.max(0, counts[index] - requirement.count)
+                        : 0
+            );
+        }
+        events.getFastSBCChallengeChemistry = players => {
+            const items = _.filter(players);
+            const total = Number(events.calculateChemistry(items).totalChemistry ?? 0);
+            const playerChemistry = _.map(items, (player, index) =>
+                Number(
+                    events.calculateChemistry(items, index, player).playerChemistry ?? 0
+                )
+            );
+            return {
+                total,
+                minimum: playerChemistry.length ? Math.min(...playerChemistry) : 0,
+                playerChemistry
+            };
+        }
+        events.getFastSBCChallengeFocuses = (pool, spec) => {
+            const focuses = [];
+            const seen = new Set();
+            const push = focus => {
+                const normalized = focus ?? {};
+                const key = JSON.stringify(_.pick(normalized, ["teamId", "leagueId", "nationId"]));
+                if(seen.has(key)){
+                    return;
+                }
+                seen.add(key);
+                focuses.push(normalized);
+            };
+
+            _.forEach(spec.individual, requirement => {
+                if(requirement.key === SBCEligibilityKey.CLUB_ID){
+                    _.forEach(requirement.values, teamId => push({ teamId: Number(teamId) }));
+                }
+                if(requirement.key === SBCEligibilityKey.LEAGUE_ID){
+                    _.forEach(requirement.values, leagueId => push({ leagueId: Number(leagueId) }));
+                }
+                if(requirement.key === SBCEligibilityKey.NATION_ID){
+                    _.forEach(requirement.values, nationId => push({ nationId: Number(nationId) }));
+                }
+            })
+            if(spec.targetChemistry > 0 || spec.minPlayerChemistry > 0){
+                const addTop = (property, limit) => {
+                    const groups = _.orderBy(
+                        _.map(_.groupBy(pool, property), (players, value) => ({
+                            value: Number(value),
+                            count: players.length
+                        })),
+                        "count",
+                        "desc"
+                    );
+                    _.forEach(_.take(groups, limit), group => {
+                        if(Number.isFinite(group.value) && group.value !== -1){
+                            push({ [property]: group.value });
+                        }
+                    })
+                };
+                addTop("leagueId", 8);
+                addTop("nationId", 5);
+                addTop("teamId", 4);
+
+                const pairs = _.orderBy(
+                    _.map(
+                        _.groupBy(pool, player => `${player.leagueId}|${player.nationId}`),
+                        (players, key) => ({ key, count: players.length })
+                    ),
+                    "count",
+                    "desc"
+                );
+                _.forEach(_.take(pairs, 4), pair => {
+                    const [leagueId, nationId] = pair.key.split("|").map(Number);
+                    if(leagueId !== -1 && nationId !== -1){
+                        push({ leagueId, nationId });
+                    }
+                })
+            }
+            push({});
+            return _.take(focuses, 16);
+        }
+        events.getFastSBCChallengeCandidateTie = (player, attempt) => {
+            const key = events.getFastSBCPlanItemKey(player);
+            let hash = Number(attempt ?? 0) + 17;
+            for(let index = 0; index < key.length; index++){
+                hash = (hash * 31 + key.charCodeAt(index)) % 1009;
+            }
+            return hash / 1009;
+        }
+        events.scoreFastSBCChallengeCandidate = (
+            player,
+            selected,
+            spec,
+            focus,
+            desiredRating,
+            attempt,
+            requirementAvailability
+        ) => {
+            const selectedCounts = events.getFastSBCChallengeConstraintCounts(selected, spec);
+            let score = 0;
+            _.forEach(spec.individual, (requirement, index) => {
+                const matches = events.matchesFastSBCChallengeRequirement(player, requirement);
+                if(requirement.count >= spec.requiredCount && !matches){
+                    score -= 1000000;
+                    return;
+                }
+                if(matches && selectedCounts[index] < requirement.count){
+                    const availability = Math.max(1, requirementAvailability[index] ?? 1);
+                    score += 180000 / availability;
+                }else if(matches && requirement.count < spec.requiredCount){
+                    // Do not consume every scarce special/rarity card in plan one.
+                    // Once this plan has met the count, preserve matching cards for
+                    // later disjoint plans when a non-matching option can fill the slot.
+                    const availability = Math.max(1, requirementAvailability[index] ?? 1);
+                    score -= 200000 * requirement.count / availability;
+                }
+            })
+
+            if(focus.teamId !== undefined){
+                score += String(events.getFastSBCChallengeLinkedTeamId(player.teamId)) ===
+                    String(events.getFastSBCChallengeLinkedTeamId(focus.teamId)) ? 10000 : 0;
+            }
+            if(focus.leagueId !== undefined){
+                score += String(player.leagueId) === String(focus.leagueId) ? 7000 : 0;
+            }
+            if(focus.nationId !== undefined){
+                score += String(player.nationId) === String(focus.nationId) ? 4500 : 0;
+            }
+
+            const sameClub = _.filter(
+                selected,
+                candidate =>
+                    String(events.getFastSBCChallengeLinkedTeamId(candidate.teamId)) ===
+                    String(events.getFastSBCChallengeLinkedTeamId(player.teamId))
+            ).length;
+            const sameLeague = _.filter(selected, { leagueId: player.leagueId }).length;
+            const sameNation = _.filter(selected, { nationId: player.nationId }).length;
+            score += sameClub * 900 + sameLeague * 550 + sameNation * 350;
+
+            const rating = Number(player.rating ?? 0);
+            if(spec.targetRating > 0){
+                const difference = rating - desiredRating;
+                score -= Math.abs(difference) * (difference < 0 ? 260 : 140);
+            }else{
+                score -= rating * 25;
+            }
+            score += Number(player.untradeableCount ?? 0) > 0 ? 40 : 0;
+            score += events.getFastSBCChallengeCandidateTie(player, attempt);
+            return score;
+        }
+        events.repairFastSBCChallengeConstraints = (
+            selected,
+            slots,
+            pool,
+            spec,
+            focus
+        ) => {
+            let result = selected.slice();
+            for(let pass = 0; pass < spec.individual.length * 2 + 2; pass++){
+                const counts = events.getFastSBCChallengeConstraintCounts(result, spec);
+                const missingIndex = _.findIndex(
+                    spec.individual,
+                    (requirement, index) => counts[index] < requirement.count
+                );
+                if(missingIndex === -1){
+                    return result;
+                }
+                const missing = spec.individual[missingIndex];
+                const usedItems = new Set(_.map(result, events.getFastSBCPlanItemKey));
+                const usedDatabases = new Set(_.map(
+                    result,
+                    player => String(player?.databaseId ?? events.getFastSBCPlanItemKey(player))
+                ));
+                let best = null;
+                _.forEach(slots, (slot, slotIndex) => {
+                    const current = result[slotIndex];
+                    _.forEach(pool, candidate => {
+                        const itemKey = events.getFastSBCPlanItemKey(candidate);
+                        const databaseKey = String(candidate?.databaseId ?? itemKey);
+                        if(
+                            candidate === current ||
+                            usedItems.has(itemKey) ||
+                            usedDatabases.has(databaseKey) ||
+                            !events.fastSBCChallengePlayerFitsPosition(candidate, slot.position) ||
+                            !events.matchesFastSBCChallengeRequirement(candidate, missing)
+                        ){
+                            return;
+                        }
+                        const next = result.slice();
+                        next[slotIndex] = candidate;
+                        const nextCounts = events.getFastSBCChallengeConstraintCounts(next, spec);
+                        const preservesSatisfied = _.every(
+                            spec.individual,
+                            (requirement, index) =>
+                                counts[index] < requirement.count ||
+                                nextCounts[index] >= requirement.count
+                        );
+                        if(!preservesSatisfied){
+                            return;
+                        }
+                        const chemistry = events.getFastSBCChallengeChemistry(next).total;
+                        const rating = events.teamRatingCount(_.map(next, "rating"));
+                        const focusMatches =
+                            (focus.leagueId !== undefined && candidate.leagueId === focus.leagueId ? 2 : 0) +
+                            (focus.nationId !== undefined && candidate.nationId === focus.nationId ? 1 : 0) +
+                            (focus.teamId !== undefined &&
+                                events.getFastSBCChallengeLinkedTeamId(candidate.teamId) ===
+                                events.getFastSBCChallengeLinkedTeamId(focus.teamId) ? 3 : 0);
+                        const score =
+                            focusMatches * 10000 +
+                            chemistry * 300 +
+                            Math.min(rating, spec.targetRating || rating) * 50 -
+                            events.getFastSBCChallengeConstraintSurplus(next, spec) * 200000 -
+                            Number(candidate.rating ?? 0);
+                        if(!best || score > best.score){
+                            best = { score, next };
+                        }
+                    })
+                })
+                if(!best){
+                    return null;
+                }
+                result = best.next;
+            }
+            return events.fastSBCChallengeConstraintsMet(result, spec) ? result : null;
+        }
+        events.repairFastSBCChallengeRating = (selected, slots, pool, spec) => {
+            let result = selected.slice();
+            if(spec.targetRating <= 0){
+                return result;
+            }
+            for(let pass = 0; pass < spec.requiredCount * 2; pass++){
+                const currentRating = events.teamRatingCount(_.map(result, "rating"));
+                if(currentRating >= spec.targetRating){
+                    return result;
+                }
+                const usedItems = new Set(_.map(result, events.getFastSBCPlanItemKey));
+                const usedDatabases = new Set(_.map(
+                    result,
+                    player => String(player?.databaseId ?? events.getFastSBCPlanItemKey(player))
+                ));
+                let best = null;
+                _.forEach(slots, (slot, slotIndex) => {
+                    const current = result[slotIndex];
+                    _.forEach(pool, candidate => {
+                        const itemKey = events.getFastSBCPlanItemKey(candidate);
+                        const databaseKey = String(candidate?.databaseId ?? itemKey);
+                        if(
+                            Number(candidate.rating ?? 0) <= Number(current.rating ?? 0) ||
+                            usedItems.has(itemKey) ||
+                            usedDatabases.has(databaseKey) ||
+                            !events.fastSBCChallengePlayerFitsPosition(candidate, slot.position)
+                        ){
+                            return;
+                        }
+                        const next = result.slice();
+                        next[slotIndex] = candidate;
+                        if(!events.fastSBCChallengeConstraintsMet(next, spec)){
+                            return;
+                        }
+                        const nextRating = events.teamRatingCount(_.map(next, "rating"));
+                        if(nextRating <= currentRating){
+                            return;
+                        }
+                        const chemistry = events.getFastSBCChallengeChemistry(next).total;
+                        const reachesTarget = nextRating >= spec.targetRating;
+                        const score =
+                            (reachesTarget ? 1000000 : 0) +
+                            (reachesTarget
+                                ? -(nextRating - spec.targetRating) * 10000
+                                : nextRating * 10000) +
+                            chemistry * 100 -
+                            events.getFastSBCChallengeConstraintSurplus(next, spec) * 200000 -
+                            Number(candidate.rating ?? 0);
+                        if(!best || score > best.score){
+                            best = { score, next };
+                        }
+                    })
+                })
+                if(!best){
+                    return null;
+                }
+                result = best.next;
+            }
+            return events.teamRatingCount(_.map(result, "rating")) >= spec.targetRating
+                ? result
+                : null;
+        }
+        events.repairFastSBCChallengeChemistry = (selected, slots, pool, spec) => {
+            let result = selected.slice();
+            const meetsChemistry = chemistry =>
+                chemistry.total >= spec.targetChemistry &&
+                chemistry.minimum >= spec.minPlayerChemistry;
+            if(meetsChemistry(events.getFastSBCChallengeChemistry(result))){
+                return result;
+            }
+            for(let pass = 0; pass < spec.requiredCount * 2; pass++){
+                const currentChemistry = events.getFastSBCChallengeChemistry(result);
+                if(meetsChemistry(currentChemistry)){
+                    return result;
+                }
+                const usedItems = new Set(_.map(result, events.getFastSBCPlanItemKey));
+                const usedDatabases = new Set(_.map(
+                    result,
+                    player => String(player?.databaseId ?? events.getFastSBCPlanItemKey(player))
+                ));
+                let best = null;
+                _.forEach(slots, (slot, slotIndex) => {
+                    const current = result[slotIndex];
+                    _.forEach(pool, candidate => {
+                        const itemKey = events.getFastSBCPlanItemKey(candidate);
+                        const databaseKey = String(candidate?.databaseId ?? itemKey);
+                        if(
+                            candidate === current ||
+                            usedItems.has(itemKey) ||
+                            usedDatabases.has(databaseKey) ||
+                            !events.fastSBCChallengePlayerFitsPosition(candidate, slot.position)
+                        ){
+                            return;
+                        }
+                        const next = result.slice();
+                        next[slotIndex] = candidate;
+                        if(
+                            !events.fastSBCChallengeConstraintsMet(next, spec) ||
+                            events.teamRatingCount(_.map(next, "rating")) < spec.targetRating
+                        ){
+                            return;
+                        }
+                        const chemistry = events.getFastSBCChallengeChemistry(next);
+                        const improves =
+                            chemistry.total > currentChemistry.total ||
+                            (
+                                chemistry.total === currentChemistry.total &&
+                                chemistry.minimum > currentChemistry.minimum
+                            );
+                        if(!improves){
+                            return;
+                        }
+                        const score =
+                            chemistry.minimum * 100000 +
+                            chemistry.total * 1000 -
+                            events.getFastSBCChallengeConstraintSurplus(next, spec) * 200000 -
+                            Number(candidate.rating ?? 0);
+                        if(!best || score > best.score){
+                            best = { score, next };
+                        }
+                    })
+                })
+                if(!best){
+                    return null;
+                }
+                result = best.next;
+            }
+            return meetsChemistry(events.getFastSBCChallengeChemistry(result))
+                ? result
+                : null;
+        }
+        events.buildFastSBCChallengeCandidate = (
+            challenge,
+            spec,
+            pool,
+            focus,
+            attempt = 0
+        ) => {
+            const slots = spec.slots;
+            const optionsBySlot = _.map(slots, slot => {
+                const positioned = _.filter(
+                    pool,
+                    player => events.fastSBCChallengePlayerFitsPosition(player, slot.position)
+                );
+                return positioned.length ? positioned : (spec.targetChemistry > 0 ? [] : pool);
+            });
+            if(_.some(optionsBySlot, options => options.length === 0)){
+                return null;
+            }
+            const requirementAvailability = _.map(
+                spec.individual,
+                requirement => _.filter(
+                    pool,
+                    player => events.matchesFastSBCChallengeRequirement(player, requirement)
+                ).length
+            );
+            if(_.some(
+                spec.individual,
+                (requirement, index) => requirementAvailability[index] < requirement.count
+            )){
+                return null;
+            }
+
+            const slotOrder = _.orderBy(
+                _.map(slots, (slot, slotIndex) => ({
+                    slot,
+                    slotIndex,
+                    options: optionsBySlot[slotIndex]
+                })),
+                item => item.options.length,
+                "asc"
+            );
+            const selected = Array(slots.length).fill(null);
+            const selectedList = [];
+            const usedItems = new Set();
+            const usedDatabases = new Set();
+            const desiredRating = Math.max(
+                0,
+                Number(spec.targetRating ?? 0) + [0, 1, -1][attempt % 3]
+            );
+
+            for(const entry of slotOrder){
+                let best = null;
+                _.forEach(entry.options, candidate => {
+                    const itemKey = events.getFastSBCPlanItemKey(candidate);
+                    const databaseKey = String(candidate?.databaseId ?? itemKey);
+                    if(usedItems.has(itemKey) || usedDatabases.has(databaseKey)){
+                        return;
+                    }
+                    const score = events.scoreFastSBCChallengeCandidate(
+                        candidate,
+                        selectedList,
+                        spec,
+                        focus,
+                        desiredRating,
+                        attempt,
+                        requirementAvailability
+                    );
+                    if(!best || score > best.score){
+                        best = { score, candidate };
+                    }
+                })
+                if(!best){
+                    return null;
+                }
+                selected[entry.slotIndex] = best.candidate;
+                selectedList.push(best.candidate);
+                usedItems.add(events.getFastSBCPlanItemKey(best.candidate));
+                usedDatabases.add(String(
+                    best.candidate?.databaseId ??
+                    events.getFastSBCPlanItemKey(best.candidate)
+                ));
+            }
+
+            let repaired = events.repairFastSBCChallengeConstraints(
+                selected,
+                slots,
+                pool,
+                spec,
+                focus
+            );
+            if(!repaired){
+                return null;
+            }
+            repaired = events.repairFastSBCChallengeRating(repaired, slots, pool, spec);
+            if(!repaired){
+                return null;
+            }
+            repaired = events.repairFastSBCChallengeChemistry(repaired, slots, pool, spec);
+            if(!repaired){
+                return null;
+            }
+            return repaired;
+        }
+        events.validateFastSBCChallengeCandidate = (
+            challenge,
+            players,
+            virtualChallenge
+        ) => {
+            if(!challenge || !players?.length){
+                return { valid: false, rating: 0, chemistry: 0 };
+            }
+            const spec = events.getFastSBCChallengeSpec(challenge);
+            if(players.length !== spec.requiredCount){
+                return { valid: false, rating: 0, chemistry: 0 };
+            }
+            const candidateChallenge =
+                virtualChallenge ??
+                events.createVirtualChallenge(challenge);
+            const slotItems = candidateChallenge.squad
+                .getPlayers()
+                .map(slot => slot.getItem());
+            _.forEach(spec.slots, (slot, index) => {
+                slotItems[slot.slotIndex] = players[index];
+            })
+            candidateChallenge.squad.setPlayers(slotItems, true);
+            const chemistry = events.getFastSBCChallengeChemistry(players);
+            return {
+                valid: Boolean(candidateChallenge.meetsRequirements?.()),
+                rating: events.teamRatingCount(_.map(players, "rating")),
+                chemistry: chemistry.total,
+                minimumChemistry: chemistry.minimum
+            };
+        }
+        events.generateFastSBCChallengePlans = async(challenge, maxPlans = 10) => {
+            const spec = events.getFastSBCChallengeSpec(challenge);
+            const planLimit = Math.max(0, Math.min(10, Number(maxPlans) || 0));
+            if(!spec.supported || !spec.isChallengePlan || planLimit === 0){
+                return [];
+            }
+            const ownedState = events.getFastSBCPlanOwnedState();
+            const reservedItemIds = new Set();
+            const plans = [];
+            const virtualChallenge = events.createVirtualChallenge(challenge);
+
+            for(let planIndex = 0; planIndex < planLimit; planIndex++){
+                const pool = events.getFastSBCChallengePlayerPool(spec, reservedItemIds);
+                if(pool.length < spec.requiredCount){
+                    break;
+                }
+                const focuses = events.getFastSBCChallengeFocuses(pool, spec);
+                let best = null;
+                let validCount = 0;
+                for(let focusIndex = 0; focusIndex < focuses.length; focusIndex++){
+                    if(focusIndex > 0 && focusIndex % 4 === 0){
+                        // Keep mobile browsers responsive while the bounded search runs.
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                    }
+                    const players = events.buildFastSBCChallengeCandidate(
+                        challenge,
+                        spec,
+                        pool,
+                        focuses[focusIndex],
+                        planIndex + focusIndex
+                    );
+                    if(!players){
+                        continue;
+                    }
+                    const validation = events.validateFastSBCChallengeCandidate(
+                        challenge,
+                        players,
+                        virtualChallenge
+                    );
+                    if(!validation.valid){
+                        continue;
+                    }
+                    validCount++;
+                    const estimatedValue = _.sumBy(
+                        players,
+                        player => Number(info.base.price?.[player.rating] ?? player.rating * 1000)
+                    );
+                    const score =
+                        estimatedValue +
+                        _.sumBy(players, player => Number(player.rating ?? 0));
+                    if(!best || score < best.score){
+                        best = { score, players, validation };
+                    }
+                    if(validCount >= 3){
+                        break;
+                    }
+                }
+                if(!best){
+                    break;
+                }
+                const itemIds = _.map(best.players, events.getFastSBCPlanItemKey);
+                _.forEach(itemIds, itemId => reservedItemIds.add(itemId));
+                plans.push({
+                    number: plans.length + 1,
+                    status: "ready",
+                    error: "",
+                    itemIds,
+                    players: best.players,
+                    snapshots: _.map(best.players, player =>
+                        events.getFastSBCPlanPlayerSnapshot(player, ownedState.storageIds)
+                    ),
+                    squadRating: best.validation.rating,
+                    chemistry: best.validation.chemistry,
+                    minimumChemistry: best.validation.minimumChemistry,
+                    verified: true
+                });
+                await new Promise(resolve => setTimeout(resolve, 0));
+            }
+            return plans;
+        }
         events.generateFastSBCPlans = (requirements, requiredCount, maxPlans = 10) => {
             const groups = _.filter(
                 _.map(requirements, requirement => ({
@@ -11017,8 +11903,15 @@
                         invalid: "fastsbc.plan.invalid"
                     };
                     const status = fy(statusKeys[plan.status] ?? "fastsbc.plan.invalid");
+                    const planMetrics = Number.isFinite(plan.squadRating)
+                        ? ` · ${fy([
+                            "fastsbc.challenge.metrics",
+                            plan.squadRating,
+                            plan.chemistry ?? 0
+                        ])}`
+                        : "";
                     statusText.textContent = plan.status === "ready"
-                        ? `${status} · ${fy(["fastsbc.plan.valid", plan.snapshots.length])}`
+                        ? `${status} · ${fy(["fastsbc.plan.valid", plan.snapshots.length])}${planMetrics}`
                         : status;
                     errorText.textContent = plan.error || fy("fastsbc.plan.changed");
                     list.replaceChildren();
@@ -11209,9 +12102,6 @@
         }
         events.buildFastSBCPlanSession = async(setId, challengeId) => {
             const requirements = info.base.fastsbc[`${challengeId}#${setId}`];
-            if(!requirements){
-                throw new Error(`Fast SBC requirements ${challengeId}#${setId} are unavailable`);
-            }
             let loaded;
             try {
                 loaded = await events.loadFastSBCPlanChallenge(setId, challengeId);
@@ -11225,17 +12115,28 @@
                     challenge: events.findFastSBCPlanChallenge(setEntity, challengeId)
                 };
             }
-            const requiredCount = Number(
-                loaded.challenge?.squad?.getNumOfRequiredPlayers?.() ??
-                _.sumBy(requirements, requirement => Number(requirement?.c ?? 0))
-            );
+            const challengeSpec = loaded.challenge
+                ? events.getFastSBCChallengeSpec(loaded.challenge)
+                : null;
+            const challengeMode = !requirements && challengeSpec?.supported;
+            if(!requirements && !challengeMode){
+                throw new Error(`Fast SBC requirements ${challengeId}#${setId} are unavailable`);
+            }
+            const requiredCount = challengeMode
+                ? Number(challengeSpec.requiredCount)
+                : Number(
+                    loaded.challenge?.squad?.getNumOfRequiredPlayers?.() ??
+                    _.sumBy(requirements ?? [], requirement => Number(requirement?.c ?? 0))
+                );
             const unassignedPlayers = _.filter(
                 repositories.Item.getUnassignedItems(),
                 item => item?.isPlayer?.() && item.duplicateId !== 0
             );
             let plans;
             try {
-                plans = events.generateFastSBCPlans(requirements, requiredCount, 10);
+                plans = challengeMode
+                    ? await events.generateFastSBCChallengePlans(loaded.challenge, 10)
+                    : events.generateFastSBCPlans(requirements, requiredCount, 10);
             } catch(error) {
                 if(error && typeof error === "object"){
                     error.fsuFastSBCStage = "generate";
@@ -11245,10 +12146,12 @@
                 generationError.fsuFastSBCStage = "generate";
                 throw generationError;
             }
-            const estimatedCount = Math.max(
-                events.fastSBCQuantity(true, unassignedPlayers, requirements),
-                plans.length
-            );
+            const estimatedCount = challengeMode
+                ? plans.length
+                : Math.max(
+                    events.fastSBCQuantity(true, unassignedPlayers, requirements),
+                    plans.length
+                );
             return {
                 setId: Number(setId),
                 challengeId: Number(challengeId),
@@ -11260,6 +12163,8 @@
                 requiredCount,
                 estimatedCount,
                 plans,
+                mode: challengeMode ? "challenge" : "simple",
+                challengeSpec,
                 currentIndex: 0,
                 submitting: false,
                 view: null
@@ -11301,7 +12206,12 @@
 
                 stage = "plans";
                 if(!session.plans.length){
-                    events.notice("fastsbc.plan.empty", 2);
+                    events.notice(
+                        session.mode === "challenge"
+                            ? "fastsbc.challenge.empty"
+                            : "fastsbc.plan.empty",
+                        2
+                    );
                     return;
                 }
                 stage = "render";
@@ -11336,7 +12246,12 @@
                     session.challengeId
                 );
                 if(!nextSession.plans.length){
-                    events.notice("fastsbc.plan.empty", 2);
+                    events.notice(
+                        nextSession.mode === "challenge"
+                            ? "fastsbc.challenge.empty"
+                            : "fastsbc.plan.empty",
+                        2
+                    );
                     return;
                 }
                 session.setName = nextSession.setName;
@@ -11344,6 +12259,8 @@
                 session.requiredCount = nextSession.requiredCount;
                 session.estimatedCount = nextSession.estimatedCount;
                 session.plans = nextSession.plans;
+                session.mode = nextSession.mode;
+                session.challengeSpec = nextSession.challengeSpec;
                 session.currentIndex = 0;
                 events.fastSBCPlanSession = session;
             } catch(error) {
