@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.10.06
+// @version      26.11.00
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1084,11 +1084,50 @@
             events.changeLoadingText("loadingclose.text");
         };
         //本地化文本显示程序
+        const getStoredFSULanguagePreference = () => {
+            try {
+                const savedSettings = JSON.parse(GM_getValue("set", "{}"));
+                return ["en", "ko"].includes(savedSettings?.language)
+                    ? savedSettings.language
+                    : "auto";
+            } catch(error) {
+                console.warn("[FSU] Failed to read language preference", error);
+                return "auto";
+            }
+        };
+        const applyFSULanguagePreference = preference => {
+            const normalizedPreference = ["en", "ko"].includes(preference)
+                ? preference
+                : "auto";
+            info.languagePreference = normalizedPreference;
+            if(normalizedPreference === "ko"){
+                info.language = 3;
+                return;
+            }
+            if(normalizedPreference === "en"){
+                info.language = 2;
+                return;
+            }
+            const locale = typeof services !== "undefined"
+                ? services.Localization?.locale
+                : null;
+            if(locale?.language === "ko"){
+                info.language = 3;
+            }else if(locale?.language === "zh"){
+                info.language = locale.variant === "Hans" ? 0 : 1;
+            }else{
+                info.language = 2;
+            }
+        };
         const fy = function(p){
             let t = "";
+            const localize = key => {
+                const translations = info.localization[key];
+                return translations?.[info.language] ?? translations?.[2] ?? key;
+            };
             if(Array.isArray(p)){
                 let copyP = _.cloneDeep(p);
-                t = info.localization[copyP.shift()][info.language];
+                t = localize(copyP.shift());
                 let s = copyP.slice();
                 for (let n in s) {
                     t = t.replace(`%${Number(n) + 1}`,`${s[n]}`);
@@ -1099,11 +1138,11 @@
                 for (let i of pa) {
                     let pf = i.match(/{(.*?)}/)[1];
                     if(info.localization.hasOwnProperty(pf)){
-                        t = t.replace(i,info.localization[pf][info.language]);
+                        t = t.replace(i,localize(pf));
                     }
                 }
             }else{
-                t = info.localization.hasOwnProperty(p) ? info.localization[p][info.language] : p;
+                t = info.localization.hasOwnProperty(p) ? localize(p) : p;
             }
             return t;
         }
@@ -1169,6 +1208,11 @@
             "emptylist.t":["处理后无符合条件球员","處理後無符合條件球員","No eligible players after processing"],
             "emptylist.c":["请改变条件或翻页查看","請改變條件或翻頁查看","Please change the criteria or flip the page to view"],
             "set.title":["FSU设置","FSU設定","FSU Settings"],
+            "set.language.title":["显示语言","顯示語言","Display Language"],
+            "set.language.auto":["跟随EA","跟隨EA","Auto (EA)"],
+            "set.language.english":["英语","英語","English"],
+            "set.language.korean":["韩语","韓語","한국어"],
+            "notice.languagechanged":["语言设置已保存，正在重新加载Web App。","語言設定已儲存，正在重新載入Web App。","Language saved. Reloading the Web App."],
             "set.card.title":["球员卡信息","球員卡資訊","Player Card Information"],
             "set.card.pos":["额外位置","額外位置","Extra Position"],
             "set.card.price":["球员价格","球員價格","Player Price"],
@@ -1723,6 +1767,627 @@
             "builder.sbfirstcommon":["银铜品质优先普通","銀銅品質優先普通","Silver/Bronze Quality Prioritize Normal"],
             "builder.sbfirstcommon.short":["银铜优先普通","銀銅優先普通","Silver/Bronze Prioritize Normal"],
         }
+        const koreanLocalization = {
+            "price.btntext":"가격 확인",
+            "price.formatno":"데이터 없음",
+            "price.formatcompany":"만",
+            "price.now":"저렴한 가격",
+            "price.low":"평가 가격",
+            "price.last":"구매 가격",
+            "duplicate.swap":"클럽에 보낼 수 있음",
+            "duplicate.not":"클럽 플레이어는 거래가 불가능합니다",
+            "duplicate.yes":"클럽 플레이어는 거래 가능합니다.",
+            "duplicate.nodata":"클럽 플레이어 데이터 없음",
+            "duplicate.lowprice":"평가 가격",
+            "top.readme":"【FSU】플러그인 지침",
+            "top.upgrade":"업그레이드할 수 있는 FSU 플러그인의 새 버전이 있습니다.",
+            "notice.upgradefailed":"새 버전 쿼리 실패",
+            "notice.upgradeconfirm":"새 버전이 있습니다. 보려면 상단 링크를 클릭하세요.",
+            "notice.uasreset":"목록이 다시 로드되었습니다.",
+            "notice.priceloading":"가격 데이터 읽기를 시작하십시오. 잠시 기다려 주십시오.",
+            "notice.loaderror":"데이터를 읽지 못했습니다. 네트워크를 확인하세요.",
+            "notice.succeeded":"FSU 플러그인이 성공적으로 로드되었습니다.",
+            "notice.duplicateloading":"중복된 플레이어 데이터 읽기를 시작하십시오. 잠시 기다려 주십시오.",
+            "notice.quicksearch":"바로가기를 사용하여 추가하고 마지막 구성을 직접 따라 플레이어를 검색하세요.",
+            "notice.appointloading":"지정된 조건 플레이어 읽기를 시작합니다. 잠시만 기다려 주십시오.",
+            "notice.noduplicate":"중복 플레이어 없음",
+            "notice.quickauction":"플레이어는 즉시 구매 가격으로 최저 판매 가격으로 나열됩니다.",
+            "task.player":"플레이어",
+            "task.pack":"팩",
+            "task.added":"오늘 추가됨",
+            "task.noadded":"오늘 새로 추가된 내용이 없습니다.",
+            "task.new":"새로운",
+            "task.expire":"만료됨",
+            "task.nodata":"데이터가 없습니다. 잠시 후 WEBAPP에 다시 접속하여 확인하십시오.",
+            "sbc.price":"예상 비용:",
+            "sbc.topprice":"견적",
+            "sbc.topsquad":"분대",
+            "sbc.like":"좋아요:",
+            "sbc.dislike":"싫어요:",
+            "sbc.consult":"계획 보기",
+            "sbc.count":"점수 계산",
+            "sbc.duplicates":"중복 플레이어 목록",
+            "sbc.qucikdupes":"D",
+            "sbc.appoint":"특정 조건 플레이어 목록",
+            "sbc.addquick":"빠른 추가 플레이어",
+            "sbc.swapquick":"퀵 스왑 플레이어",
+            "sbc.watchplayer":"시계 플레이어",
+            "uasreset.btntext":"목록 다시 로드",
+            "sbc.filtert":"필터",
+            "sbc.filter0":"모두",
+            "sbc.filter1":"새로운",
+            "sbc.filter2":"만료됨",
+            "sbc.filter3":"승인",
+            "loadingclose.text":"문제가 발생하면 여기를 클릭하여 닫으십시오.",
+            "quicklist.gotofutbin":"푸트빈으로 이동",
+            "quicklist.auction":"저렴한 가격에 빠른 경매",
+            "emptylist.t":"처리 후 적합한 플레이어가 없습니다.",
+            "emptylist.c":"기준을 변경하거나 페이지를 넘겨서 확인하세요",
+            "set.title":"FSU 설정",
+            "set.language.title":"표시 언어",
+            "set.language.auto":"자동(EA)",
+            "set.language.english":"English",
+            "set.language.korean":"한국어",
+            "notice.languagechanged":"언어가 저장되었습니다. 웹 앱을 다시 로드하는 중입니다.",
+            "set.card.title":"플레이어 카드 정보",
+            "set.card.pos":"추가 위치",
+            "set.card.price":"플레이어 가격",
+            "set.card.other":"기타 속성",
+            "set.card.club":"클럽 플레이어",
+            "set.card.low":"평점 최저가",
+            "set.sbc.title":"SBC 기능",
+            "set.sbc.top":"스쿼드 상단 버튼",
+            "set.sbc.right":"스쿼드 오른쪽 버튼",
+            "set.sbc.quick":"선수 빠른 추가",
+            "set.sbc.duplicate":"중복 플레이어로 채우기",
+            "set.sbc.records":"선택 항목 기억",
+            "set.sbc.input":"정보 입력 검색",
+            "set.info.title":"정보 표시",
+            "set.info.obj":"목표 상단 표시",
+            "set.info.sbc":"SBC 상단 표시",
+            "set.info.sbcf":"SBC 필터",
+            "set.info.sbcs":"SBC 하위 작업",
+            "set.info.pack":"팩 획득 가능 선수",
+            "set.info.squad":"스쿼드 가치",
+            "set.style.title":"플레이어 카드 정보 스타일",
+            "set.style.new":"품질에 따라 다름",
+            "set.style.old":"단색 스타일",
+            "set.player.title":"선수 선택 시 작업",
+            "set.player.auction":"최저가 빠른 판매",
+            "set.player.futbin":"자세한 내용은 FUTBIN으로 이동하세요.",
+            "quicklist.getprice":"이적시장 최저가 검색",
+            "quicklist.getpricey":"이적시장 최저가 새로고침",
+            "set.player.getprice":"이적시장 최저가 검색",
+            "quicklist.getpricelt":"최저가",
+            "quicklist.getpriceload":"로드 중",
+            "sbc.squadfill":"SBC 스쿼드 자동 완성",
+            "notice.templateload":"SBC 스쿼드를 읽고 가격을 비교합니다. 기다리세요.",
+            "notice.templateerror":"분대를 저장하지 못했습니다. 다시 시도해 주세요.",
+            "notice.templatesuccess":"스쿼드가 성공적으로 채워졌습니다.",
+            "notice.templatezero":"스쿼드를 저장하지 못했습니다. 다시 시도해 주세요.",
+            "set.sbc.template":"SBC 스쿼드 자동 완성",
+            "notice.marketsetmax":"검색 정보가 최적화되었습니다. 이제 직접 검색할 수 있습니다. 결과가 없으면 돌아가서 매개변수를 조정하세요.",
+            "set.sbc.market":"판타지 플레이어 경매 검색 최적화",
+            "notice.auctionsuccess":"%1이(가) %2을(를) 성공적으로 나열했습니다.",
+            "notice.auctionnoplayer":"%1 플레이어를 찾을 수 없습니다.",
+            "notice.auctionlimits":"%1의 FUTBIN 가격이 플레이어 한도를 초과했습니다.",
+            "notice.auctionmax":"경매장 한도에 도달했습니다.",
+            "losa.all":"모두 선택",
+            "losa.select":"선택됨",
+            "losa.price":"합계",
+            "loas.button":"경매 선정 플레이어",
+            "loas.popupt":"플레이어를 위한 대량 경매 목록 알림",
+            "loas.popupm":"이 목록에서 약 %1명의 플레이어를 선택했으며 예상 경매 가격은 %2입니다. 경매 목록을 하나씩 시작하려면 확인을 클릭하세요. 로딩 아이콘 아래 텍스트를 클릭하면 프로세스 중에 취소할 수 있습니다.",
+            "loas.variation":"이 섹션에서 플레이어의 일괄 경매 선택이 %1(으)로 조정되었습니다.",
+            "loas.start":"프로그램이 플레이어 대량 판매를 시작합니다. 이 작업에는 %1초가 소요될 것으로 예상됩니다.",
+            "loadingclose.template1":"SBC 구성표 목록을 읽으십시오. 잠시 기다려 주십시오.",
+            "loadingclose.template2":"계획 %1 라인업 읽기 및 비교, 나머지 %2 계획, 프로그램을 종료하려면 여기를 클릭하십시오.",
+            "loadingclose.loas":"%1명의 플레이어가 나열되고 나머지 %2는 프로그램을 종료하려면 여기를 클릭하십시오.",
+            "set.player.loas":"대량 경매 플레이어",
+            "notice.squaderror":"구성표 읽기에 실패했습니다. FUTBIN에 작업 구성표가 없을 수 있습니다. 나중에 다시 시도하십시오.",
+            "set.getdoc":"설정 지침 보기",
+            "builder.league":"지정리그 제외",
+            "notice.phoneloas":"모바일 단말기에 등록한 후 화면을 새로 고치기 전에 경매 목록에 다시 입력해야 합니다.",
+            "notice.builder":"제외 후 플레이어 수가 더 이상 라인업을 채우기에 충분하지 않습니다. 필요한 경우 다시 검색할 수 있도록 기준을 조정하십시오.",
+            "notice.conceptdiff":"구매한 가상 플레이어의 버전이 여러 개 있는 것으로 확인되어, 검색되지 않은 버전의 밝기가 추가되었습니다.",
+            "notice.packback":"할당되지 않은 플레이어가 없으며 자동으로 돌아옵니다.",
+            "notice.notchemplayer":"클럽에 현재 케미컬 요구 사항을 충족하는 선수가 없습니다.",
+            "notice.chemplayerloading":"읽기 시작 화학 플레이어를 만나보세요. 잠시 기다려주세요.",
+            "sbc.chemplayer":"화학 플레이어 목록",
+            "notice.noplayer":"지정된 조건이 없습니다 플레이어",
+            "squadback.popupt":"스쿼드 백 팁",
+            "squadback.popupm":"분대는 후퇴한 후 더 이상 이 라인업으로 돌아올 수 없으며 %1번 돌아갈 수 있습니다.",
+            "sbc.squadback":"B",
+            "notice.nosquad":"작업 기록이 없어 롤백할 수 없습니다.",
+            "tile.settitle":"FSU 설정",
+            "tile.settext":"FSU 기능과 표시 언어 설정",
+            "set.sbc.cback":"가상 플레이어 구매 자동 배포",
+            "set.sbc.sback":"라인업 대체",
+            "swaptradable.btntext":"대량 거래소 거래 가능",
+            "swaptradable.popupt":"팀 내 트레이드 가능한 선수 일괄 교환",
+            "swaptradable.popupm":"할당되지 않은 플레이어를 팀 내 거래 가능한 플레이어와 교환하려면 확인을 클릭하여 총 %1명의 플레이어를 확보하세요.",
+            "notice.swaptsuccess":"%1 교환 성공",
+            "notice.swapterror":"%1 교환 실패, 프로그램이 일시 중지됨",
+            "loadingclose.swapt":"플레이어 %1 교체, %2 남음",
+            "set.player.swapt":"할당되지 않은 대량 거래소 거래 가능",
+            "set.sbc.dupfill":"반복 플레이어 채우기 분대",
+            "dupfill.btntext":"반복 플레이어 채우기 분대",
+            "autofill.btntext":"원클릭 채우기(우선순위 반복)",
+            "set.sbc.icount":"표시되는 플레이어 수 검색",
+            "set.sbc.autofill":"원클릭 채우기 플레이어",
+            "completion.btntext":"원클릭 라인업 완성",
+            "set.sbc.completion":"원클릭 라인업 완성",
+            "notice.setsuccess":"설정이 성공적으로 저장되었습니다.",
+            "notice.seterror":"설정을 저장하지 못했습니다. 확인하십시오.",
+            "shieldlea.btntext":"리그 설정 제외",
+            "shieldlea.placeholder":"리그번호ID와 영문쉼표를 입력해주세요",
+            "squadcmpl.btntext":"분대 완료(우선순위 반복)",
+            "squadcmpl.popupt":"분대 완료 팁",
+            "squadcmpl.placeholder":"평점과 영문 쉼표를 조합해서 입력해주세요",
+            "squadcmpl.placeholder_zero":"공백을 채울 필요가 없습니다.",
+            "squadcmpl.error":"입력된 채우기 점수 형식이 일치하지 않으며 지정된 점수를 채울 수 없습니다.",
+            "set.sbc.squadcmpl":"분대 완료",
+            "notice.ldatasuccess":"모든 플레이어 데이터가 성공적으로 로드되었습니다.",
+            "notice.ldataerror":"플레이어 데이터 로드에 실패했습니다. 로드하려면 페이지를 새로 고치십시오. 그렇지 않으면 핵심 기능을 사용할 수 없습니다.",
+            "loadingclose.ldata":"플레이어 데이터(%1/%2)를 읽는 중입니다. 잠시 기다려 주십시오.",
+            "uatoclub.btntext":"%1을(를) 클럽에 직접 보내기",
+            "uatoclub.success":"클럽에 직접 보내기 성공",
+            "uatoclub.error":"클럽을 직접 보내지 못했습니다. 페이지에 들어가 직접 지정하세요.",
+            "set.info.skipanimation":"패키지 애니메이션 건너뛰기",
+            "builder.untradeable":"거래 불가",
+            "set.player.uatoclub":"클럽에 할당되지 않은 외부 전송",
+            "douagain.sbctile.title":"빠른 SBC",
+            "douagain.packtile.title":"빠른 포장 풀기",
+            "douagain.sbctile.text":"SBC를 열거나 완료하십시오.",
+            "douagain.packtile.text":"먼저 패키지를 열어보세요.",
+            "douagain.error":"프로그램 오류를 열지 못했습니다. 계속하려면 SBC를 다시 완료하십시오.",
+            "douagain.sbctile.state1":"%1회 완료",
+            "douagain.sbctile.state2":"%1회 가능",
+            "douagain.sbctile.state3":"완료됨",
+            "set.info.sbcagain":"스토어 익스프레스 SBC",
+            "set.info.packagain":"스토어 퀵 오픈 팩",
+            "sbc.infocount":"%1회 완료",
+            "notice.dupfilldiff":"라인업 존재나 쉴드 조건으로 인해 선수가 완전히 채워지지 않은 점 주의하시기 바랍니다",
+            "screenshot.text":"할당되지 않은 총 %1명의 플레이어, 총 가격 %2",
+            "packcoin.text":"저장 값:",
+            "sbcrange.title":"등급 범위",
+            "sbcrange.to":"~",
+            "tile.gptitle":"데이터 다시 로드",
+            "notice.basesbc":"더 많은 SBC 작업을 표시하려면 초기 SBC를 완료해야 합니다.",
+            "builder.ignorepos":"플레이어 위치 무시",
+            "transfertoclub.popupt":"플레이어 팁 보내기",
+            "transfertoclub.popupm":"목록에 있는 %1명의 선수를 클럽으로 보내시겠습니까?",
+            "readauction.error":"플레이어 경매 정보를 읽지 못했습니다. 다시 시도하십시오.",
+            "buyplayer.success":"플레이어 %1을(를) 성공적으로 구입했습니다. 비용은 %2입니다.",
+            "buyplayer.error":"플레이어 %1 구매에 실패했습니다. %2 나중에 다시 시도하십시오.",
+            "buyplayer.error.child1":"다른 사용자가 구매함,",
+            "buyplayer.error.child2":"금화가 부족해요,",
+            "buyplayer.error.child3":"경매정보가 없습니다.",
+            "buyplayer.error.child4":"구매 시간이 초과되었습니다.",
+            "buyplayer.error.child5":"할당되지 않은 항목이 너무 많습니다.",
+            "buyplayer.sendclub.success":"%1 선수를 구매해 클럽으로 보냈습니다",
+            "buyplayer.sendclub.error":"팀을 보내기 위해 플레이어 %1을(를) 구입하지 못했습니다.",
+            "readauction.loadingclose":"최신 FUT 가격 읽기",
+            "readauction.loadingclose2":"경매 정보 읽기",
+            "buyplayer.loadingclose":"선수를 구매하려고 합니다",
+            "conceptbuy.btntext":"이 플레이어를 직접 구매하세요",
+            "set.sbc.conceptbuy":"컨셉플레이어 직접구매",
+            "set.player.transfertoclub":"이적송출클럽",
+            "transfertoclub.unable":"중복으로 인해 플레이어 %1을(를) 보낼 수 없습니다",
+            "numberofqueries.btntext":"가격 문의 건수",
+            "numberofqueries.popupm":"선수 구매 문의 건수에 영향을 줍니다. 처음에는 futbin을 이용해 가격을 읽어보고, 검색 결과에 따라 다음번 가격을 확인해보세요. 쿼리 가격은 경매 가격 + 및 -에 따라 변경됩니다. 경매 가격을 직접 입력하고 + 및 -를 클릭할 수 있습니다. 특정 규칙에 대한 설명 문서를 읽어보세요. \u003c br \u003e 기본 구성은 5회이며, 최소 설정은 1회까지 가능합니다. 너무 많이 사용하는 것은 권장되지 않습니다.",
+            "numberofqueries.placeholder":"숫자를 입력하세요. 공백을 입력하면 5번으로 재설정됩니다.",
+            "settingsbutton.phone":"설명、진입、조회",
+            "notice.lockplayer":"플레이어 잠금 성공",
+            "notice.unlockplayer":"플레이어 성공 잠금 해제",
+            "locked.unlock":"잠금 해제",
+            "locked.lock":"잠금",
+            "locked.tile":"잠금 플레이어",
+            "locked.navtilte":"플레이어 목록 잠금",
+            "pack.filter0":"거래 가능 팩",
+            "history.title":"검색 기록",
+            "consult.popupt":"가져오기 분대 ID 또는 URL을 입력하십시오.",
+            "consult.popupm":"두 웹사이트의 SBC 팀 ID 또는 URL을 가져오는 FUTBIN 및 FUT.GG를 지원합니다. 비어 있으면 기본적으로 FUTBIN 가격이 가장 낮은 5개 구성표를 읽어 계산합니다.",
+            "consult.placeholder":"여기에 분대 ID 또는 URL을 입력하세요",
+            "consult.error":"유효한 분대 ID 또는 URL을 식별할 수 없습니다. 다시 입력하십시오.",
+            "meetsreq.error":"클럽에 교체 가능한 요구 사항 충족 선수가 없습니다.",
+            "set.sbc.templatemode":"SBC 분대 채우기 입력 모드",
+            "readauction.loadingclose3":"가격 읽는 중: %1",
+            "squadcmpl.popupm":"라인업 완료는 가상의 플레이어를 동일한 등급의 플레이어로 대체하고 공석은 채워진 등급으로 대체됩니다. 등급에 필요한 숫자를 영문 쉼표와 함께 입력하세요. 단일 등급은 모든 공석을 대체하고, 다중 등급은 지정된 공석 수를 대체합니다.",
+            "squadcmpl.popupmsup":"시뮬레이션 결과는 약간 편향될 수 있으며, 버튼을 클릭하면 무료 계산을 위한 웹사이트로 이동할 수 있습니다.",
+            "shieldlea.popupm":"제외 리그 설정은 다음과 같습니다(제외 리그 버튼을 켜야 적용됩니다). 오른쪽을 클릭하면 상태가 전환되며, 해당 리그의 플레이어 수는 스위치 옆에 있습니다.",
+            "popupButtonsText.44401":"홈페이지에 가서 계산해보세요",
+            "squadcmpl.simulatedsuccess":"이 시뮬레이션 완료 후 라인업 점수: %1 , 예상 채우기 플레이어 값: %2 .",
+            "squadcmpl.simulatederror":"전체 라인업을 시뮬레이션할 수 없습니다. 플레이어를 입력하거나, 제외 옵션을 조정하거나, 계산을 위해 웹사이트에 들어가세요.",
+            "packfilter.total":"전체:%1 예상:%2",
+            "requirements.addbtn":"%1 추가",
+            "requirements.swapbtn":"%1 교체",
+            "squadcmpl.popupmsupallconcept":"이번에는 챌린지 요구사항을 고려하지 않고 컨셉 선수를 교체합니다. 교체할 수 없다면 해당 평점의 선수가 없는 것입니다.",
+            "trypack.foot.info1_2":"이 시뮬레이션에는 특수 %2명을 포함하여 총 %1명의 플레이어가 있습니다.",
+            "trypack.foot.info2_1":"평균 수익률:",
+            "trypack.foot.info2_2":"이 값:",
+            "trypack.foot.info2_3":"차이점:",
+            "trypack.foot.info3":"이 기능은 EA의 홍보 확률로 시뮬레이션한 개봉 후 획득한 플레이어 효과입니다. 이는 단지 오락용이므로 심각하게 받아들여서는 안 됩니다.",
+            "trypack.popup.suffix":"(시뮬레이트)",
+            "trypack.button.again":"다시 시도하세요",
+            "builder.firststorage":"플레이어 스토리지 플레이어 사용 우선순위",
+            "builder.firststorage.short":"우선순위 저장",
+            "fastsbc.nosbcdata":"빠른 SBC: 처음으로 정보를 읽기 위해 SBC 페이지에 들어갈 때까지 표시되지 않습니다.",
+            "academy.btntext2":"진화 보기",
+            "shieldflag.btntext":"희귀 플레이어 설정 사용",
+            "shieldflag.popupm":"여기에서 이 희귀도를 사용할 플레이어를 열고(희귀도 플레이어를 사용하려면 버튼을 켜야 함) 상태를 전환하려면 오른쪽을 클릭하고 스위치 옆에 이 희귀도를 가진 플레이어 수를 클릭하세요.",
+            "builder.flag":"희귀 플레이어 사용",
+            "builder.flag.short":"희귀도(%1) 사용",
+            "builder.league.short":"리그 제외(%1)",
+            "builder.untradeable.short":"거래 가능 제외",
+            "builder.academy.short":"진화 제외",
+            "popupButtonsText.44407":"설정으로 이동 Rarity Player 사용",
+            "valuableplayer.popupt":"귀중한 플레이어 팁",
+            "valuableplayer.popupm":"제출된 라인업에 %1명의 귀중한 선수(빨간색으로 표시)가 포함된 경우 제출을 진행할지 여부를 결정하십시오.",
+            "popupButtonsText.44408":"계속",
+            "popupButtonsText.44409":"포기하다",
+            "sbcneedslist.popupt":"SBC에는 플레이어 통계가 필요합니다.",
+            "sbcneedslist.popupm":"여기서 계산에는 TOTW 또는 특별 요청이 포함되지 않으며 각 수요 라인업 점수의 SBC만 포함됩니다.\u003cbr\u003e계산 결과 및 값은 FUTBIN 점수의 가장 낮은 값을 기준으로 하며 실제 사용과 약간 다를 수 있으며 기존 재고와 실제 완료 간의 차이에 대해서만 참고용입니다.",
+            "popupButtonsText.44410":"누락된 플레이어 수를 다운로드합니다(txt).",
+            "sbcneedslist.title_1":"평가",
+            "sbcneedslist.title_2":"필요",
+            "sbcneedslist.title_3":"보류",
+            "sbcneedslist.title_4":"부족",
+            "sbcneedslist.title_5":"가격 부족",
+            "sbcneedslist.total":"합계",
+            "sbcneedslist.btn":"계산이 필요함",
+            "fastsbc.add":"빠른 SBC 추가",
+            "fastsbc.del":"빠른 SBC 취소",
+            "notice.addfastsbc":"빠른 SBC(%1)를 추가하는 데 성공했습니다.",
+            "notice.delfastsbc":"빠른 SBC(%1) 취소에 성공했습니다.",
+            "realprob.popupt":"%1 - 실제 확률",
+            "realprob.popupm":"이 섹션은 FUTNEXT 팩의 실제 개봉에서 데이터를 가져오며, 이는 EA에서 발표한 확률과 크게 다를 수 있습니다. 데이터는 참조용으로만 제공됩니다. \u003cbr\u003eEA는 예고되지 않았거나 비교할 수 없는 확률을 가질 수 있습니다. 이해해주세요.",
+            "realprob.title_1":"희귀함",
+            "realprob.title_2":"EA 확률",
+            "realprob.title_3":"실제 확률",
+            "realprob.title_4":"열어야 함",
+            "realprob.btn":"실제 문제",
+            "autobuy.nav.tilte":"플레이어 자동 구매",
+            "autobuy.noresult.title":"플레이어 먼저 검색",
+            "autobuy.noresult.text":"검색하려면 위에 플레이어 이름을 입력하세요.",
+            "autobuy.noselected.notice":"검색하기 전에 입력하고 선택하세요.",
+            "autobuy.tile.title":"플레이어 자동 구매",
+            "autobuy.tile.content":"문제가 발생하면 테스트 버전 사용을 중단하세요.",
+            "autobuy.tabs.text0":"작동",
+            "autobuy.tabs.text1":"로그",
+            "autobuy.info.title":"구매정보",
+            "autobuy.info.mintext":"최소 가격",
+            "autobuy.info.maxtext":"최대 가격",
+            "autobuy.info.numtext":"수량",
+            "autobuy.list.title0":"최신 선반",
+            "autobuy.list.title1":"최근 거래",
+            "autobuy.list.text0":"기록이 없습니다",
+            "autobuy.list.text1":"보상 아이템",
+            "autobuy.list.text2":"거래불가",
+            "autobuy.info.setprice":"최신 목록 사용",
+            "autobuy.info.gotosales":"경매 내역",
+            "fastsbc.tab.text":"고속",
+            "builder.sabfirstcommon":"브론즈/실버: 공통 우선",
+            "openpack.unassigned.notice":"할당되지 않은 플레이어가 있습니다. 팩을 열기 전에 할당해 주세요.",
+            "openpack.openerror.notice":"팩 열기에 실패했습니다(오류 코드: %1). 스토어로 돌아가서 목록을 새로 고치세요.",
+            "openpack.progress.loadertext1":"%1 여는 중...",
+            "openpack.progress.loadertext2":"열기 진행률 %1/%2 . 일시중지하려면 탭하세요.",
+            "openpack.packnotenough.notice":"%1 부족: %2 사용 가능, %3 필요.",
+            "openpack.result.popupt":"팩 열기 결과 - %1",
+            "openpack.result.popupm1":"%1 플레이어 팩을 열었습니다(%2 열지 않음). 클럽에 %3, SBC 스토리지에 %4, 특수 플레이어 %5, 최고 등급 %6이 할당되었습니다.",
+            "openpack.result.popupm2":"위에는 최대 20명의 플레이어가 표시되며, 특별한 품질과 높은 등급의 플레이어를 우선적으로 표시합니다. 다른 플레이어는 표시되지 않습니다. 나머지 플레이어는 Club 또는 SBC 스토리지를 확인하세요.",
+            "openpack.storebtn.text":"벌크 오픈",
+            "openpack.storebtn.subtext":"선수 자동 할당",
+            "openpack.storebtn.popupt":"대량 공개 알림 - %1",
+            "openpack.storebtn.popupm":"대량 열기는 선택한 플레이어 팩을 자동으로 엽니다.\u003cbr\u003e중복되지 않은 플레이어는 클럽으로 보내집니다.\u003cbr\u003e등급이 %1(골드 범위)보다 높은 중복 플레이어는 SBC 저장소로 보내집니다.\u003cbr\u003e할당할 수 없는 플레이어가 있으면 할당되지 않은 목록이 표시되고 프로세스가 중지됩니다.\u003cbr\u003e\u003cbr\u003e열 수 있는 팩 수(기본값은 모두):",
+            "sort.desc":"내림차순",
+            "sort.asc":"오름차순",
+            "packssort.switch.notice":"%1 정렬을 %2(팩 반환 기준)로 전환",
+            "allsendclub.button.text":"청구 및 플레이어를 클럽에 보내기",
+            "accelerate.popupt":"가속 유형(Max Chemistry)",
+            "accelerate.popupm":"화학 스타일: %1 가속 유형: %2\u003cbr\u003e\u003cbr\u003e가속 유형을 변경할 수 있는 화학 스타일:\u003cbr\u003e",
+            "accelerate.popupm2":"*로 표시된 가속 유형은 플레이어 하위 속성이 로드되지 않았음을 나타냅니다. 이로 인해 부정확한 계산이 발생할 수 있습니다. 속성을 로드하고 값을 수정하려면 가속 유형 라벨이나 플레이어 프로필을 클릭하세요.",
+            "accelerate.type.E":"폭발물",
+            "accelerate.type.C":"제어됨",
+            "accelerate.type.L":"긴",
+            "unassignedlist.refresh.btn":"목록 새로 고침",
+            "pickpreview.popupm":"이는 선택 가능한 플레이어의 미리보기일 뿐이며 획득한 모든 아이템을 나타내지는 않습니다. 일부 데이터 불일치가 발생할 수 있습니다. 게임 내 결과를 최종 기준으로 참고하시기 바랍니다.",
+            "inpacktile.title":"팩 내",
+            "inpacktile.desc":"디스플레이 전용입니다. 영구적으로 사용 가능한 낮은 확률의 아이콘과 영웅은 포함되지 않습니다.",
+            "clubplayers.tile.title":"내 플레이어",
+            "clubplayers.tile.desc":"클럽 및 SBC 저장소에서 플레이어를 찾아보세요.",
+            "clubplayers.scope":"클럽 + SBC 스토리지",
+            "clubplayers.search":"플레이어 이름 검색",
+            "clubplayers.filter.minovr":"최소 OVR",
+            "clubplayers.filter.maxovr":"최대 OVR",
+            "clubplayers.filter.position":"위치",
+            "clubplayers.filter.primary":"기본 전용",
+            "clubplayers.filter.nation":"국가",
+            "clubplayers.filter.league":"리그",
+            "clubplayers.filter.club":"클럽",
+            "clubplayers.filter.rarity":"희귀도",
+            "clubplayers.filter.quality":"품질",
+            "clubplayers.filter.skills":"개인기",
+            "clubplayers.filter.weakfoot":"약한 발",
+            "clubplayers.filter.foot":"강한 발",
+            "clubplayers.filter.gender":"성별",
+            "clubplayers.filter.location":"위치",
+            "clubplayers.filter.tradeable":"거래 상태",
+            "clubplayers.filter.sort":"정렬",
+            "clubplayers.filter.columns":"열 수",
+            "clubplayers.select.all":"모두",
+            "clubplayers.quality.bronze":"브론즈",
+            "clubplayers.quality.silver":"실버",
+            "clubplayers.quality.gold":"골드",
+            "clubplayers.quality.special":"스페셜",
+            "clubplayers.location.club":"클럽",
+            "clubplayers.location.storage":"SBC 스토리지",
+            "clubplayers.tradeable.yes":"거래 가능",
+            "clubplayers.tradeable.no":"거래 불가",
+            "clubplayers.foot.left":"왼쪽",
+            "clubplayers.foot.right":"오른쪽",
+            "clubplayers.gender.male":"남성",
+            "clubplayers.gender.female":"여성",
+            "clubplayers.sort.ratingdesc":"평점: 높은 순",
+            "clubplayers.sort.ratingasc":"평점: 낮은 순",
+            "clubplayers.sort.nameasc":"이름: A-Z",
+            "clubplayers.sort.namedesc":"이름: Z-A",
+            "clubplayers.results":"선수 %2명 중 %1명",
+            "clubplayers.visible":"%2명 중 %1명 표시",
+            "clubplayers.reset":"필터 초기화",
+            "clubplayers.loadmore":"더 보기",
+            "clubplayers.empty":"현재 필터와 일치하는 플레이어가 없습니다.",
+            "clubplayers.detail.open":"%1의 플레이어 세부 정보 보기",
+            "clubplayers.detail.info":"플레이어 정보",
+            "clubplayers.detail.attributes":"세부 속성",
+            "clubplayers.detail.playstyles":"플레이스타일",
+            "clubplayers.detail.playstyles.plus":"플레이스타일+",
+            "clubplayers.detail.playstyles.basic":"플레이스타일",
+            "clubplayers.detail.playstyles.empty":"플레이 스타일 없음",
+            "clubplayers.detail.rating":"전체",
+            "clubplayers.detail.positions":"대체 위치",
+            "clubplayers.detail.height":"높이",
+            "clubplayers.detail.weight":"무게",
+            "clubplayers.detail.bodytype":"체형",
+            "clubplayers.detail.accelerate":"가속 유형",
+            "clubplayers.detail.itemid":"아이템 ID",
+            "clubplayers.detail.eaid":"EA ID",
+            "clubplayers.detail.close":"플레이어 세부정보 닫기",
+            "clubplayers.detail.source":"데이터는 현재 EA FC 웹 앱 플레이어 항목에서 가져옵니다. FSU는 클럽 데이터를 FUT.GG에 업로드하지 않습니다.",
+            "clubplayers.detail.estimated":"EA가 업그레이드된 얼굴 통계만 노출하는 경우 세부 값은 EA의 속성 가중치로 추정됩니다.",
+            "clubplayers.detail.error":"이 플레이어의 세부정보를 열 수 없습니다.",
+            "clubplayers.detail.face.pac":"속도",
+            "clubplayers.detail.face.sho":"슈팅",
+            "clubplayers.detail.face.pas":"패스",
+            "clubplayers.detail.face.dri":"드리블",
+            "clubplayers.detail.face.def":"수비",
+            "clubplayers.detail.face.phy":"피지컬",
+            "clubplayers.detail.face.div":"다이빙",
+            "clubplayers.detail.face.han":"취급",
+            "clubplayers.detail.face.kic":"발로 차기",
+            "clubplayers.detail.face.ref":"반사신경",
+            "clubplayers.detail.face.spd":"속도",
+            "clubplayers.detail.face.pos":"포지셔닝",
+            "academy.clubplayers.entry":"적합 선수 찾기",
+            "academy.clubplayers.title":"적합 선수 (%1)",
+            "academy.clubplayers.scope":"클럽 · 적합 선수만",
+            "academy.clubplayers.eligible":"적격",
+            "academy.clubplayers.select":"이 진화에 %1 선택",
+            "academy.clubplayers.empty":"이 진화에 적합한 클럽 선수가 없습니다.",
+            "academy.clubplayers.notready":"Evolution 플레이어 선택이 준비되지 않았습니다. 이 화면을 다시 열고 다시 시도해 보세요.",
+            "academy.clubplayers.changed":"이 플레이어는 더 이상 Evolution 요구 사항을 충족하지 않습니다.",
+            "academy.clubplayers.error":"적격 플레이어 목록을 열 수 없습니다.",
+            "player.inclub":"소유",
+            "player.noclub":"소유하지 않음",
+            "specialtile.title":"특별 품질",
+            "specialtile.desc":"동적 업그레이드 또는 화학 부스트의 특성",
+            "special.dynamic":"동적 업그레이드",
+            "special.extrachem":"화학 부스트",
+            "special.dynamic.notice":"이 플레이어는 %1이며 업그레이드 마감일까지 %2일 남았습니다.",
+            "special.extrachem.notice":"이 플레이어는 %1이며 %2의 추가 화학력 향상을 제공합니다.",
+            "special.extrachem.full":"전체 화학",
+            "special.extrachem.club":"+%1 클럽",
+            "special.extrachem.league":"+%1 리그",
+            "special.extrachem.nation":"+%1 국가",
+            "special.extrachem.allLeague":"+%1 모든 리그",
+            "special.extrachem.allNation":"+%1 모든 국가",
+            "loadingclose.template3":"컨셉 플레이어 교체 시도 중 진행률: %1/%2 위치: %3 프로그램을 종료하려면 여기를 클릭하십시오.",
+            "substitution.unassigned":"할당되지 않음",
+            "substitution.samerating":"동일 등급",
+            "substitution.chemistry":"화학",
+            "substitution.requirement":"요구 사항 충족",
+            "substitution.sameclub":"같은 클럽",
+            "substitution.samenationandleague":"같은 국가 및 리그",
+            "substitution.swaptitle":"다음으로 교체",
+            "substitution.addtitle":"다른 이름으로 추가",
+            "substitution.swapconcepttitle":"컨셉 플레이어를 다음으로 교체",
+            "listfilter.title.rating":"평가",
+            "listfilter.title.scope":"범위",
+            "listfilter.title.position":"위치",
+            "listfilter.title.chemistry":"화학",
+            "listfilter.title.quality":"품질",
+            "listfilter.sort.asc":"Δ ASC",
+            "listfilter.sort.desc":"∇ 설명",
+            "listfilter.select.all":"전체",
+            "listfilter.select.position":"%1",
+            "listfilter.select.storage":"저장",
+            "listfilter.select.club":"클럽",
+            "listfilter.select.normal":"정상",
+            "listfilter.select.special":"스페셜",
+            "academy.attr.ovr":"ovr",
+            "academy.attr.ps":"ps",
+            "academy.attr.psplus":"ps+",
+            "academy.attr.wf":"wf",
+            "academy.attr.sm":"sm",
+            "academy.attr.post":"위치",
+            "academy.attr.role":"역할",
+            "academy.attr.rarity":"라티",
+            "academy.attr.cu":"cos",
+            "academy.attr.not":"부스트 없음",
+            "academy.attr.maintips":"* 직접 카드 부스트에는 계산이 필요합니다. 값은 추정됩니다.",
+            "academy.attr.pac":"속도",
+            "academy.attr.sho":"슈팅",
+            "academy.attr.pas":"패스",
+            "academy.attr.dri":"드리블",
+            "academy.attr.def":"수비",
+            "academy.attr.phy":"피지컬",
+            "academy.attr.div":"다이빙",
+            "academy.attr.han":"핸들링",
+            "academy.attr.kic":"킥",
+            "academy.attr.ref":"반응속도",
+            "academy.attr.spd":"스피드",
+            "academy.attr.pos":"위치선정",
+            "academy.attr.tips":"참고: 속성 값은 카드 속성이 아닌 하위 속성 합계입니다.",
+            "academy.attr.main":"속성",
+            "academy.attr.sub":"하위 속성",
+            "academy.attr.load":"기본 속성이 로드되지 않았습니다. 왼쪽의 + 버튼을 클릭하세요.",
+            "special.extrachem.popupm":"플레이어의 현재 희귀도만을 기준으로 합니다. 진화에 의해 변경된 플레이어는 제외됩니다.",
+            "special.dynamic.popupm":"플레이어의 원래 희귀도만을 기준으로 합니다. 이 희귀도로 진화한 플레이어는 제외됩니다.",
+            "apiprroxy.popupt":"FUTGG 전달 주소 설정",
+            "apiprroxy.popupm":"여기에서 FUTGG 전달 주소를 설정할 수 있습니다. 규칙에 따라 구성해야 합니다. 그렇지 않으면 가격을 읽을 수 없습니다. 설정을 지우려면 공백으로 남겨두세요.",
+            "apiprroxy.placeholder":"전체 URL을 https://***/ 형식으로 입력하세요.",
+            "fgrating.popupt":"FG 보기",
+            "fgrating.popupm1":"점수는 FUTGG 방법을 사용하며 각 직위/역할 조합에 대해 최고 평점과 권장 케미스트리를 보여줍니다.",
+            "fgrating.popupm2":"결과는 계산된 값이며 게임 내 성능을 반영하지 않을 수 있습니다.",
+            "fgrating.popup.title1":"위치",
+            "fgrating.popup.title2":"역할",
+            "fgrating.popup.title3":"순위",
+            "fgrating.popup.title4":"점수",
+            "fgrating.popup.title5":"화학",
+            "builder.sbfirstcommon":"실버/브론즈 품질 우선 보통",
+            "builder.sbfirstcommon.short":"실버/브론즈 우선순위 보통",
+            "sbcrange.concepttitle":"개념 검색 등급 범위 없음",
+            "searchconcept.sameclub":"같은 클럽의 검색 컨셉",
+            "searchconcept.sameleague":"같은 리그, 같은 국가에서의 검색 개념",
+            "notice.searchconceptloading":"특정 컨셉 선수 검색 시작",
+            "subsbcaward.title":"보상 가치:",
+            "subsbcaward.nope":"셀 수 없다",
+            "sbc.quciktransfers":"T",
+            "sbc.onlycmpltext":"필요한 등급을 보기 위해서만 편의를 위해 분대를 완전하게 유지하세요.",
+            "set.player.pickbest":"플레이어 선택 베스트 팁",
+            "set.sbc.headentrance":"탑 SBC 입구",
+            "playerignore.popupt":"SBC는 플레이어 구성을 무시합니다.",
+            "playerignore.popupm":"조정을 클릭하면 구성이 저장되며, 이는 원클릭 채우기, 라인업 완성 등의 코드에 영향을 미칩니다. 신중하게 선택하십시오.",
+            "playerignore.button":"플레이어 구성 제외",
+            "popupButtonsText.44403":"닫기",
+            "builder.academy":"진화 제외",
+            "builder.strictlypcik":"플레이어 선택 SBC 엄밀히 일반 및 희귀",
+            "headentrance.numberset":"상단 입장번호",
+            "popupButtonsText.44404":"설정 제외 리그 바로가기",
+            "popupButtonsText.44405":"골든 플레이어 범위 설정 바로가기",
+            "goldenplayer.popupmt":"골든 플레이어 범위 설정",
+            "goldenplayer.popupm":"기본 골드플레이어는 83까지 입니다. 설정을 원하시면 내용을 입력하신 후 확인을 눌러주세요. 최소값은 76입니다. 비어 있으면 기본값을 복원합니다.",
+            "goldenplayer.placeholder":"최소 76, 최대 99의 두 자리 숫자를 입력하세요.",
+            "headentrance.popupmt":"상위 SBC 항목 수량 설정",
+            "headentrance.popupm":"기본값은 컴퓨터에서는 5, 휴대폰에서는 3입니다. 숫자를 변경하려면 숫자를 입력하세요. 최대값은 8을 초과할 수 없습니다. 비어 있으면 기본값을 복원합니다.",
+            "headentrance.placeholder":"1자리, 최소 1, 최대 8을 입력하세요.",
+            "sbc.swapgold":"동일한 등급의 금으로 빠르게 교체하세요",
+            "bibconcept.btntext":"컨셉 선수 일괄 구매",
+            "readauction.progress":"구매 진행: %1/%2",
+            "buyplayer.getinfo.error":"플레이어 정보 읽기에 실패했습니다. 다시 시도해 주세요.",
+            "buyplayer.bibresults":"대량 구매 완료, %1 성공, %2 실패, 총 비용 %3.",
+            "builder.ignorepos.short":"위치 무시",
+            "builder.goldenrange.short":"골드 범위:≤%1",
+            "builder.strictlypcik.short":"엄밀히 말하면 드물다.",
+            "builder.comprange":"골드 범위 내 스쿼드 완료 우선 레어(75-%1)",
+            "builder.comprange.short":"≤%1 우선순위 희귀",
+            "builder.comprare":"스쿼드 완료 우선 비특수 선수",
+            "builder.comprare.short":"우선순위 비특수",
+            "academy.btntext":"%1 에볼루션 보기",
+            "academy.freetips":"자유진화",
+            "academy.bio.add":"+ %1",
+            "academy.bio.change":"변경",
+            "academy.bio.upgrade":"업그레이드",
+            "academy.bio.new":"신규",
+            "loas.input":"등록 시간을 수정하려면 입력하세요.",
+            "loas.input.tips":"시간을 기본으로 입력해 주세요. 기본값이며 1은 1시간, 3은 3시간, 6은 6시간, 12는 12시간, 24는 1일, 72는 3일이며 그 외 시간은 지원되지 않습니다.",
+            "loas.input.error":"등록 시간을 잘못 입력하셨으니 반드시 안내를 따라주세요.",
+            "returns.text":"평균 수익률:",
+            "notice.submitrepeat":"라인업에 미지정 거래불가 버전이 있을 경우 자동으로 교체되어 제출됩니다.",
+            "fastsbc.popupt":"빠른 SBC 팁",
+            "fastsbc.popupm":"이 모드는 지정된 SBC를 신속하게 실행하고, 할당되지 않은 옵션과 제외 옵션에 우선순위를 부여하며, 할당되지 않은 거래 가능한 대체 항목을 인식하지 않습니다. 이는 주의해서 사용해야 하는 실험적 기능입니다. 과도한 사용은 BAN 제출 등 알 수 없는 페널티를 초래할 수 있으며, 귀중한 플레이어를 제출할 수 있습니다. 확인 후에는 플러그인 사용에 대한 메시지가 더 이상 표시되지 않습니다.",
+            "fastsbc.success":"빠른 SBC 성공했습니다. 너무 자주 사용하지 말고 적당히 사용해주세요.",
+            "fastsbc.title":"반복 플레이어는 %1 SBC를 빠르게 완료할 수 있습니다",
+            "fastsbc.sbcbtntext":"완료(%1)",
+            "fastsbc.challenge.btn":"제출안 생성",
+            "fastsbc.challenge.unsupported":"이 SBC에는 아직 자동 계획 생성에서 지원되지 않는 조건이 포함되어 있습니다.",
+            "fastsbc.challenge.empty":"현재 클럽과 SBC 보관소에서는 등급, 케미스트리, 플레이어 조건을 만족하는 계획을 세울 수 없습니다.",
+            "fastsbc.challenge.metrics":"평점 %1 · 조직력 %2",
+            "fastsbc.plan.title":"빠른 SBC 제출안",
+            "fastsbc.plan.summary":"예상 가능 %1회 · 제출안 %2개 생성",
+            "fastsbc.plan.counter":"제출안 %1 / %2",
+            "fastsbc.plan.ready":"제출 가능",
+            "fastsbc.plan.filling":"스쿼드 채우는 중",
+            "fastsbc.plan.submitting":"제출 중",
+            "fastsbc.plan.submitted":"제출됨",
+            "fastsbc.plan.invalid":"제출안 사용 불가",
+            "fastsbc.plan.valid":"요구사항 충족 · 선수 %1명 · 중복 없음",
+            "fastsbc.plan.playercount":"선수 %1명",
+            "fastsbc.plan.layout.list":"목록",
+            "fastsbc.plan.layout.grid":"그리드",
+            "fastsbc.plan.fill":"제출안 %1 채우기",
+            "fastsbc.plan.filled":"SBC 스쿼드에 제출안을 채웠습니다.",
+            "fastsbc.plan.submit":"제출안 %1 제출",
+            "fastsbc.plan.regenerate":"제출안 다시 생성",
+            "fastsbc.plan.previous":"이전 제출안",
+            "fastsbc.plan.next":"다음 제출안",
+            "fastsbc.plan.close":"SBC 제출안 닫기",
+            "fastsbc.plan.empty":"전체 계획을 생성할 수 없습니다. 플레이어 수, 잠금, 제외 설정을 확인하세요.",
+            "fastsbc.plan.changed":"일부 선수가 클럽 또는 SBC 보관함에 없습니다. 제출안을 다시 생성하세요.",
+            "fastsbc.plan.requirements":"현재 선수 조합이 SBC 요구사항을 충족하지 않습니다. 제출안을 다시 생성하세요.",
+            "fastsbc.plan.loaderror":"SBC를 로드할 수 없습니다. 다시 열고 다시 시도해 보세요.",
+            "fastsbc.plan.openerror":"빠른 SBC를 열지 못했습니다: %1",
+            "fastsbc.plan.location.club":"클럽",
+            "fastsbc.plan.location.storage":"SBC 보관함",
+            "fastsbc.plan.location.unknown":"알 수 없음",
+            "fastsbc.plan.itemid":"아이템 ID %1",
+            "tile.gptext":"문제가 있으면 다시 불러오세요.",
+            "players.bodytype_1":"마른 보통 체형",
+            "players.bodytype_2":"균형 보통 체형",
+            "players.bodytype_3":"건장한 보통 체형",
+            "players.bodytype_4":"마른 장신 체형",
+            "players.bodytype_5":"균형 장신 체형",
+            "players.bodytype_6":"건장한 장신 체형",
+            "players.bodytype_7":"마른 단신 체형",
+            "players.bodytype_8":"균형 단신 체형",
+            "players.bodytype_9":"건장한 단신 체형",
+            "players.bodytype_10":"고유 체형",
+            "players.realface_1":"실제 얼굴",
+            "players.realface_0":"일반 얼굴",
+            "notice.players.realface":"%1 선수의 게임 내 얼굴 유형은 %2입니다.",
+            "plyers.bodytype.popupm":"본문 유형 [ %1 ]은 시각적 인식의 너비와 높이를 나타내는 %2 처럼 동작합니다. 드리블이 좋은 짧은 다리, 가로채기가 좋은 키 큰 다리, 날씬하고 좁고 유연하며 땅딸막한 넓은 타격이 가능하다고 이해하면 된다.\u003cbr/\u003e\u003cbr/\u003e독특한 체형은 키가 크고 작음을 구분할 필요가 없다. 별반 달라 보이지 않을 수도 있지만, 움직임이 더 매끄럽고 매끄러워지거나 독점적인 타격, 가로채기, 화려함 및 기타 동작이 있을 것입니다.",
+            "plyers.bodytype.popupt":"선수 체형 설명",
+            "plyers.relo.popupt":"플레이어 역할 등급 설명",
+            "popupButtonsText.44406":"Easysbc로 이동하여 확인하세요.",
+            "fastsbc.entertips":"입력 시 빠른 완료",
+            "fastsbc.error_1":"제출에 실패했습니다. SBC가 여러 번 실패했습니다.",
+            "fastsbc.error_2":"제출에 실패했습니다. SBC를 완료할 수 없으며 관련 작업 재설정을 완료해야 합니다.",
+            "fastsbc.error_3":"제출에 실패했습니다. 조건을 충족하는 플레이어가 부족합니다.",
+            "fastsbc.error_4":"제출 실패, 거래 가능한 플레이어 교환에 실패했습니다. 다시 시도해 주세요.",
+            "set.card.meta":"플레이어 메타 등급 및 순위",
+            "fastsbc.error_5":"제출에 실패했습니다. SBC가 BAN일 가능성이 높습니다. 잠시 후 다시 시도해 주세요.",
+            "sbccount.btntext":"SBC 수: %1",
+            "sbccount.popupt":"SBC 계산 지침",
+            "sbccount.popupm":"여기서는 플러그인이 실행되는 날 실행 중인 장치에서 제출한 SBC 수만 계산됩니다. SBC 제출을 계속할지 결정해 주세요. \u003cbr/\u003e 현재 90개 이상의 SBC 제출이 1시간 이내에 차단될 수 있으며, 차단이 해제되려면 1~24시간을 기다려야 한다는 소문이 돌고 있습니다.",
+            "meta.role.unknown":"알 수 없음",
+            "plyers.relo.popupm":"권장 플레이어 역할 [%1], 암묵적인 화학 스타일 [%2], 책임 개요: \u003cbr/\u003e\u003cbr/\u003e%3\u003cbr/\u003e\u003cbr/\u003e%4\u003cbr/\u003e\u003cbr/\u003e동일한 역할 및 3개의 화학 포인트 레벨:%5(%6), 모든 레벨에서 의미: S(1-10) , A(11-50) , B(51-100) , C(101-300), D가 남음, GK는 그 이하로 인해 C레벨에 머물고, ? 데이터가 없다는 뜻이다. \u003cbr/\u003e\u003cbr/\u003e상위 3,000위의 데이터만 평점이며, +와 ++는 추가 친숙도를 의미하며, 아래 버튼을 클릭하시면 보실 수 있습니다.",
+            "plyers.relo.popupm.v1":"조정 가능한 변형:%1, 플레이어 속성 정보에 따라 직접 설정하십시오.",
+            "plyers.relo.popupm.v2":"역할은 다양한 위치에 존재할 수 있습니다. 위치, 친숙도 및 기타 정보에 따라 자신의 역할을 선택하고 플레이어 속성 정보에 따라 변형을 선택하십시오.",
+            "storage.tile":"SBC 스토리지",
+            "storage.navtilte":"SBC 스토리지 플레이어 목록",
+            "storage.setclub.text":"총 %1명의 선수를 클럽으로 다시 보낼 수 있습니다",
+            "storage.setclub.button":"대량보내기",
+            "sbc.qucikstorage":"S",
+            "tile.dodotitle":"플러그인 토론",
+            "tile.dodotext":"피드백과 토론을 환영합니다.",
+            "trypack.button.text":"한번 시도해 보세요.",
+            "trypack.button.subtext":"시뮬레이션",
+            "trypack.foot.info1_1":"가격:",
+        };
+        _.forOwn(info.localization, (translations, key) => {
+            translations[3] = koreanLocalization[key] ?? translations[2];
+        });
+        applyFSULanguagePreference(getStoredFSULanguagePreference());
         //固话的HTML内容
         html = {
             "priceBtn":"<button class=\"flat pagination fsu-getprice\" id=\"getprice\">{price.btntext}</button>",
@@ -1735,6 +2400,10 @@
         };
         info.base.sytle = ".tns-horizontal.tns-subpixel>.tns-item{position: relative;}button.notevents{pointer-events: none;color: #a4a9b4;}.btn-standard.section-header-btn.mini.call-to-action.fsu-getprice{margin-left: 1rem;}.btn-standard.section-header-btn.mini.call-to-action.fsu-getprice:hover{background-color:#e9dfcd}.view-modal-container.form-modal header .fsu-getprice{position: absolute;top: .5rem;left: 0;height: 2rem;line-height: 2rem;}.ut-sbc-set-tile-view.production-tagged .tileHeader::before{display:none;}a.header_explain{color: #a2a2a2;text-decoration: none;line-height: 3rem;}a.header_explain:hover{color: #ffffff;}.ut-fifa-header-view{display: flex;justify-content: space-between;}    .fsu-loading-close{display: none;position: absolute;bottom: 38%;z-index: 999;}.fsu-loading .fsu-loading-close{display: block;text-align: center;}                                                               .fsu-sbc-info div{width: 50%;}.fsu-sbc-info div:last-child{display: flex;justify-content: space-around;}.fsu-sbc-info .currency-coins::after{font-size:16px}                .rewards-footer li{position: relative;}.fsu-sbc-vplayer {position: absolute;bottom: .25rem;right:0;background-color: #8A6E2C;padding: .5rem;color: #15191d;line-height: 1rem;font-size: 16px;}.fsu-sbc-vplayer:hover{background-color: #f6b803;}                 @media screen and (min-width:1280px) and (max-width:1441px) {.ut-split-view {padding:0;}.ut-split-view>.ut-content {max-height:100%;}}                     li.with-icon.hide {display: none;}                      .fsu-input{border: 0 !important;background-color: rgba(0,0,0,0) !important;padding-left: 0 !important;font-family: UltimateTeamCondensed,sans-serif;font-size: 1em;color: #f8eede;}                  .fsu-quick{position:absolute;top:100%;width:100%;display:flex;align-items:center;font-family:UltimateTeam,sans-serif;justify-content:center;margin-top:.2rem}.fsu-quick.top .fsu-quick-list{display:flex;align-items:center}.fsu-quick-list .im{height:1.8rem;line-height:1.8rem;cursor:pointer;background-color:#2b3540;font-family:UltimateTeam,sans-serif;border-radius:4px;padding:0 .2rem;font-size:1rem;font-weight:900;color:#f2f2f2;overflow: hidden;}.fsu-quick-list .im:hover{background-color:#394754}.fsu-quick-list.other .im{background-color:#f8eede;color:#ef6405;font-weight:500;margin-left:.3rem;text-align:center;}.fsu-quick-list.other .im:hover{background-color:#f5efe6}.fsu-quick-list .im span{font-size:.8rem;font-weight:300;color:#a4a9b4}.fsu-quick-list.left .im{margin-right:.3rem}.fsu-quick-list.right .im{margin-left:.3rem}.fsu-quick-inr{font-size:.8rem;margin:0 .3rem}.fsu-quick.right{position:absolute;top:50%;width:2rem;display:block;right:0%;z-index:3;-webkit-transform:translateY(-50%) !important;transform:translateY(-50%) !important}.phone .fsu-quick.right{top:8rem;-webkit-transform:translateY(0%) !important;transform:translateY(0%) !important}.fsu-quick.right .fsu-quick-list .im{width:1.4rem;margin-bottom:.2rem;text-align:center}.fsu-quick.right .fsu-quick-list .im.disabled{background-color:#30302e;color:#656563}.entityContainer>.name.untradeable{color:#f6b803}                                  .phone .fsu-sbc-info{font-size:.875rem}.phone .fsu-task{display:block;font-size:.875rem}.phone .fsu-price-box.right > div .value{font-size:1rem;margin-top:.2rem}.phone .fsu-price-box.right > div .title{font-size:.875rem}.phone .fsu-player-other > div{font-size:0.6rem}.phone .small.player .fsu-cards-price{font-size:.875rem}.phone .small.player .fsu-cards-price::after{font-size:.875rem}.phone .fsu-cards.fsu-cards-attr{font-size:.6rem}.phone .fsu-quick-list .im{font-size:.875rem}                                              .ut-pinned-item .listFUTItem.has-auction-data .fsu-player-other{margin-top:0 !important;top:.8rem;right:.2rem;position:absolute;z-index:2}        .fsu-sbcfilter-box{align-items:center;background-color:#394754;display:flex;justify-content:center;padding:1rem;z-index:10}.fsu-sbcfilter-option{align-items:center;box-sizing:border-box;display:flex;flex:1;max-width:300px}.fsu-sbcfilter-option .ut-drop-down-control{margin-left:1rem;flex:1}                                .fsu-setbox{display: grid;grid-template-columns: repeat(3, minmax(0, 1fr));}.phone .fsu-setbox{display: grid;grid-template-columns: repeat(1, minmax(0, 1fr));}                                  .btn-standard.mini.fsu-reward-but{height:2rem;line-height:2rem;position:absolute;top:.2rem;left:50%;transform:translateX(-50%)}.btn-standard.mini.fsu-reward-but.pcr{bottom:1.9rem;top:auto}           .btn-standard.mini.fsu-pickspc{line-height:2rem;height:2rem;margin:.5rem auto 0 auto}.ut-image-button-control.back-btn.fsu-picksback{height:100%;width:3rem;position:absolute;left:0;font-size:1.6rem}                       .fsu-fcount{position:absolute;right:0.5rem;height:1.4rem;top:.8rem;line-height:1.5rem;padding:0 .4rem;border-radius:.2rem;z-index:1;background-color: #264A35;}        .phone .fsu-store-tile .ut-tile-content-graphic-info .description{display:block;}        .fsu-range button{margin:0}                                                               .fsu-price-box{font-family:UltimateTeamCondensed,sans-serif}.fsu-price-box.right{position:absolute;right:1rem;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%);display:flex;align-items:center}.fsu-price-box.right>div{background-color:#3B4754;color: #ffffff;padding:0.5rem;text-align:center;border-radius:4px;margin-top:0;display:block}.fsu-price-box.right>div .title{color:#a4a9b4;padding:0;font-size:1rem;line-height:1rem}.fsu-price-box.right>div .title span.plus{color:#36b84b;font-weight:500;padding-left:.2rem}.fsu-price-box.right>div .title span.minus{color:#d21433;font-weight:500;padding-left:.2rem}.fsu-price-val .currency-coins::after{font-size:1rem;margin-top:-3px}.fsu-price-box.bottom{padding-left:6.3rem;margin:.2rem 0rem}.fsu-price-box.bottom>div{display:flex;align-items:center;font-size:0.9375rem}.fsu-price-box.bottom>div .title{color:#a4a9b4;margin-right:.2rem}.fsu-price-box.bottom .fsu-price-val .currency-coins::after{font-size:inherit}.fsu-price-box.trf{position:absolute;left:54%;margin-top:.2rem}.fsu-price-box.trf .fsu-price-val{display:flex;align-items:center;background-color:#3B4754;color: #ffffff;text-align:center;border-radius:4px;padding:0 .3rem;height:20px}.fsu-price-box.trf .fsu-price-val .title{font-size:.875rem;margin-right:.2rem}.fsu-price-box.trf .fsu-price-val .currency-coins::after{margin-top:-2px}.fsu-price-box.top{position:absolute;right:0%;top:8%;display:flex;align-items:center}.fsu-price-box.top>div{display:flex;align-items:center;background-color:#3B4754;color: #ffffff;padding:.1rem 0.5rem;text-align:center;border-radius:4px}.fsu-price-box.top>div .title{font-size:0.875rem;margin-right:0.5rem}.fsu-price-last{margin-right:.5rem}.fsu-player-other{display:flex;margin-top:.2rem;font-family:UltimateTeamCondensed,sans-serif;font-size:.8rem;line-height:1rem}.fsu-price-box.top+.fsu-player-other{margin-top:.4rem}                                                                    .fsu-cards-lea-small,.fsu-cards-accele-large,.fsu-cards-meta,.fsu-cards-price{position:absolute;z-index:2;font-family:UltimateTeamCondensed,sans-serif;font-weight:300;text-align:center;width:1.6rem;top:25%}.fsu-cards-lea-small{bottom:8%;height:16%;font-size:70%;width:100%;top:auto;font-weight:500;line-height:1}.fsu-cards-lea-small~.playStyle,.ut-squad-pitch-view:not(.sbc) .fsu-cards-lea-small{display:none !important}.specials .fsu-cards-lea-small{bottom:10%}.fsu-cards-accele-large,.fsu-cards-meta,.fsu-cards-price{width:auto !important;padding:0 0.2rem;left:50%;-webkit-transform:translateX(-50%) !important;transform:translateX(-50%) !important;white-space:nowrap;background-color:#13151d;border:1px solid;border-radius:5px}.fsu-cards-accele-large,.fsu-cards-meta{bottom:0;top:auto !important}.fsu-cards-price{color:#fff;top:0 !important}.ut-squad-pitch-view:not(.sbc) .fsu-cards-lea-small~.playStyle{display:block !important}            .fsu-cards-attr,.fsu-cards-pos{position:absolute;z-index:2;font-family:UltimateTeamCondensed,sans-serif;font-weight:300;text-align:center;top:25%;display:flex;flex-direction:column;gap:2px;transform: scale(0.9);}                .large.player~.fsu-cards-attr,.large.player .fsu-cards-attr,.ut-tactics-instruction-menu-view  .fsu-cards-attr{left:calc(50% + 61px);font-size:14px;gap:4px;transform: scale(1);}           .large.player~.fsu-cards-attr > div,.large.player .fsu-cards-attr > div,.large.player~.fsu-cards-pos > div,.large.player .fsu-cards-pos > div{width:28px;height:16px;line-height:17px}       .small.player~.fsu-cards-attr{left:70px;font-size:12px;top:50%;transform:translateY(-50%) scale(0.9);}.small.player~.fsu-cards-attr > .fsu-bodytype{font-size:11px}                         .reward.small .small.player~.fsu-cards-attr{left:calc(50% + 42px);top:20%}.reward.small .small.player~.fsu-cards-pos{left:calc(50% - 66px);top:20%;font-size:12px}             .ut-squad-slot-view .small.player~.fsu-cards-attr{left:auto;right:-4px}              .large.player~.fsu-cards-pos,.large.player .fsu-cards-pos,.ut-tactics-instruction-menu-view  .fsu-cards-pos{left:calc(50% - 90px);font-size:14px;gap:4px;transform: scale(1);}                  .ut-squad-slot-view .small.player~.fsu-cards-pos{flex-direction:row;font-size:12px;top:auto;bottom:-1.6rem;left:50%;transform:translate(-50%,0)}                   .ut-squad-slot-dock-view .ut-squad-slot-view .small.player~.fsu-cards-pos{bottom:-.6rem}.ut-store-xray-pack-details-view .large.player~.fsu-cards-attr{left:calc(50% + 42px)}.large.player .fsu-cards-attr{right:0;left:auto;}.large.player .fsu-cards-pos{right:auto;left:0;}       .fsu-akb .ut-toggle-cell-view>.ut-toggle-control .ut-toggle-control--grip,.fsu-akb-title .ut-toggle-cell-view>.ut-toggle-control .ut-toggle-control--grip{font-family:UltimateTeam-Icons,sans-serif;font-style:normal;font-variant:normal;font-weight:400;text-transform:none;flex-shrink:0;font-size:1em;text-decoration:none;text-align:center;line-height:1.5rem;transition:color .3s,bottom .3s,top .3s}.fsu-akb .ut-toggle-cell-view>.ut-toggle-control .ut-toggle-control--grip::before,.fsu-akb-title .ut-toggle-cell-view>.ut-toggle-control .ut-toggle-control--grip::before{content:'\\E051';color:#3a4755}.fsu-akb .ut-toggle-cell-view>.ut-toggle-control.toggled:not(.disabled) .ut-toggle-control--grip::before,.fsu-akb-title .ut-toggle-cell-view>.ut-toggle-control.toggled:not(.disabled) .ut-toggle-control--grip::before{content:'\\E02F';color:#36b94b}.fsu-akb .ut-toggle-cell-view>.ut-toggle-control.toggled:not(.disabled) .ut-toggle-control--track,.fsu-akb-title .ut-toggle-cell-view>.ut-toggle-control.toggled:not(.disabled) .ut-toggle-control--track{background-color:#36b94b}.fsu-akb .ut-toggle-cell-view>.ut-toggle-cell-view--label{display:none}.fsu-akb .ut-toggle-cell-view{position:absolute;z-index:10;transform:scale(0.7);padding:0 1rem 1rem 0;cursor:pointer}.fsu-akb-title{align-items:center;background-color:#2b3540;display:flex;justify-content:space-between;padding:.75rem .5rem;border-top:solid 1px #556c95}.fsu-akb-left{display:flex;align-items:center}.fsu-akb-title .ut-toggle-cell-view>.ut-toggle-control .ut-toggle-control--grip{transition:color .3s,left .3s,right .3s}.fsu-akb-left>div{padding:0 .675rem 0 0}.fsu-akb-left>div:last-child{padding-right:0}                  body.landscape.futweb{min-height: 38rem;}                                                         html[dir=ltr] .listFUTItem .entityContainer>.name.fsulocked.locked,html[dir=ltr] .listFUTItem .entityContainer>.name.fsulocked.untradeable{padding-right:2.7em}html[dir=ltr] .listFUTItem .entityContainer>.name.fsulocked.locked::before,html[dir=ltr] .listFUTItem .entityContainer>.name.fsulocked.untradeable::before{right:1.4em}                                    .filter-btn.fsu-eligibilitysearch{height:1.8rem;width:1.8rem;position:absolute;right:0}.ut-image-button-control.filter-btn.fsu-eligibilitysearch::after{font-size:1rem;content:'\\E09D'}                  .item.player>.fsu-cards-rating{position:absolute;left:50%;top:50%;font-size:5rem;transform:translate(-50%,-50%)}.large.item.player>.fsu-cards-rating{font-size:7rem}.item.player.ut-item-loading>.fsu-cards-rating{opacity:1}.item.player.ut-item-loaded>.fsu-cards-rating{opacity:0}                        .fsu-chemistryfilter{position:absolute;right:.5rem;top:.5rem;}                          .ut-list-active-tag-view .label-container.fsu-inclubtag{background-color:#0b96ff}.ut-list-active-tag-view .label-container.fsu-inclubtag::after{border-color:#0b96ff}                                           .fsu-optionbest{position:relative}.fsu-optionbest > span,.fsu-optionbest > .player-pick-option,.fsu-optionbest > .fsu-pickspc{position:relative;z-index:1}.fsu-optionbest >.no-favorites-tile{position:absolute;max-width:100%;height:120%;width:100%;margin:-15% 0 0 0;z-index:0;top:0px;right:0px;padding:0;background-image: url(https://www.ea.com/ea-sports-fc/ultimate-team/web-app/content/25E4CDAE-799B-45BE-B257-667FDCDE8044/2025/fut/dynamicObjectives/groups/f4c231d9-a38c-44a4-a932-87af2136cca5/group_background.png);}.fsu-optionbest > .no-favorites-tile::before{font-size:2.2rem;height:2.2rem;width:2.2rem;line-height:2.2rem;}.fsu-optionbest > .player-pick-option.selected ~ .no-favorites-tile::before{display:none}                      .fsu-navsbc{height:80%;justify-content:flex-end;margin-right:1rem;flex: 0 0 auto;}.fsu-navsbc button{margin:-0.25rem;width:60px;}.phone .fsu-navsbc{margin-right:.25rem}.phone .fsu-navsbc button{margin:-.1rem}    .fsu-shownavsbc .ut-navigation-button-control{width:3rem}.fsu-shownavsbc .title{flex:1 0;position:relative !important;width:auto !important;text-align:left !important;padding:0 0 0 0.5rem !important}.fsu-shownavsbc .fsu-navsbc{height:3rem}.fsu-shownavsbc .ut-iteminfochange-button-control{display:none}.fsu-shownavsbc .fsu-navsbc button{width:2.6rem}        .phone .fsu-optionbest > .no-favorites-tile{height:108%;margin:-4% 0 0 0;border-radius:10px}.phone .fsu-optionbest > .no-favorites-tile::before{font-size:1rem;height:1rem;width:1rem;line-height:1rem;margin:.25rem}                .fsu-cards-attr div.fsu-academytips{display:flex;align-content:center;justify-content:center;background:linear-gradient(to bottom,#00A7CC 0,#007D99 100%);color:#0f1010;box-shadow:0 1px 1px 0 rgba(0,0,0,.5);border:none}.fsu-academytips-icon{height:0;width:10px;margin-left:-2px;}                              .fsu-academytips-icon::before,.ut-store-pack-details-view--description.fsu-packprice:before,.fsu-cards-price.fsu-unassigned:before{font-family:UltimateTeam-Icons,sans-serif;font-style:normal;font-variant:normal;font-weight:400;text-decoration:none;text-transform:none}.fsu-academytips-icon::before{content:'\\E001'}.ut-store-pack-details-view--description.fsu-packprice:before{color:#f7b702;display:inline-block;content:'\\E096';margin-right:.25rem}.fsu-cards-price.fsu-unassigned:before{content:'\\E0C4';display:inline-block;margin-right:.3em;vertical-align:middle;color:#f7b702}                                      .fsu-cards-meta{padding:0;display:flex;font-family:UltimateTeam,sans-serif;font-size:.8rem;height:1rem;align-items:center;z-index:5;cursor:pointer;}.fsu-cards-meta > div{margin-right:.2rem}.fsu-cards-meta > div:first-child{border-radius:4px 0 0 4px;height:1rem;width:1.6rem;font-weight:900;}                                button.currency.call-to-action.fsu-challengefastbtn{height:2.6rem;line-height:1.4rem;padding:0px 1rem;font-size:1rem}button.currency.call-to-action.fsu-challengefastbtn > span{display: block !important;}button.currency.call-to-action.fsu-challengefastbtn .subtext{font-size:80%;line-height:1rem;color:#a6a6a6;}.ut-sbc-challenge-table-row-view .fsu-challengefastbtn{width:70%}@media (min-width:768px){.ut-sbc-challenge-table-row-view .fsu-challengefastbtn{width:60%}}.ut-sbc-challenge-table-row-view.selected button.currency.call-to-action.fsu-challengefastbtn{background-color:#222426;color:#fcfcf7}.ut-sbc-challenge-table-row-view.selected button.currency.call-to-action.fsu-challengefastbtn.hover{background-color:#575753}.ut-sbc-challenge-table-row-view button.currency.call-to-action.fsu-challengefastbtn.disabled{background-color:#575753;color:#30312f}                                     .fsu-navsbccount{padding:.2em 0;margin-right:.5rem;align-items:center;display:flex;justify-content:flex-end}.fsu-navsbccount::after{background-position:right top;content:'';background-repeat:no-repeat;background-size:100%;display:inline-block;height:1em;vertical-align:middle;width:1em;background-image:url(https://www.ea.com/ea-sports-fc/ultimate-team/web-app/images/sbc/logo_SBC_home_tile.png);margin-top:-.15em;margin-left:.3em}                                .ut-image-button-control.filter-btn.fsu-transfer::after{content:'\\E0E5';font-size:1.6rem}.ut-image-button-control.filter-btn.fsu-club::after{content:'\\E052';font-size:1.6rem}.ut-image-button-control.filter-btn.fsu-swap::after{content:'\\E0E4';font-size:1.4rem}.ut-image-button-control.filter-btn.fsu-refresh::after{content:'\\E0C4';font-size:1.4rem}.ut-image-button-control.filter-btn.fsu-storage::after{content:'\\E0C9';font-size:1.4rem}.filter-btn.fsu-swap,.filter-btn.fsu-transfer,.filter-btn.fsu-club,.filter-btn.fsu-storage,.filter-btn.fsu-refresh{margin-left:1rem;width:3rem;height:3rem}                                            .ut-club-hub-view .tile.fsu-storage .tileContent:before { content:'\\E0C9'; }                          .ut-list-active-tag-view .label-container.fsu-instoragetag,.listFUTItem.hover .ut-list-active-tag-view .label-container.fsu-instoragetag{background-color:#f19be6}.ut-list-active-tag-view .label-container.fsu-instoragetag::after,.listFUTItem.hover .ut-list-active-tag-view .label-container.fsu-instoragetag::after{border-top-color:#f19be6}                                                                                                                                      .ut-player-picks-view .carousel-indicator-dots.fsu-pickbest li{width:16px;height:16px;text-align:center;overflow:hidden}.ut-player-picks-view .carousel-indicator-dots.fsu-pickbest li.active{transform:scale(1.4)}.ut-player-picks-view .carousel-indicator-dots.fsu-pickbest li.best::after{content:'\\E0D4';font-family:UltimateTeam-Icons,sans-serif;font-style:normal;font-variant:normal;font-weight:400;text-decoration:none;text-transform:none;color:#07f468;font-size:1rem;line-height:1.1rem}.ut-player-picks-view .carousel-indicator-dots.fsu-pickbest li.best.active::after{color:#fd4821}                                     .ut-button-group button.more.fsu-open::after{-webkit-transform:rotate(0deg) !important;transform:rotate(0deg) !important}                                                                .fsu-sbcNeedsBody,.fsu-realProdBody{height:30vh;overflow-y:auto}.fsu-sbcNeedsTitle,.fsu-sbcNeedsBodyItem,.fsu-realProdTitle,.fsu-realProdBodyItem{display:flex}.fsu-sbcNeedsTitle,.fsu-realProdTitle{padding:.5rem 1rem;background-color:#30312f;font-size:1rem}.fsu-sbcNeedsBodyItem,.fsu-realProdBodyItem{padding:.75rem 1rem;align-items:center;background-color:#18191b;font-size:1em}.fsu-sbcNeedsBodyItem:nth-of-type(even),.fsu-realProdBodyItem:nth-of-type(even){background-color:#212224}.fsu-sbcNeedsTitle div,.fsu-sbcNeedsBodyItem div{width:18%}.fsu-realProdTitle div,.fsu-realProdBodyItem div{width:20%}.fsu-sbcNeedsTitle div:last-child,.fsu-sbcNeedsBodyItem div:last-child{width:28%;text-align:right}.fsu-realProdTitle div:first-child,.fsu-realProdBodyItem div:first-child{width:40%}                                    .fsu-price-reward::after{font-family:UltimateTeam-Icons,sans-serif;content:'\\E0C9';font-size:94%;color:#fae8e6}.small.player .fsu-price-box{font-size:90%}.large.player .fsu-price-box{font-size:1rem}.small.player .fsu-price-box,.large.player .fsu-price-box{display:flex;justify-content:center;align-items:center}.fsu-price-box.old{background-color:#0f1417;color:#a4a9b4;border:0}.fsu-price-val[data-value='0'][data-type='1']{display:none !important}.fsu-cards-price::after{margin-left:.2em !important;margin-top:0}.large.player .fsu-cards-price.currency-coins::after{margin-top:-.15em}.fsu-price-box.right>div .value{font-size:1.2rem;margin-top:.5rem;line-height:1.2rem;display:flex;justify-content:center;align-items:center}.fsu-price-val .fsu-price-reward::after{margin-left:.3em;font-size:80%;margin-top:-.15em}                              .fsu-cards-foot{position:relative}.fsu-cards-foot::after{content:'';height:3px;width:3px;background-color:var(--fsu-cards-foot-color);display:block;position:absolute;bottom:0px;border-radius:2px}.fsu-cards-foot.l::after{left:0px}.fsu-cards-foot.r::after{right:0px}                    .fsu-cards-attr div,.fsu-cards-pos div{border:1px solid;border-color:inherit;line-height:100%;border-radius:5px;color:var(--fsu-cards-color);background:var(--fsu-cards-background);width:22px;white-space:nowrap;height: 13px;line-height: 15px;}                        .fsu-lockbtn{padding:0 8px !important;min-height:30px !important;position:absolute;right:64px;bottom:0;font-size:0.75rem !important;z-index:2;display:flex;align-items:center}.fsu-lockbtn.lock::before{content:'\\E09C'}.fsu-lockbtn.unlock::before{content:'\\E09C'}.fsu-lockbtn::before{font-family:UltimateTeam-Icons,sans-serif;padding-right:.2rem;content:'';display:block}.fsu-lockbtn.unlock{background-color:#fcfcf7;color:#151616}.fsu-lockbtn.unlock::after{content:'';display:block;position:absolute;left:18px;top:10px;width:2px;height:16px;background:#ff4c4c;transform:rotate(45deg);transform-origin:top center}.ut-club-hub-view .tile.fsu-lock .tileContent:before { content:'\\E09C'; }html[dir=ltr] .listFUTItem .entityContainer>.name.fsulocked::after{font-family:UltimateTeam-Icons,sans-serif;color:#d31332;margin-top:2px;position:absolute;width:1.1em;content:'\\E09C';right:0}html[dir=ltr] .listFUTItem .entityContainer>.name.fsulocked{padding-right:1.4em}html[dir=ltr] :not(.phone) .listFUTItem .entityContainer>.name.fsulocked.untradeable { max-width: 42%; }.fsu-cardlock{position:absolute;height:.9rem;width:.9rem;right:0;bottom:5%;z-index:2;background-color:#222426;border:1px solid #333d47;border-radius:100%;text-align:center;box-shadow:0 1px 3px #000;font-size:10.8px}.fsu-cardlock::before{font-family:UltimateTeam-Icons,sans-serif;content:'\\E09C';display:inline-block;vertical-align:middle;background-size:100% auto;color:#d31332;background-repeat:no-repeat}                                  .listfilter-btn{padding:0;width:100%;height:1.6rem;line-height:1.8rem;border-radius:.4rem;font-size:.9rem;min-height:1.6rem}                                      .ut-squad-building-set-status-label-view.refresh.sbccount{display:flex;align-items:center;gap:4px;opacity:0.5}.ut-squad-building-set-status-label-view.refresh.sbccount::before{content:'\\E0C2';color:#36b84b;font-size:14px;line-height:17px}                                                           .fsu-trypack-box{position:absolute;right:0}.landscape button.currency.fsu-trypack{padding:.25rem .5rem;width:auto;color:#f2f2f2;background:#556c95;border-radius:.6rem;align-items:center;display:flex;font-family:UltimateTeam-Icons,sans-serif;min-height:36px}.landscape button.currency.fsu-trypack .text{font-size:1rem;font-weight:600}.landscape button.currency.fsu-trypack::after{content:'\\E0A2';font-size:110%;padding-left:.2rem}.landscape button.currency.fsu-trypack.hover{background:#9e9e99}.phone .fsu-trypack-box{position:relative;}                                .fsu-player-other>div{background:#3B4754;color:#a4a9b4;padding:0.1rem 0.3rem;text-align:center;border-radius:20px;font-size:inherit;line-height:1.5;margin-right:0.5rem;height:1rem;white-space:nowrap}.fsu-player-other>div.swap{background:#36b84b;color:#201e20}.fsu-player-other>div.not{background:#8A6E2C;color:#201e20}.fsu-player-other>div.storage{background:#f6b803;color:#201e20}.fsu-player-other>div.yes{background:#264A35;color:#201e20}.large.player+.fsu-player-other{justify-content:center}.large.player+.fsu-player-other>div{margin-right:0rem}.fsu-player-other .currency-coins::after{font-size:.875rem;margin-top:-3px;margin-left:2px !important}@media (max-width:1130px){.has-auction-data .fsu-player-other{margin-top:5rem !important}.has-auction-data .fsu-price-box.trf{margin-top:5rem !important;left:auto;right:3%}}                                                                                     /*商店数量标识*/.ut-store-hub-view .storehub-tile.packs-tile.highlight[data-num]::after{content:attr(data-num);top:22px;padding:2px 6px;border-radius:4px;line-height:1.2rem;font-size:1.2rem;color:#0c0d0d;height:16px;width:auto}@media (min-width:768px){.ut-store-hub-view .storehub-tile.packs-tile.highlight[data-num]::after{height:20px;font-size:1.4rem;line-height:1.4rem;top:26px;padding:2px 8px}}                         /*旧卡样式去除边框*/.fsu-cards.old div{border:none}                                 /*阵容价值部分*/.fsu-squad-pValue{font-family:UltimateTeamCondensed,sans-serif;font-weight:400;font-size:.875rem;text-overflow:ellipsis;white-space:nowrap}.fsu-squad-pValue.currency-coins::after{font-size:.875rem;margin-left:.2em !important;margin-top:-.2em !important}.fsu-squad-pTitle .plus{color:#36b84b;padding-left:.1rem}.fsu-squad-pTitle .minus{color:#d21433;padding-left:.1rem}                                    /*弹窗球员列表显示优化*/.fsu-popupItemList{display:flex;flex-direction:column;gap:12px}.fsu-popupItemList > .listFUTItem{margin:0 !important}                                           /*改变为公共新标识*/.fsu-newtips{background-color: #ee2208;z-index:2;position:absolute;left:0;top:20px;transform:rotate(-45deg);transform-origin:0 100%;height:36px;line-height:42px;width:80px;text-align:center;font-weight:bold}            /*调整配色*/.fsu-task{display: flex;justify-content: space-between;padding: 0.5rem;background-color: #ee2208;}.fsu-task.no{background-color: #b1570c;}.task-expire{background-color: #b1570c;height: 2rem;line-height: 2rem;text-align: center;}.fsu-sbc-info{padding: 0.5rem;background-color: #2f4a5b;display: flex;font-family: UltimateTeamCondensed,sans-serif;justify-content: space-between;font-size: 1rem;}                        /*导航栏计数标识*/.fsu-tab-count{font-size:14px;align-self:center;padding:4px 6px;background-color: #575753;color:#a6a6a1;line-height:1;border-radius:4px;margin-left:6px}.selected > .fsu-tab-count{background-color: #ee2208;color:#fcfcfc}.selected > .fsu-tab-count.expire{background-color: #aa540c}.phone .fsu-tab-count{padding:2px 3px;font-size:12px;border-radius:3px}                           /*挑选包预览*/.fsu-popupItemList .listFUTItem .entityContainer>.name{padding-top:10px;padding-bottom:0px}html[dir=ltr] .fsu-popupItemList .listFUTItem .entityContainer .item{margin-right:14px}.fsu-popupItemOther{font-size:26px;display:flex;color:#ffffff;width:100%;justify-content:space-between;align-items:center;padding:8px;background-color:#2f4a5b;box-sizing:border-box;gap:12px}.fsu-popupItemOther .btn-standard{width:auto;flex:0;min-width:120px;margin-bottom:0}.fsu-popupItemTrait{display:flex;gap:8px}.phone .fsu-popupItemOther{flex-direction:column}.phone .fsu-popupItemOther .btn-standard{width:100%}.fsu-traitIcon.fut_icon.icon{color:#ffc91f}.fsu-traitIcon.fut_icon.icon_basetrait16{position:relative}.fsu-traitIcon.fut_icon.icon_basetrait16:before{content:'\\E074';z-index:1;position:relative;top:2px;background:#2f4a5b;clip-path:inset(5px 5px 10px 5px)}.fsu-traitIcon.fut_icon.icon_basetrait16::after{content:'\\E031';position:absolute;left:0;z-index:0}.fsu-popupItemList .listFUTItem .rowContent{border-radius:10px}                              /*卡片状态标识配色*/.fsu-cards-buyerror,.fsu-cards-storage,.fsu-cards-unassigned{left:auto !important;right:1% !important;background-color:#5b167d !important;border-color:#7c319e !important;color:#fae8e6 !important}.fsu-cards-buyerror{background-color:#d31332 !important;border-color:#d6675d !important;color:#fae8e6 !important}.fsu-cards-unassigned{background-color:#d19a01 !important;border-color:#DEBA43 !important;color:#FCFBF0 !important}                                             /*未分配快速任务标签*/.fsu-unassigned-fastsbcbox{display:flex;padding:6px 16px;gap:12px;overflow-x:auto}.fsu-unassigned-fastsbcbox .btn-standard{overflow:visible;position:relative;padding:3px 6px;border-radius:6px}.fsu-unassigned-fastsbcinfo{display:flex;align-items:flex-start;justify-content:center;flex-direction:column;max-width:10rem;overflow:hidden}.fsu-unassigned-fastsbcdot{position:absolute;top:-6px;right:-6px;background:#0ff;height:14px;width:14px;line-height:14px}.fsu-unassigned-fastsbctext{line-height:20px;max-width:10rem;font-size:14px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}.fsu-unassigned-fastsbctsub{line-height:12px;max-width:10rem;font-size:12px;color:rgb(166,166,166)}.fsu-unassigned-fastsbctsub span{margin:0px 2px}                                                                   /*可开球员tile和特殊品质tile*/.fsu-showPlayerstile header p{padding-top:4px;color:#a6a6a1}.fsu-showPlayerstile .img-box{text-align:center;height:160px}.fsu-showPlayerstile .img-box img{height:auto;width:80%}.fsu-showPlayerstile.fsu-specialTile .img-box img{height:80%;width:auto}.fsu-showPlayerstile.fsu-specialTile .img-box img:first-child{height:70%}.fsu-showPlayerstile.fsu-specialTile .img-box img:last-child{height:70%}.fsu-showPlayerstile .ut-label-view{margin-top:-32px}                               /*包内球员*/.fsu-showPlayers{}.fsu-showPlayersList{grid-template-columns:repeat(auto-fill,300px);display:grid;justify-content:center;gap:30px;padding:48px}.fsu-showPlayersItem{background-color:#2d2c36;border-radius:16px;color:#fcfcfc;padding:16px 16px 48px 16px;overflow:clip;position:relative}.phone .fsu-showPlayersList{padding:8px;gap:8px;grid-template-columns:1fr 1fr}.phone .fsu-showPlayersItem{zoom:0.6}.fsu-showPlayersTrais{display:flex;gap:8px;justify-content:center;font-size:24px;margin:8px 0;padding:8px 0;opacity:0.6;flex-wrap: wrap;}.fsu-showPlayersCard{display:grid;justify-content:center}.fsu-showPlayersBtn{width:100%;margin:0 -16px;border-radius:0;border:none;line-height:32px;position:absolute;bottom:0}.fsu-showPlayersLabel{position:absolute;left:0;top:0;line-height:32px;font-size:14px;color:#0f0f0f;background-color:#0b96ff;padding:0 20px;border-radius:0 0 16px 0}                               /*移除部分界面name的内间距*/.fsu-removeNamePadding ~ div.name{padding-top:14px !important;padding-bottom:0px !important}                                            /*卡组展示*/.fsu-showPlayersItem.fsu-showRarity{display:flex;flex-direction:column;font-size:14px;line-height:14px}.fsu-showRarityCard{display:grid;text-align:center;position:relative;margin-top:-16px}.fsu-showRarityCard img{height:200px;margin:auto}.fsu-showRarityCount{position:absolute;top:138px;width:100%;line-height:32px;font-size:32px;font-family:UltimateTeamCondensed,sans-serif;font-weight:bold}.fsu-showRarityBtns{display:flex;position:absolute;bottom:0;width:100%;margin:0 -16px;gap:1px;background-color:rgba(222,222,216,.25)}.fsu-showRarityBtns > button{flex:1;border:0;border-radius:0;line-height:32px}.fsu-showRarityBtns > button.btn-standard.disabled{background-color:#6a6a65}.fsu-showRarityTips{padding:0 16px;background-color:#0b96ff;color:#0f0f0f;height:32px;line-height:32px;position:absolute;top:0;left:0;border-bottom-right-radius:19px}.fsu-showRarityInfo{padding:16px 0;display:flex;flex-direction:column;gap:4px;font-size:12px;line-height:12px}.fsu-showRarityAttrs,.fsu-showRarityExpiry{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap}.fsu-showRarityExpiry{gap:6px}.fsu-showRarityExpiry i{color:#f7b702}.fsu-showRarityAttrs div{padding:4px 8px;background-color:rgba(7,244,104,.4);border-radius:20px}                          /*新SBC右侧快捷列表*/.fsu-substitutionBox{margin:0 16px;padding:12px;display:flex;flex-direction:column;gap:6px}.fsu-substitutionTitle{font-size:12px;line-height:14px}.fsu-substitutionBtns{background:#6a696d;display:flex;justify-content:space-around;font-size:14px;line-height:14px;gap:1px;border-radius:12px;overflow:clip;align-items:center}.fsu-substitutionBtns > button{flex:1;text-align:center;padding:12px 0;background:#504f52;font-size:inherit;line-height:inherit;border-radius:0;border:0;min-height:auto;}.fsu-substitutionTitle:not(:first-of-type) {margin-top: 12px;}                                                    /*新排序筛选*/.fsu-SortFilterBox{display:flex;gap:8px;margin:0px 16px 8px 16px}.fsu-SortFilterItem{flex:1;min-width:0}.fsu-SortFilterTitle{font-size:12px;line-height:14px;margin-bottom:4px;color:#a6a6a1}.fsu-SortFilterBtn{border:none;border-radius:8px;width:100%;min-height:auto;font-size:14px;background:#504f52;padding:8px 0px;white-space:nowrap;line-height:14px;overflow:hidden}.fsu-SortFilterBtn.priority{background: #786735;}                                   /*新阵容价值*/.fsu-SquadValue{position:absolute;right:20px;top:20px;font-family:UltimateTeamCondensed,sans-serif;font-weight:400}.fsu-SquadValueItem{background:#4e4f4dcc;font-size:17px;line-height:18px;padding:8px 10px 6px 10px;border-radius:4px;display:flex;align-items:center;gap:8px;color:#fcfcfc;justify-content:space-between;margin-bottom:10px}.fsu-SquadValueTitle{font-size:14px}.fsu-SquadValuePrice{}.phone .fsu-SquadValue{right:auto;left:14px;top:auto;bottom:62px;text-shadow:2px 2px 3px rgba(0,0,0,.5)}.phone .fsu-SquadValueItem{font-size:15px;line-height:16px;padding:0px;margin-bottom:0px;background:none;margin-top:8px}.phone .fsu-SquadValueTitle{font-size:13px}                               /*新价格显示框*/.fsu-PriceBar{position:absolute;transform:translateX(-50%) scale(0.9) !important;left:50%;z-index:2;font-family:UltimateTeamCondensed,sans-serif;display:flex;gap:8px}.fsu-PriceBarItem{display:flex;align-items:stretch;justify-content:center;background-color:#13151d;border:1px solid #3f444b;font-size:15px;border-radius:4px;overflow:hidden;height:17px;box-shadow:0px 1px 3px rgb(63 68 75 / 40%)}.fsu-PriceBarItem .fsu-PriceValue{display:flex;align-items:center;padding:3px 4px 0px 4px;color:#f7b702}.fsu-PriceBarItem .fsu-PriceType{display:flex;align-items:center;padding:2px 3px 0 1.6px;background-color:#2b3036;color:#a0a0a0;font-size:11px;font-weight:700;font-style:italic;letter-spacing:.4px;text-transform:uppercase}.large.player .fsu-PriceBar{transform:translateX(-50%) scale(1.2) !important;top:4px}.fsu-PriceRightBox{position:absolute;right:16px;z-index:2;transform:translateY(-50%) !important;top:50%;display:flex;gap:16px;font-family:UltimateTeamCondensed,sans-serif}.fsu-PriceRightItem{background-color:#3b4754;border-radius:8px;padding:8px 6px;color:#a4a9b4;display:flex;flex-direction:column;gap:8px;align-items:center}.fsu-PriceRightBox.top{top:16px}.fsu-PriceRightBox.top .fsu-PriceRightItem{flex-direction:row;padding:4px 6px 2px}.fsu-PriceRightBoxTitle{font-size:14px;text-align:center;line-height:14px}.fsu-PriceRightBoxBar{display:flex;justify-content:center;align-items:center}.fsu-PriceRightItem .fsu-PriceValue{font-size:22px;line-height:18px;color:#f7b702}.fsu-PriceRightItem .fsu-PriceType{text-transform:uppercase;font-size:14px;font-weight:500;padding:3px 4px 2.2px 1.6px;background-color:#2b3036;color:#a0a0a0;font-style:italic;margin-left:4px;border-radius:4px;margin-top:-3px}.fsu-PriceBarItem[data-show='0'],.fsu-PriceRightItem[data-show='0']{display:none !important}.fsu-PriceBarItem.tradable .fsu-PriceValue,.fsu-PriceRightItem.tradable .fsu-PriceValue{color:#fcfcfc}.fsu-PriceType[data-content='ut']{font-size:0}.fsu-PriceType[data-content='ut']::after{background-position:right top;content:'';background-repeat:no-repeat;background-size:100%;display:inline-block;height:12px;vertical-align:middle;width:12px;background-image:url(../web-app/images/coinIcon.png);margin-top:-2px;margin-right:-1px}.fsu-PriceBarItem.precious .fsu-PriceType{background-color:#fd7254}.fsu-PriceBarItem.precious{background:#ee2208;border-color:#fd7254}.fsu-PriceRightBoxBar .fsu-PriceType[data-content='ut']{height:16px;width:16px}.fsu-PriceRightBoxBar .fsu-PriceType[data-content='ut']::after{margin-top:0.5px;margin-right:0px;margin-left:2px;height:14px;width:14px}                                /*进化增加属性展示*/.fsu-academyAttribute{font-family:UltimateTeam-Icons,sans-serif;font-size:14px;line-height:16px;color:#80807a}.fsu-academyAttributeIncrease{padding-left:8px;padding-right:4px}.fsu-academyAttributeIncrease span{color:#07f468}.fsu-academyAttributeValue{font-weight:bold;font-size:16px}.fsu-academyAttributeValue.added{color:#0b96ff}.fsu-academyAttributeValue.addedMain{color:#fd4821}                                    /*进化属性显示*/.academieBtn{background:#2d2c36;border-radius:8px;padding:8px 12px 6px 12px;cursor:pointer;margin-bottom:8px;font-family:UltimateTeamCondensed,sans-serif;border:1px solid #2d2c36}.academieBtn.not{opacity:0.5}.academieBtn:hover{border-color:#1fc3c1}.academieBtnTitle{display:flex;align-items:center;justify-content:space-between;line-height:14px;margin-bottom:6px}.academieBtnName{color:#b5b9c3;font-size:14px}.academieBtnTime{font-size:12px;color:#9e9e9a}.academyBoostsBox{display:flex;gap:4px;font-size:12px;line-height:11px;text-transform:uppercase;flex-wrap:wrap;flex-direction:row}.academyBoostsItem{padding:4px 4px 1px 4px;border-radius:4px;font-weight:500;background:#3a4652;color:#d4d8de}.academyBoostsItem span{color:#07f468;font-size:16px;padding-left:2px;font-weight:100}.academyBoostsTips{flex:100%;padding-top:6px;color:#9e9e9a}.academyBtnTips{color:#fd7254;padding:8px 4px;font-size:14px;text-align:center}.academyViewBox{background:#191820;border-radius:8px;padding:8px 12px 6px 12px;margin-bottom:8px;font-family:UltimateTeamCondensed,sans-serif}.academyViewBox .academyBoostsBox{gap:8px;justify-content:center}.academyViewBox .academyBoostsTips{text-align:center}.academyViewBox.itemList{padding:24px 8px 8px;margin:-32px 16px 16px}.academyViewBox.itemList .academyBoostsBox{gap:4px}.academyViewBox.itemList .academyBoostsBox > *{zoom:0.8}                                    /*进化需求按钮*/.fsu-substitutionBtns>button.fsu-substitutionReqBtn{display:flex;align-items:center;justify-content:center;gap:4px;position:relative;height:36px}.fsu-substitutionReqBtn>img{height:24px;width:auto}.fsu-substitutionReqBtn>img.small{height:20px;width:20px}.fsu-substitutionReqBtn>div{position:absolute;right:0;bottom:0;padding:3px 4px 0px;background:rgb(253 114 84 / 70%);font-size:14px;line-height:12px;border-top-left-radius:4px}.fsu-substitutionReqBtn.state-meet>div{background:rgb(38 133 53 / 70%)} */                                                     /*CSS*/"
         info.base.sytle += `
+            .fsu-language-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+            .fsu-language-option{box-sizing:border-box;min-width:0;min-height:44px;margin:0;padding:0 10px;border:1px solid #575753;border-radius:8px;background:#30312f;color:#d7d9dc;font-family:UltimateTeam,sans-serif;font-size:14px;line-height:42px;white-space:nowrap}
+            .fsu-language-option[aria-pressed="true"]{border-color:#07f468;background:#264a35;color:#fff;box-shadow:inset 0 0 0 1px rgba(7,244,104,.18)}
+            .fsu-language-option:hover,.fsu-language-option:active{border-color:#1fc3c1;background:#3b4754}
             .ut-club-hub-view .tile.fsu-clubplayers .tileContent:before{content:'\\E052'}
             .fsu-clubPlayersDashboard{min-height:100%;background:#191820;color:#fcfcfc;font-family:UltimateTeam,sans-serif}
             .fsu-clubPlayersToolbar{position:sticky;top:0;z-index:20;padding:16px 20px;background:rgba(25,24,32,.97);border-bottom:1px solid #3f444b;box-shadow:0 10px 24px rgba(0,0,0,.18)}
@@ -1932,26 +2601,36 @@
             .fsu-fastSBCPlan[data-state="filling"] .fsu-fastSBCPlanStatus,
             .fsu-fastSBCPlan[data-state="submitting"] .fsu-fastSBCPlanStatus{color:#f7d36a}
             .fsu-fastSBCPlan[data-state="invalid"] .fsu-fastSBCPlanStatus{color:#ff9e91}
-            .fsu-fastSBCPlanList{display:flex;min-height:0;flex:1 1 auto;flex-direction:column;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:4px 12px;background:#191820;scrollbar-color:#575753 #23232b;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+            .fsu-fastSBCPlanList{display:flex;min-height:0;flex:1 1 auto;flex-direction:column;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:8px 12px;background:#191820;scrollbar-color:#575753 #23232b;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
             .fsu-fastSBCPlanList::-webkit-scrollbar{width:7px}
             .fsu-fastSBCPlanList::-webkit-scrollbar-track{background:#23232b}
             .fsu-fastSBCPlanList::-webkit-scrollbar-thumb{border:2px solid #23232b;border-radius:7px;background:#575753}
-            .fsu-fastSBCPlanPlayer{display:grid;min-width:0;min-height:150px;padding:2px 24px;align-items:center;justify-items:start;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.07)}
+            .fsu-fastSBCPlanPlayer{display:grid;min-width:0;min-height:78px;grid-template-columns:58px minmax(0,1fr) auto;align-items:center;gap:10px;padding:4px 8px;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.07)}
             .fsu-fastSBCPlanPlayer:last-child{border-bottom:0}
-            .fsu-fastSBCPlanPlayerCard{display:grid;width:120px;height:146px;place-items:center;overflow:hidden;pointer-events:none}
-            .fsu-fastSBCPlanPlayerCardView{max-width:none!important;max-height:none!important;pointer-events:none!important;zoom:.43}
+            .fsu-fastSBCPlanPlayerCard{display:grid;width:58px;height:70px;place-items:center;overflow:hidden;pointer-events:none}
+            .fsu-fastSBCPlanPlayerCardView{max-width:none!important;max-height:none!important;pointer-events:none!important;zoom:.22}
             .fsu-fastSBCPlanPlayerCard .fsu-cards,
             .fsu-fastSBCPlanPlayerCard .fsu-player-other,
             .fsu-fastSBCPlanPlayerCard .fsu-cards-attr,
             .fsu-fastSBCPlanPlayerCard .fsu-cards-pos,
             .fsu-fastSBCPlanPlayerCard .fsu-cardlock,
             .fsu-fastSBCPlanPlayerCard .fsu-lockbtn{display:none!important}
-            .fsu-fastSBCPlanPlayerCardFallback{display:grid;width:88px;height:122px;place-items:center;border:1px solid #4b515a;border-radius:10px;background:linear-gradient(145deg,#3b414b,#252831);color:#aeb3ba;font-family:UltimateTeam,sans-serif;font-size:26px;font-weight:700;clip-path:polygon(12% 0,88% 0,100% 9%,100% 82%,50% 100%,0 82%,0 9%)}
+            .fsu-fastSBCPlanPlayerCardFallback{display:grid;width:44px;height:60px;place-items:center;border:1px solid #4b515a;border-radius:7px;background:linear-gradient(145deg,#3b414b,#252831);color:#f7d36a;font-family:UltimateTeam,sans-serif;font-size:15px;font-weight:800;clip-path:polygon(12% 0,88% 0,100% 9%,100% 82%,50% 100%,0 82%,0 9%)}
+            .fsu-fastSBCPlanPlayerBody{min-width:0}
+            .fsu-fastSBCPlanPlayerName{display:flex;min-width:0;align-items:baseline;gap:8px;overflow:hidden;color:#f3f4f5;font-family:UltimateTeam,sans-serif;font-size:14px;font-weight:650;line-height:18px;white-space:nowrap}
+            .fsu-fastSBCPlanPlayerRating{flex:0 0 auto;color:#f7d36a;font-size:16px;font-weight:800}
+            .fsu-fastSBCPlanPlayerNameText{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+            .fsu-fastSBCPlanPlayerMeta{display:flex;min-width:0;align-items:center;gap:5px;margin-top:3px;color:#9299a1;font-size:11px;line-height:14px}
+            .fsu-fastSBCPlanPlayerMeta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+            .fsu-fastSBCPlanPlayerLocation{max-width:104px;padding:4px 7px 2px;border-radius:999px;background:#2e493f;color:#9cf3c2;font-size:11px;line-height:14px;text-align:center;white-space:nowrap}
+            .fsu-fastSBCPlanPlayerLocation--storage{background:#554619;color:#ffe28a}
             .fsu-fastSBCPlanList[data-layout="grid"]{display:grid;grid-template-columns:repeat(4,minmax(0,120px));align-content:start;justify-content:center;gap:0;padding:4px 6px}
-            .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayer{min-height:148px;padding:0;justify-items:center;border:0}
+            .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayer{min-height:148px;grid-template-columns:minmax(0,1fr);gap:0;padding:0;justify-items:center;border:0}
             .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCard{width:100%;max-width:120px;height:146px}
             .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardView{zoom:.43}
             .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardFallback{width:88px;height:122px;font-size:26px}
+            .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerBody,
+            .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerLocation{display:none}
             .fsu-fastSBCPlanFooter{display:grid;flex:0 0 auto;grid-template-columns:minmax(0,.9fr) minmax(0,1fr) minmax(0,1.18fr);gap:9px;padding:11px 14px 13px;border-top:1px solid #3f444b;background:#22232b}
             .fsu-fastSBCPlanRegenerate,.fsu-fastSBCPlanFill,.fsu-fastSBCPlanSubmit{box-sizing:border-box!important;width:100%!important;min-height:44px!important;height:44px!important;margin:0!important;padding:0 12px!important;border-radius:9px!important;font-size:14px!important;line-height:42px!important;white-space:nowrap!important}
             .fsu-fastSBCPlanRegenerate{border:1px solid #4b515a!important;background:#30343e!important;color:#e5e7e9!important}
@@ -1964,7 +2643,7 @@
             .fsu-fastSBCPlanSubmit.disabled,.fsu-fastSBCPlanSubmit:disabled{filter:none!important;opacity:.38!important}
             .fsu-fastSBCPlanError{display:none;grid-column:1/-1;padding:8px 10px;border:1px solid #75433f;border-radius:8px;background:#422c2d;color:#ffc1b9;font-size:12px;line-height:16px}
             .fsu-fastSBCPlan[data-state="invalid"] .fsu-fastSBCPlanError{display:block}
-            @media (max-width:620px){.fsu-fastSBCPlanOverlay{padding:6px!important}.fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}.fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}.fsu-fastSBCPlanDialogBody{height:100%!important;min-height:0!important}.fsu-fastSBCPlan{height:100%!important;max-height:none!important}.fsu-fastSBCPlanHeaderMeta{gap:6px}.fsu-fastSBCPlanSummary{font-size:12px}.fsu-fastSBCPlanViewButton{min-width:46px!important;padding:0 7px!important}.fsu-fastSBCPlanList{padding:4px 7px}.fsu-fastSBCPlanPlayer{min-height:144px;padding:0 20px}.fsu-fastSBCPlanPlayerCard{width:114px;height:144px}.fsu-fastSBCPlanPlayerCardView{zoom:.43}.fsu-fastSBCPlanPlayerCardFallback{width:86px;height:120px}.fsu-fastSBCPlanList[data-layout="grid"]{grid-template-columns:repeat(3,minmax(0,114px));gap:0;padding:4px 2px}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayer{min-height:144px;padding:0;justify-items:center}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCard{width:100%;max-width:114px;height:144px}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardView{zoom:.43}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardFallback{width:86px;height:120px}.fsu-fastSBCPlanFooter{grid-template-columns:repeat(2,minmax(0,1fr))}.fsu-fastSBCPlanRegenerate{grid-column:1/-1}}
+            @media (max-width:620px){.fsu-fastSBCPlanOverlay{padding:6px!important}.fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}.fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}.fsu-fastSBCPlanDialogBody{height:100%!important;min-height:0!important}.fsu-fastSBCPlan{height:100%!important;max-height:none!important}.fsu-fastSBCPlanHeaderMeta{gap:6px}.fsu-fastSBCPlanSummary{font-size:12px}.fsu-fastSBCPlanViewButton{min-width:46px!important;padding:0 7px!important}.fsu-fastSBCPlanList{padding:5px 7px}.fsu-fastSBCPlanPlayer{min-height:74px;grid-template-columns:50px minmax(0,1fr) auto;gap:7px;padding:4px 5px}.fsu-fastSBCPlanPlayerCard{width:50px;height:68px}.fsu-fastSBCPlanPlayerCardView{zoom:.2}.fsu-fastSBCPlanPlayerCardFallback{width:40px;height:56px;font-size:14px}.fsu-fastSBCPlanPlayerLocation{max-width:82px;padding-right:5px;padding-left:5px}.fsu-fastSBCPlanList[data-layout="grid"]{grid-template-columns:repeat(3,minmax(0,114px));gap:0;padding:4px 2px}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayer{min-height:144px;grid-template-columns:minmax(0,1fr);gap:0;padding:0;justify-items:center}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCard{width:100%;max-width:114px;height:144px}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardView{zoom:.43}.fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardFallback{width:86px;height:120px;font-size:26px}.fsu-fastSBCPlanFooter{grid-template-columns:repeat(2,minmax(0,1fr))}.fsu-fastSBCPlanRegenerate{grid-column:1/-1}}
             .phone .fsu-fastSBCPlanOverlay{padding:6px!important}
             .phone .fsu-fastSBCPlanDialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100vh - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important}
             .phone .fsu-fastSBCPlanDialogHeader{min-height:52px!important;flex-basis:52px!important;padding:0 58px!important}
@@ -1976,13 +2655,14 @@
             .phone .fsu-fastSBCPlanSummary{font-size:12px}
             .phone .fsu-fastSBCPlanViewButton{min-width:46px!important;padding:0 7px!important}
             .phone .fsu-fastSBCPlanNavigator{padding:8px 10px}
-            .phone .fsu-fastSBCPlanList{padding:4px 7px}
-            .phone .fsu-fastSBCPlanPlayer{min-height:144px;padding:0 20px}
-            .phone .fsu-fastSBCPlanPlayerCard{width:114px;height:144px}
-            .phone .fsu-fastSBCPlanPlayerCardView{zoom:.43}
-            .phone .fsu-fastSBCPlanPlayerCardFallback{width:86px;height:120px}
+            .phone .fsu-fastSBCPlanList{padding:5px 7px}
+            .phone .fsu-fastSBCPlanPlayer{min-height:74px;grid-template-columns:50px minmax(0,1fr) auto;gap:7px;padding:4px 5px}
+            .phone .fsu-fastSBCPlanPlayerCard{width:50px;height:68px}
+            .phone .fsu-fastSBCPlanPlayerCardView{zoom:.2}
+            .phone .fsu-fastSBCPlanPlayerCardFallback{width:40px;height:56px;font-size:14px}
+            .phone .fsu-fastSBCPlanPlayerLocation{max-width:82px;padding-right:5px;padding-left:5px}
             .phone .fsu-fastSBCPlanList[data-layout="grid"]{grid-template-columns:repeat(3,minmax(0,114px));gap:0;padding:4px 2px}
-            .phone .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayer{min-height:144px;padding:0;justify-items:center}
+            .phone .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayer{min-height:144px;grid-template-columns:minmax(0,1fr);gap:0;padding:0;justify-items:center}
             .phone .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCard{width:100%;max-width:114px;height:144px}
             .phone .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardView{zoom:.43}
             .phone .fsu-fastSBCPlanList[data-layout="grid"] .fsu-fastSBCPlanPlayerCardFallback{width:86px;height:120px}
@@ -2488,10 +3168,7 @@
             if (!this._generated) {
                 call.view.login.call(this, ...args);
 
-                let locale = services.Localization.locale;
-                if(locale.language == "zh"){
-                    info.language = locale.variant == "Hans" ? 0 : 1;
-                }
+                applyFSULanguagePreference(info.languagePreference);
                 events.notice("notice.succeeded",0);
                 let psBtn = events.createElementWithConfig("div",{
                     textContent:fy("notice.succeeded"),
@@ -8025,6 +8702,50 @@
                 let i = document.createElement("div");
                 i.classList.add("ut-pinned-list");
 
+                let languageSection = document.createElement("div");
+                languageSection.classList.add("sort-filter-container");
+                let languageTitle = document.createElement("h4");
+                languageTitle.textContent = fy("set.language.title");
+                languageSection.appendChild(languageTitle);
+                let languageOptions = document.createElement("div");
+                languageOptions.classList.add("fsu-language-options");
+                this._languageButtons = {};
+                _.forEach([
+                    { id: "auto", label: "set.language.auto" },
+                    { id: "en", label: "set.language.english" },
+                    { id: "ko", label: "set.language.korean" }
+                ], option => {
+                    const button = events.createElementWithConfig("button", {
+                        classList: "fsu-language-option",
+                        textContent: fy(option.label),
+                        attributes: {
+                            "type": "button",
+                            "aria-pressed": String(info.set.language === option.id)
+                        }
+                    });
+                    button.addEventListener("click", event => {
+                        event.preventDefault();
+                        if(info.set.language === option.id){
+                            return;
+                        }
+                        info.set.language = option.id;
+                        GM_setValue("set", JSON.stringify(info.set));
+                        applyFSULanguagePreference(option.id);
+                        _.forOwn(this._languageButtons, (languageButton, languageId) => {
+                            languageButton.setAttribute(
+                                "aria-pressed",
+                                String(languageId === option.id)
+                            );
+                        });
+                        events.notice("notice.languagechanged", 0);
+                        setTimeout(() => window.location.reload(), 700);
+                    });
+                    this._languageButtons[option.id] = button;
+                    languageOptions.appendChild(button);
+                });
+                languageSection.appendChild(languageOptions);
+                i.appendChild(languageSection);
+
                 let ics = document.createElement("div");
                 ics.classList.add("sort-filter-container");
                 let icst = document.createElement("h4");
@@ -8216,8 +8937,12 @@
             if(!b.hasOwnProperty("goldenrange")){
                 b["goldenrange"] = 83;
             }
+            if(!["auto", "en", "ko"].includes(b.language)){
+                b.language = "auto";
+            }
             console.log(b)
             info.set = b;
+            applyFSULanguagePreference(b.language);
         }
         set.save = function(s,r){
             info.set[s] = r;
@@ -12426,8 +13151,8 @@
                         const row = events.createElementWithConfig("div", {
                             classList: "fsu-fastSBCPlanPlayer",
                             attributes: {
-                                "role": "img",
-                                "aria-label": snapshot.name
+                                "aria-label": `${snapshot.rating || "—"} ${snapshot.name}`,
+                                "title": fy(["fastsbc.plan.itemid", snapshot.itemId])
                             }
                         });
                         const card = events.createElementWithConfig("div", {
@@ -12453,7 +13178,7 @@
                             itemView?.dealloc?.();
                             card.appendChild(events.createElementWithConfig("div", {
                                 classList: "fsu-fastSBCPlanPlayerCardFallback",
-                                textContent: "?"
+                                textContent: snapshot.rating || "?"
                             }));
                             console.warn(
                                 "[FSU] Fast SBC player card render failed",
@@ -12462,6 +13187,45 @@
                             );
                         }
                         row.appendChild(card);
+                        const body = events.createElementWithConfig("div", {
+                            classList: "fsu-fastSBCPlanPlayerBody"
+                        });
+                        const name = events.createElementWithConfig("div", {
+                            classList: "fsu-fastSBCPlanPlayerName",
+                            attributes: {
+                                "title": `${snapshot.rating || "—"} ${snapshot.name}`
+                            }
+                        });
+                        name.appendChild(events.createElementWithConfig("span", {
+                            classList: "fsu-fastSBCPlanPlayerRating",
+                            textContent: snapshot.rating || "—"
+                        }));
+                        name.appendChild(events.createElementWithConfig("span", {
+                            classList: "fsu-fastSBCPlanPlayerNameText",
+                            textContent: snapshot.name
+                        }));
+                        body.appendChild(name);
+                        const meta = events.createElementWithConfig("div", {
+                            classList: "fsu-fastSBCPlanPlayerMeta"
+                        });
+                        meta.appendChild(events.createElementWithConfig("span", {
+                            textContent: `${snapshot.position} · ${snapshot.rarity}`
+                        }));
+                        meta.appendChild(events.createElementWithConfig("span", {
+                            textContent: fy(
+                                snapshot.tradeable
+                                    ? "clubplayers.tradeable.yes"
+                                    : "clubplayers.tradeable.no"
+                            )
+                        }));
+                        body.appendChild(meta);
+                        row.appendChild(body);
+                        row.appendChild(events.createElementWithConfig("div", {
+                            classList: snapshot.location === "storage"
+                                ? ["fsu-fastSBCPlanPlayerLocation", "fsu-fastSBCPlanPlayerLocation--storage"]
+                                : "fsu-fastSBCPlanPlayerLocation",
+                            textContent: fy(`fastsbc.plan.location.${snapshot.location}`)
+                        }));
                         list.appendChild(row);
                     })
                     list.scrollTop = 0;
