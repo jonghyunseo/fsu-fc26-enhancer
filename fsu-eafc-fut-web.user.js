@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.11.01
+// @version      26.12.00
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -11228,12 +11228,49 @@
                 }))
                 .value();
         }
+        events.getFastSBCChallengeGroupConstraint = (requirement, key, values) => {
+            const groupKeys = new Map();
+            if(SBCEligibilityKey.SAME_NATION_COUNT !== undefined){
+                groupKeys.set(SBCEligibilityKey.SAME_NATION_COUNT, "nationId");
+            }
+            if(SBCEligibilityKey.SAME_LEAGUE_COUNT !== undefined){
+                groupKeys.set(SBCEligibilityKey.SAME_LEAGUE_COUNT, "leagueId");
+            }
+            if(SBCEligibilityKey.SAME_CLUB_COUNT !== undefined){
+                groupKeys.set(SBCEligibilityKey.SAME_CLUB_COUNT, "teamId");
+            }
+            const property = groupKeys.get(key);
+            const target = Number(values?.[0]);
+            if(!property || !Number.isFinite(target) || target < 0){
+                return null;
+            }
+            let operator = "exact";
+            if(
+                typeof SBCEligibilityScope !== "undefined" &&
+                requirement?.scope === SBCEligibilityScope.GREATER
+            ){
+                operator = "min";
+            }else if(
+                typeof SBCEligibilityScope !== "undefined" &&
+                requirement?.scope === SBCEligibilityScope.LOWER
+            ){
+                operator = "max";
+            }
+            return {
+                key,
+                property,
+                target,
+                operator,
+                source: requirement
+            };
+        }
         events.getFastSBCChallengeSpec = (challenge) => {
             if(!challenge?.eligibilityRequirements?.length || !challenge?.squad){
                 return {
                     supported: false,
                     requiredCount: 0,
                     individual: [],
+                    group: [],
                     unsupportedKeys: []
                 };
             }
@@ -11249,11 +11286,15 @@
                 SBCEligibilityKey.PLAYER_MIN_OVR,
                 SBCEligibilityKey.PLAYER_QUALITY,
                 SBCEligibilityKey.PLAYER_RARITY,
-                SBCEligibilityKey.PLAYER_RARITY_GROUP
+                SBCEligibilityKey.PLAYER_RARITY_GROUP,
+                SBCEligibilityKey.SAME_NATION_COUNT,
+                SBCEligibilityKey.SAME_LEAGUE_COUNT,
+                SBCEligibilityKey.SAME_CLUB_COUNT
             ], key => key !== undefined));
             const slots = events.getFastSBCChallengeSlots(challenge);
             const requiredCount = slots.length;
             const individual = [];
+            const group = [];
             const unsupportedKeys = [];
             let targetRating = 0;
             let targetChemistry = 0;
@@ -11289,6 +11330,12 @@
                     minPlayerChemistry = Math.max(minPlayerChemistry, firstValue);
                     return;
                 }
+                const groupConstraint =
+                    events.getFastSBCChallengeGroupConstraint(requirement, key, values);
+                if(groupConstraint){
+                    group.push(groupConstraint);
+                    return;
+                }
                 const rawCount = Number(requirement?.count ?? 0);
                 const count = rawCount === -1
                     ? requiredCount
@@ -11311,12 +11358,14 @@
                 targetChemistry,
                 minPlayerChemistry,
                 individual,
+                group,
                 unsupportedKeys,
                 isChallengePlan:
                     targetRating > 0 ||
                     targetChemistry > 0 ||
                     minPlayerChemistry > 0 ||
-                    individual.length > 0
+                    individual.length > 0 ||
+                    group.length > 0
             };
         }
         events.canGenerateFastSBCChallengePlans = (challenge) => {
@@ -11324,7 +11373,11 @@
             return Boolean(spec.supported && spec.isChallengePlan);
         }
         events.getFastSBCChallengeLinkedTeamId = teamId => {
-            return repositories.TeamConfig?.teamLinks?.get?.(teamId) ?? teamId;
+            return (
+                repositories.TeamConfig?.getLinkedTeam?.(teamId) ??
+                repositories.TeamConfig?.teamLinks?.get?.(teamId) ??
+                teamId
+            );
         }
         events.matchesFastSBCChallengeRequirement = (player, requirement) => {
             if(!player || !requirement){
@@ -11542,6 +11595,54 @@
             const positions = player?.basePossiblePositions ?? player?.possiblePositions ?? [];
             return _.includes(positions, Number(position));
         }
+        events.getFastSBCChallengeGroupKey = (player, constraint) => {
+            if(!player || !constraint){
+                return null;
+            }
+            if(constraint.property === "teamId"){
+                return String(
+                    events.getFastSBCChallengeLinkedTeamId(player.teamId)
+                );
+            }
+            const value = player[constraint.property];
+            return value === undefined || value === null ? null : String(value);
+        }
+        events.getFastSBCChallengeGroupValue = (players, constraint) => {
+            const counts = new Map();
+            _.forEach(_.filter(players), player => {
+                const key = events.getFastSBCChallengeGroupKey(player, constraint);
+                if(key !== null){
+                    counts.set(key, Number(counts.get(key) ?? 0) + 1);
+                }
+            })
+            return counts.size
+                ? Math.max(...Array.from(counts.values()))
+                : 0;
+        }
+        events.getFastSBCChallengeGroupViolation = (players, constraint) => {
+            const value = events.getFastSBCChallengeGroupValue(players, constraint);
+            if(constraint.operator === "min"){
+                return Math.max(0, constraint.target - value);
+            }
+            if(constraint.operator === "max"){
+                return Math.max(0, value - constraint.target);
+            }
+            return Math.abs(value - constraint.target);
+        }
+        events.getFastSBCChallengeGroupViolationTotal = (players, spec) => {
+            return _.sumBy(
+                spec?.group ?? [],
+                constraint =>
+                    events.getFastSBCChallengeGroupViolation(players, constraint)
+            );
+        }
+        events.fastSBCChallengeGroupConstraintsMet = (players, spec) => {
+            return _.every(
+                spec?.group ?? [],
+                constraint =>
+                    events.getFastSBCChallengeGroupViolation(players, constraint) === 0
+            );
+        }
         events.getFastSBCChallengeConstraintCounts = (players, spec) => {
             return _.map(spec.individual, requirement =>
                 _.filter(
@@ -11551,6 +11652,16 @@
             );
         }
         events.fastSBCChallengeConstraintsMet = (players, spec) => {
+            const counts = events.getFastSBCChallengeConstraintCounts(players, spec);
+            return (
+                _.every(
+                    spec.individual,
+                    (requirement, index) => counts[index] >= requirement.count
+                ) &&
+                events.fastSBCChallengeGroupConstraintsMet(players, spec)
+            );
+        }
+        events.fastSBCChallengeIndividualConstraintsMet = (players, spec) => {
             const counts = events.getFastSBCChallengeConstraintCounts(players, spec);
             return _.every(
                 spec.individual,
@@ -11593,6 +11704,29 @@
                 seen.add(key);
                 focuses.push(normalized);
             };
+            const addTop = (property, limit) => {
+                const constraint = { property };
+                const groups = _.orderBy(
+                    _.map(
+                        _.groupBy(
+                            pool,
+                            player =>
+                                events.getFastSBCChallengeGroupKey(player, constraint)
+                        ),
+                        (players, value) => ({
+                            value: Number(value),
+                            count: players.length
+                        })
+                    ),
+                    "count",
+                    "desc"
+                );
+                _.forEach(_.take(groups, limit), group => {
+                    if(Number.isFinite(group.value) && group.value !== -1){
+                        push({ [property]: group.value });
+                    }
+                })
+            };
 
             _.forEach(spec.individual, requirement => {
                 if(requirement.key === SBCEligibilityKey.CLUB_ID){
@@ -11605,22 +11739,14 @@
                     _.forEach(requirement.values, nationId => push({ nationId: Number(nationId) }));
                 }
             })
+            _.forEach(spec.group ?? [], constraint => {
+                if(constraint.operator === "max"){
+                    return;
+                }
+                const limit = constraint.property === "leagueId" ? 8 : 6;
+                addTop(constraint.property, limit);
+            })
             if(spec.targetChemistry > 0 || spec.minPlayerChemistry > 0){
-                const addTop = (property, limit) => {
-                    const groups = _.orderBy(
-                        _.map(_.groupBy(pool, property), (players, value) => ({
-                            value: Number(value),
-                            count: players.length
-                        })),
-                        "count",
-                        "desc"
-                    );
-                    _.forEach(_.take(groups, limit), group => {
-                        if(Number.isFinite(group.value) && group.value !== -1){
-                            push({ [property]: group.value });
-                        }
-                    })
-                };
                 addTop("leagueId", 8);
                 addTop("nationId", 5);
                 addTop("teamId", 4);
@@ -11688,6 +11814,14 @@
                     score -= 200000 * requirement.count / availability;
                 }
             })
+            const currentGroupViolation =
+                events.getFastSBCChallengeGroupViolationTotal(selected, spec);
+            const nextGroupViolation =
+                events.getFastSBCChallengeGroupViolationTotal(
+                    selected.concat(player),
+                    spec
+                );
+            score += (currentGroupViolation - nextGroupViolation) * 260000;
 
             if(focus.teamId !== undefined){
                 score += String(events.getFastSBCChallengeLinkedTeamId(player.teamId)) ===
@@ -11796,6 +11930,130 @@
                 result = best.next;
             }
             return events.fastSBCChallengeConstraintsMet(result, spec) ? result : null;
+        }
+        events.repairFastSBCChallengeGroupConstraints = (
+            selected,
+            slots,
+            pool,
+            spec,
+            focus
+        ) => {
+            let result = selected.slice();
+            const maxPasses = Math.max(
+                spec.requiredCount * Math.max(1, spec.group?.length ?? 0) * 2,
+                2
+            );
+            for(let pass = 0; pass < maxPasses; pass++){
+                const currentViolation =
+                    events.getFastSBCChallengeGroupViolationTotal(result, spec);
+                if(currentViolation === 0){
+                    return result;
+                }
+                const usedItems = new Set(
+                    _.map(result, events.getFastSBCPlanItemKey)
+                );
+                const usedDatabases = new Set(_.map(
+                    result,
+                    player => String(
+                        player?.databaseId ??
+                        events.getFastSBCPlanItemKey(player)
+                    )
+                ));
+                let best = null;
+                _.forEach(slots, (slot, slotIndex) => {
+                    const current = result[slotIndex];
+                    _.forEach(pool, candidate => {
+                        const itemKey = events.getFastSBCPlanItemKey(candidate);
+                        const databaseKey = String(
+                            candidate?.databaseId ?? itemKey
+                        );
+                        if(
+                            candidate === current ||
+                            usedItems.has(itemKey) ||
+                            usedDatabases.has(databaseKey) ||
+                            !events.fastSBCChallengePlayerFitsPosition(
+                                candidate,
+                                slot.position
+                            )
+                        ){
+                            return;
+                        }
+                        const next = result.slice();
+                        next[slotIndex] = candidate;
+                        if(
+                            !events.fastSBCChallengeIndividualConstraintsMet(
+                                next,
+                                spec
+                            )
+                        ){
+                            return;
+                        }
+                        const nextViolation =
+                            events.getFastSBCChallengeGroupViolationTotal(
+                                next,
+                                spec
+                            );
+                        if(nextViolation >= currentViolation){
+                            return;
+                        }
+                        const chemistry =
+                            events.getFastSBCChallengeChemistry(next).total;
+                        const rating =
+                            events.teamRatingCount(_.map(next, "rating"));
+                        const focusMatches =
+                            (
+                                focus.leagueId !== undefined &&
+                                candidate.leagueId === focus.leagueId
+                                    ? 2
+                                    : 0
+                            ) +
+                            (
+                                focus.nationId !== undefined &&
+                                candidate.nationId === focus.nationId
+                                    ? 1
+                                    : 0
+                            ) +
+                            (
+                                focus.teamId !== undefined &&
+                                events.getFastSBCChallengeLinkedTeamId(
+                                    candidate.teamId
+                                ) ===
+                                events.getFastSBCChallengeLinkedTeamId(
+                                    focus.teamId
+                                )
+                                    ? 3
+                                    : 0
+                            );
+                        const score =
+                            (currentViolation - nextViolation) * 1000000 +
+                            focusMatches * 10000 +
+                            chemistry * 300 +
+                            Math.min(
+                                rating,
+                                spec.targetRating || rating
+                            ) * 50 -
+                            events.getFastSBCChallengeConstraintSurplus(
+                                next,
+                                spec
+                            ) * 200000 -
+                            events.getFastSBCChallengeMinimumOvrWaste(
+                                next,
+                                spec
+                            ) * 20000 -
+                            Number(candidate.rating ?? 0);
+                        if(!best || score > best.score){
+                            best = { score, next };
+                        }
+                    })
+                })
+                if(!best){
+                    return null;
+                }
+                result = best.next;
+            }
+            return events.fastSBCChallengeGroupConstraintsMet(result, spec)
+                ? result
+                : null;
         }
         events.repairFastSBCChallengeRating = (selected, slots, pool, spec) => {
             let result = selected.slice();
@@ -11961,6 +12219,15 @@
             )){
                 return null;
             }
+            if(_.some(
+                spec.group ?? [],
+                constraint =>
+                    constraint.operator !== "max" &&
+                    events.getFastSBCChallengeGroupValue(pool, constraint) <
+                        constraint.target
+            )){
+                return null;
+            }
 
             const slotOrder = _.orderBy(
                 _.map(slots, (slot, slotIndex) => ({
@@ -12015,6 +12282,16 @@
 
             let repaired = events.repairFastSBCChallengeConstraints(
                 selected,
+                slots,
+                pool,
+                spec,
+                focus
+            );
+            if(!repaired){
+                return null;
+            }
+            repaired = events.repairFastSBCChallengeGroupConstraints(
+                repaired,
                 slots,
                 pool,
                 spec,
