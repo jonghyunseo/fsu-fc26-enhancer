@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.12.04
+// @version      26.12.05
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -1724,6 +1724,11 @@
             "fastsbc.plan.location.storage":["SBC仓库","SBC倉庫","SBC Storage"],
             "fastsbc.plan.location.unknown":["未知位置","未知位置","Unknown"],
             "fastsbc.plan.itemid":["物品ID %1","物品ID %1","Item ID %1"],
+            "fastsbc.plan.inventory":["候选 %1 · 仓库可用 %2/%3 · 优先 %4 · %5","候選 %1 · 倉庫可用 %2/%3 · 優先 %4 · %5","Candidates %1 · Storage eligible %2/%3 · priority %4 · %5"],
+            "fastsbc.plan.priority.on":["开启","開啟","On"],
+            "fastsbc.plan.priority.off":["关闭","關閉","Off"],
+            "fastsbc.plan.inventory.live":["已刷新","已重新整理","Refreshed"],
+            "fastsbc.plan.inventory.cached":["缓存","快取","Cached"],
             "fastsbc.plan.partial":["诊断用部分方案","診斷用部分方案","Diagnostic partial plan"],
             "fastsbc.plan.partialstatus":["已填入 %1/%2 名球员 · 不可提交","已填入 %1/%2 名球員 · 不可提交","%1/%2 players filled · submission disabled"],
             "fastsbc.plan.partialsummary":["没有完整方案 · 缺少 %1 项条件","沒有完整方案 · 缺少 %1 項條件","No complete plan · %1 unmet conditions"],
@@ -1801,8 +1806,8 @@
             "trypack.foot.info3":["此功能是通过EA公示概率模拟出的开启后获得的球员效果，此过程中不会与EA有数据交互，不会对你此后开包有所影响，仅供娱乐、切勿当真。","此功能是通過EA公示概率模擬出的開啟後獲得的球員效果，此過程中不會與EA有資料互動，不會對你此後開包有所影響，僅供娛樂、切勿當真。","This function is a player effect obtained after opening simulated by EA's publicity probability. It is for entertainment only and should not be taken seriously."],
             "trypack.popup.suffix":["（模拟开包）","（模擬開包）","(Simulate)"],
             "trypack.button.again":["再来一次","再來一次","Try Again"],
-            "builder.firststorage":["优先使用球员仓库球员","優先使用球員倉庫球員","Priority to use player storage players"],
-            "builder.firststorage.short":["优先仓库球员","優先倉庫球員","Priority storage"],
+            "builder.firststorage":["优先使用球员仓库球员","優先使用球員倉庫球員","Prioritize SBC Storage players"],
+            "builder.firststorage.short":["优先仓库球员","優先倉庫球員","SBC Storage first"],
             "fastsbc.nosbcdata":["快速SBC：首次需进入SBC页面读取信息后才会显示","快速SBC：首次需進入SBC頁面讀取資訊後才會顯示","Quick SBC: It will not be displayed until you enter the SBC page to read the information for the first time."],
             "academy.btntext2":["查看可进化任务","檢視可進化任務","View Evolutions"],
             "shieldflag.btntext":["可使用特殊球员设置","可使用特殊球員設定","Use Rarity Player Settings"],
@@ -2291,8 +2296,8 @@
             "trypack.foot.info3":"이 기능은 EA의 홍보 확률로 시뮬레이션한 개봉 후 획득한 플레이어 효과입니다. 이는 단지 오락용이므로 심각하게 받아들여서는 안 됩니다.",
             "trypack.popup.suffix":"(시뮬레이트)",
             "trypack.button.again":"다시 시도하세요",
-            "builder.firststorage":"플레이어 스토리지 플레이어 사용 우선순위",
-            "builder.firststorage.short":"우선순위 저장",
+            "builder.firststorage":"SBC 보관함 선수 우선 사용",
+            "builder.firststorage.short":"SBC 보관함 우선",
             "fastsbc.nosbcdata":"빠른 SBC: 처음으로 정보를 읽기 위해 SBC 페이지에 들어갈 때까지 표시되지 않습니다.",
             "academy.btntext2":"진화 보기",
             "shieldflag.btntext":"희귀 플레이어 설정 사용",
@@ -2622,6 +2627,11 @@
             "fastsbc.plan.location.storage":"SBC 보관함",
             "fastsbc.plan.location.unknown":"알 수 없음",
             "fastsbc.plan.itemid":"아이템 ID %1",
+            "fastsbc.plan.inventory":"후보 %1명 · Storage 사용 가능 %2/%3명 · 우선 %4 · %5",
+            "fastsbc.plan.priority.on":"켜짐",
+            "fastsbc.plan.priority.off":"꺼짐",
+            "fastsbc.plan.inventory.live":"갱신됨",
+            "fastsbc.plan.inventory.cached":"캐시",
             "fastsbc.plan.partial":"진단용 부분 제출안",
             "fastsbc.plan.partialstatus":"선수 %1/%2명 배치 · 제출 불가",
             "fastsbc.plan.partialsummary":"완성안 없음 · 부족 조건 %1개",
@@ -2894,6 +2904,7 @@
             .fsu-fastSBCPlanChallenge{overflow:hidden;color:#fcfcfc;font-family:UltimateTeam,sans-serif;font-size:18px;font-weight:700;line-height:22px;text-overflow:ellipsis;white-space:nowrap}
             .fsu-fastSBCPlanHeaderMeta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:5px}
             .fsu-fastSBCPlanSummary{min-width:0;flex:1 1 auto;overflow:hidden;color:#aeb3ba;font-size:13px;line-height:17px;text-overflow:ellipsis;white-space:nowrap}
+            .fsu-fastSBCPlanInventory{margin-top:4px;color:#7ce0df;font-size:11px;line-height:15px;white-space:normal;word-break:keep-all}
             .fsu-fastSBCPlanViewMode{display:grid;flex:0 0 auto;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;padding:2px;border:1px solid #454b54;border-radius:8px;background:#20232a}
             .fsu-fastSBCPlanViewButton{box-sizing:border-box!important;min-width:50px!important;min-height:40px!important;height:40px!important;margin:0!important;padding:0 10px!important;border:0!important;border-radius:6px!important;background:transparent!important;color:#9da3aa!important;font-family:UltimateTeamCondensed,sans-serif!important;font-size:13px!important;line-height:38px!important;white-space:nowrap!important}
             .fsu-fastSBCPlanViewButton[aria-pressed="true"]{background:#3b4754!important;color:#fff!important;box-shadow:inset 0 0 0 1px #1fc3c1!important}
@@ -11437,9 +11448,48 @@
             }
             return `${player?.definitionId ?? "unknown"}-${player?.databaseId ?? "unknown"}`;
         }
+        events.isFastSBCPlanStoragePlayer = player => {
+            if(!player){
+                return false;
+            }
+            try {
+                if(repositories.Item?.storage?.get?.(player.id)){
+                    return true;
+                }
+            } catch(error) {
+                console.warn("[FSU] SBC Storage location lookup failed", error);
+            }
+            return (
+                typeof ItemPile !== "undefined" &&
+                ItemPile?.STORAGE !== undefined &&
+                player?.pile === ItemPile.STORAGE
+            );
+        }
+        events.shouldPreferFastSBCStoragePlayer = (player, targetRating = 0) => {
+            if(
+                !info.build.firststorage ||
+                !events.isFastSBCPlanStoragePlayer(player)
+            ){
+                return false;
+            }
+            const rating = Number(player?.rating ?? 0);
+            const requestedRating = Number(targetRating ?? 0);
+            const configuredRating = Number(info.set?.goldenrange ?? 83);
+            const baseline = requestedRating > 0
+                ? requestedRating
+                : configuredRating > 0
+                    ? configuredRating
+                    : 83;
+            return rating <= baseline + 5;
+        }
         events.getFastSBCPlanOwnedState = () => {
             const clubPlayers = repositories.Item?.club?.items?.values?.() ?? [];
-            const storagePlayers = repositories.Item?.getStorageItems?.() ?? repositories.Item?.storage?.values?.() ?? [];
+            const storagePlayers = _.filter(
+                repositories.Item?.getStorageItems?.() ??
+                    repositories.Item?.storage?.values?.() ??
+                    [],
+                player => player?.isPlayer?.()
+            );
             const storageIds = new Set(_.map(storagePlayers, events.getFastSBCPlanItemKey));
             const players = [];
             const map = new Map();
@@ -11504,7 +11554,10 @@
                 candidates,
                 [
                     player => duplicateIds.has(events.getFastSBCPlanItemKey(player)) ? 0 : 1,
-                    player => info.build.firststorage && ownedState.storageIds.has(events.getFastSBCPlanItemKey(player)) ? 0 : 1
+                    player => events.shouldPreferFastSBCStoragePlayer(
+                        player,
+                        Number(requirement?.t?.GTrating ?? 0)
+                    ) ? 0 : 1
                 ],
                 ["asc", "asc"]
             );
@@ -11856,28 +11909,45 @@
             return Math.max(1, rating) * 1000;
         }
         events.getFastSBCChallengePlanMetrics = (players, spec, validation) => {
+            const actualPlayers = _.filter(players);
             const validationRating = Number(validation?.rating);
             const squadRating = Number.isFinite(validationRating)
                 ? validationRating
-                : events.teamRatingCount(_.map(players, "rating"));
+                : events.teamRatingCount(_.map(actualPlayers, "rating"));
+            const storageCount = _.filter(
+                actualPlayers,
+                events.isFastSBCPlanStoragePlayer
+            ).length;
+            const preferredStorageCount = _.filter(
+                actualPlayers,
+                player => events.shouldPreferFastSBCStoragePlayer(
+                    player,
+                    Number(spec?.targetRating ?? 0)
+                )
+            ).length;
             return {
+                storageCount,
+                storagePreferenceMisses: info.build.firststorage
+                    ? Math.max(0, actualPlayers.length - preferredStorageCount)
+                    : 0,
                 estimatedValue: _.sumBy(
-                    players,
+                    actualPlayers,
                     events.getFastSBCChallengePlayerValue
                 ),
                 minimumOvrWaste:
-                    events.getFastSBCChallengeMinimumOvrWaste(players, spec),
+                    events.getFastSBCChallengeMinimumOvrWaste(actualPlayers, spec),
                 ratingOvershoot: spec.targetRating > 0
                     ? Math.max(0, squadRating - spec.targetRating)
                     : 0,
                 totalRating: _.sumBy(
-                    players,
+                    actualPlayers,
                     player => Number(player?.rating ?? 0)
                 )
             };
         }
         events.compareFastSBCChallengePlanMetrics = (left, right) => {
             const keys = [
+                "storagePreferenceMisses",
                 "estimatedValue",
                 "minimumOvrWaste",
                 "ratingOvershoot",
@@ -11951,17 +12021,71 @@
                     item => String(item.duplicateId)
                 )
             );
-            const ownedState = events.getFastSBCPlanOwnedState();
             return _.orderBy(
                 players,
                 [
                     player => duplicateIds.has(events.getFastSBCPlanItemKey(player)) ? 0 : 1,
-                    player => info.build.firststorage && ownedState.storageIds.has(events.getFastSBCPlanItemKey(player)) ? 0 : 1,
+                    player => events.shouldPreferFastSBCStoragePlayer(
+                        player,
+                        Number(spec?.targetRating ?? 0)
+                    ) ? 0 : 1,
                     player => Number(player.untradeableCount ?? 0) > 0 ? 0 : 1,
                     player => Number(player.rating ?? 0)
                 ],
                 ["asc", "asc", "asc", "asc"]
             );
+        }
+        events.getFastSBCPlanCandidateStats = ({
+            challengeMode,
+            challengeSpec,
+            requirements,
+            unassignedPlayers,
+            storageRefreshed
+        }) => {
+            const ownedState = events.getFastSBCPlanOwnedState();
+            let eligiblePlayers = [];
+            if(challengeMode && challengeSpec){
+                eligiblePlayers = events.getFastSBCChallengePlayerPool(
+                    challengeSpec,
+                    new Set()
+                );
+            }else{
+                _.forEach(requirements ?? [], requirement => {
+                    if(Number(requirement?.c ?? 0) <= 0 || _.isEmpty(requirement?.t)){
+                        return;
+                    }
+                    eligiblePlayers = _.concat(
+                        eligiblePlayers,
+                        events.getFastSBCPlanCandidates(
+                            {
+                                t: _.cloneDeep(requirement.t),
+                                c: Number(requirement.c)
+                            },
+                            new Set(),
+                            unassignedPlayers ?? [],
+                            ownedState
+                        )
+                    );
+                })
+            }
+            eligiblePlayers = _.uniqBy(
+                eligiblePlayers,
+                events.getFastSBCPlanItemKey
+            );
+            const eligibleStorage = _.filter(
+                eligiblePlayers,
+                player => ownedState.storageIds.has(
+                    events.getFastSBCPlanItemKey(player)
+                )
+            ).length;
+            return {
+                totalOwned: ownedState.players.length,
+                storageOwned: ownedState.storageIds.size,
+                eligibleTotal: eligiblePlayers.length,
+                eligibleStorage,
+                priorityEnabled: Boolean(info.build.firststorage),
+                storageRefreshed: Boolean(storageRefreshed)
+            };
         }
         events.fastSBCChallengePlayerFitsPosition = (player, position) => {
             if(Number(position) === -1){
@@ -12224,6 +12348,16 @@
                 score -= Math.abs(difference) * (difference < 0 ? 260 : 140);
             }else{
                 score -= rating * 25;
+            }
+            if(
+                events.shouldPreferFastSBCStoragePlayer(
+                    player,
+                    desiredRating
+                )
+            ){
+                // Keep this below mandatory requirement/group bonuses, but above
+                // ordinary rating, chemistry-link and value tie-breakers.
+                score += 30000;
             }
             score += Number(player.untradeableCount ?? 0) > 0 ? 40 : 0;
             score += events.getFastSBCChallengeCandidateTie(player, attempt);
@@ -13765,6 +13899,26 @@
                     .filter(value => value !== null)
                     .value()
             );
+            const byStorage = info.build.firststorage
+                ? _.take(
+                    _.orderBy(
+                        _.filter(
+                            candidates,
+                            candidate => events.shouldPreferFastSBCStoragePlayer(
+                                candidate,
+                                Number(spec?.targetRating ?? 0)
+                            )
+                        ),
+                        [
+                            events.getFastSBCChallengePlayerValue,
+                            candidate => Number(candidate?.rating ?? 0),
+                            linkScore
+                        ],
+                        ["asc", "asc", "desc"]
+                    ),
+                    12
+                )
+                : [];
             const byThreshold = _.take(
                 _.orderBy(
                     _.filter(
@@ -13805,7 +13959,7 @@
             );
             return _.take(
                 _.uniqBy(
-                    _.concat(byThreshold, byValue, byLinks),
+                    _.concat(byStorage, byThreshold, byValue, byLinks),
                     events.getFastSBCPlanItemKey
                 ),
                 24
@@ -14101,6 +14255,15 @@
                 repositories.Item.getUnassignedItems(),
                 item => item?.isPlayer?.() && item.duplicateId !== 0
             );
+            const unassignedDuplicateIds = new Set(
+                _.map(
+                    _.filter(
+                        unassignedPlayers,
+                        item => item?.isDuplicate?.()
+                    ),
+                    item => String(item.duplicateId)
+                )
+            );
             const planLimit = Math.max(0, Math.min(10, Number(maxPlans) || 0));
             if(planLimit === 0){
                 return [];
@@ -14221,13 +14384,25 @@
                             // 회차별 databaseId 충돌로 마지막 안이 빠지는 것을 줄인다.
                             const orderedCandidates = _.orderBy(
                                 current.available,
-                                player => candidateMembership.get(
-                                    String(
-                                        player?.databaseId ??
+                                [
+                                    player => candidateMembership.get(
+                                        String(
+                                            player?.databaseId ??
+                                            events.getFastSBCPlanItemKey(player)
+                                        )
+                                    ) ?? 1,
+                                    player => unassignedDuplicateIds.has(
                                         events.getFastSBCPlanItemKey(player)
-                                    )
-                                ) ?? 1,
-                                "asc"
+                                    ) ? 0 : 1,
+                                    player =>
+                                        events.shouldPreferFastSBCStoragePlayer(
+                                            player,
+                                            Number(entry.group?.t?.GTrating ?? 0)
+                                        )
+                                            ? 0
+                                            : 1
+                                ],
+                                ["asc", "asc", "asc"]
                             );
                             const selected = orderedCandidates[0];
                             const selectedItemKey = events.getFastSBCPlanItemKey(selected);
@@ -14287,6 +14462,55 @@
             } catch(error) {
                 console.warn("[FSU] Fast SBC observer cleanup failed", error);
             }
+        }
+        events.refreshFastSBCPlanStorage = (timeoutMs = 10000) => {
+            if(typeof services.Item?.searchStorageItems !== "function"){
+                return Promise.resolve(false);
+            }
+            const owner = events.getFastSBCPlanObserverOwner();
+            return new Promise(resolve => {
+                let settled = false;
+                let observerToken = null;
+                let timer = null;
+                const finish = (refreshed, token = observerToken) => {
+                    events.releaseFastSBCPlanObserver(token, owner);
+                    if(settled){
+                        return;
+                    }
+                    settled = true;
+                    if(timer){
+                        clearTimeout(timer);
+                    }
+                    resolve(Boolean(refreshed));
+                };
+                timer = setTimeout(() => {
+                    console.warn("[FSU] SBC Storage refresh timed out; using cached items");
+                    finish(false);
+                }, Math.max(1000, Number(timeoutMs) || 10000));
+                try {
+                    const request = services.Item.searchStorageItems(
+                        new UTSearchCriteriaDTO()
+                    );
+                    if(!request?.observe){
+                        finish(false);
+                        return;
+                    }
+                    observerToken = request.observe(owner, (token, response) => {
+                        const hasPayload = Boolean(
+                            response?.response ||
+                            response?.data ||
+                            response?.success === true
+                        );
+                        finish(response?.success !== false && hasPayload, token);
+                    });
+                } catch(error) {
+                    console.warn(
+                        "[FSU] SBC Storage refresh failed; using cached items",
+                        error
+                    );
+                    finish(false);
+                }
+            });
         }
         events.getFastSBCPlanCollectionValues = (collection) => {
             if(!collection){
@@ -14628,6 +14852,9 @@
             const headerMeta = events.createElementWithConfig("div", {
                 classList: "fsu-fastSBCPlanHeaderMeta"
             });
+            const inventory = events.createElementWithConfig("div", {
+                classList: "fsu-fastSBCPlanInventory"
+            });
             const viewMode = events.createElementWithConfig("div", {
                 classList: "fsu-fastSBCPlanViewMode",
                 attributes: {
@@ -14663,7 +14890,7 @@
             gridModeRoot.setAttribute("aria-label", fy("fastsbc.plan.layout.grid"));
             viewMode.append(listModeRoot, gridModeRoot);
             headerMeta.append(summary, viewMode);
-            header.append(challengeName, headerMeta);
+            header.append(challengeName, headerMeta, inventory);
             root.appendChild(header);
 
             const navigator = events.createElementWithConfig("div", {
@@ -14850,6 +15077,32 @@
                             session.estimatedCount,
                             session.plans.length
                         ]);
+                    const candidateStats = session.candidateStats;
+                    if(candidateStats){
+                        const inventoryText = fy([
+                            "fastsbc.plan.inventory",
+                            candidateStats.eligibleTotal,
+                            candidateStats.eligibleStorage,
+                            candidateStats.storageOwned,
+                            fy(
+                                candidateStats.priorityEnabled
+                                    ? "fastsbc.plan.priority.on"
+                                    : "fastsbc.plan.priority.off"
+                            ),
+                            fy(
+                                candidateStats.storageRefreshed
+                                    ? "fastsbc.plan.inventory.live"
+                                    : "fastsbc.plan.inventory.cached"
+                            )
+                        ]);
+                        inventory.textContent = inventoryText;
+                        inventory.setAttribute("title", inventoryText);
+                        inventory.style.display = "";
+                    }else{
+                        inventory.textContent = "";
+                        inventory.removeAttribute("title");
+                        inventory.style.display = "none";
+                    }
                     counterText.textContent = isPartial
                         ? fy("fastsbc.plan.partial")
                         : fy([
@@ -15220,6 +15473,7 @@
         }
         events.buildFastSBCPlanSession = async(setId, challengeId) => {
             const requirements = info.base.fastsbc[`${challengeId}#${setId}`];
+            const storageRefreshPromise = events.refreshFastSBCPlanStorage(8000);
             let loaded;
             try {
                 loaded = await events.loadFastSBCPlanChallenge(setId, challengeId);
@@ -15246,6 +15500,7 @@
                     loaded.challenge?.squad?.getNumOfRequiredPlayers?.() ??
                     _.sumBy(requirements ?? [], requirement => Number(requirement?.c ?? 0))
                 );
+            const storageRefreshed = await storageRefreshPromise;
             const unassignedPlayers = _.filter(
                 repositories.Item.getUnassignedItems(),
                 item => item?.isPlayer?.() && item.duplicateId !== 0
@@ -15264,6 +15519,13 @@
                 generationError.fsuFastSBCStage = "generate";
                 throw generationError;
             }
+            const candidateStats = events.getFastSBCPlanCandidateStats({
+                challengeMode,
+                challengeSpec,
+                requirements,
+                unassignedPlayers,
+                storageRefreshed
+            });
             const estimatedCount = challengeMode
                 ? _.filter(plans, plan => plan.status === "ready").length
                 : Math.max(
@@ -15283,6 +15545,7 @@
                 plans,
                 mode: challengeMode ? "challenge" : "simple",
                 challengeSpec,
+                candidateStats,
                 currentIndex: 0,
                 viewMode: "list",
                 submitting: false,
@@ -15380,6 +15643,7 @@
                 session.plans = nextSession.plans;
                 session.mode = nextSession.mode;
                 session.challengeSpec = nextSession.challengeSpec;
+                session.candidateStats = nextSession.candidateStats;
                 session.currentIndex = 0;
                 events.fastSBCPlanSession = session;
             } catch(error) {

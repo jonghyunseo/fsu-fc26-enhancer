@@ -4,7 +4,7 @@ GreasyFork에 공개된 `【FSU】EAFC FUT WEB 增强器`를 분석하고, FC26 
 
 ## 프로젝트 상태
 
-- 현재 포크 버전: `26.12.04`
+- 현재 포크 버전: `26.12.05`
 - 원본 기준 버전: `26.09`
 - userscript: [`fsu-eafc-fut-web.user.js`](./fsu-eafc-fut-web.user.js)
 - 원본 SHA-256: `A2E0BEB018921CDD334D68BD4AF9BEE843F9F391A98E01E3B27D67E74D6B9634`
@@ -22,6 +22,8 @@ SBC의 `Completion(n)`은 즉시 제출 대신 최대 10개의 독립 제출안�
 
 같은 리그 최소 인원, 같은 클럽 최소 인원, 같은 국가/지역 최대 인원 같은 그룹 조건도 지원한다. TOTW 최소 인원, 팀 평점, 조직력 조건과 함께 계산하며 이미 만족한 희귀 선수 조건을 보존한 상태에서 그룹 위반을 줄이는 선수 교체를 수행한다.
 
+제출안 생성 직전에 SBC Storage 목록을 다시 불러오며, `SBC 보관함 우선` 설정이 켜져 있으면 조건을 만족하는 Storage 카드를 가격·일반 등급 동률 처리보다 먼저 사용한다. 목표 팀 등급보다 5를 초과하는 Storage 카드는 자동 우선 대상에서 제외해 고평가 카드의 불필요한 소모를 막는다. 팝업 상단에는 전체 후보 수, 사용 가능한 Storage 후보 수, Storage 전체 보유 수, 우선 설정과 갱신 상태를 표시한다.
+
 완성 조합을 만들 수 없으면 일반 오류 대신 가장 가까운 진단용 부분안을 보여준다. 선수 수, 팀 등급, 조직력, 특수 카드와 동일 리그·클럽·국가 조건을 `현재/요구` 수치로 표시하며, 확정적인 후보 부족과 제한 탐색 실패를 구분한다. 서로 배타적인 부족 조건은 별도 빈칸으로 남기고 한 선수가 함께 만족할 수 있는 조건만 같은 최소 보충 슬롯으로 묶는다. `부분 스쿼드 채우기`는 최신 조건·보호 설정을 다시 검사하고 EA의 저장 완료를 확인한 뒤 가능한 선수만 슬롯에 저장하며, 제출 API는 호출하지 않는다.
 
 FSU Configuration의 `표시 언어`에서 `자동(EA)`, `English`, `한국어`를 선택할 수 있다. 한국어를 선택하면 FSU가 추가한 설정, 선수 화면, SBC 기능과 알림을 한국어로 표시한다.
@@ -32,7 +34,7 @@ EA Web App이 영어가 아닌 언어로 설정되어 있으면 진화 이름을
 
 1. 기존 GreasyFork판 FSU가 설치되어 있다면 먼저 **비활성화**한다.
 2. Edge에서 [Tampermonkey 공식 설치 링크](https://www.tampermonkey.net/script_installation.php#url=https://raw.githubusercontent.com/jonghyunseo/fsu-fc26-enhancer/main/fsu-eafc-fut-web.user.js)를 연다. 이 링크는 GreasyFork가 사용하는 것과 같은 Tampermonkey 설치 중계 화면을 거친다.
-3. Tampermonkey 설치 화면에서 버전이 `26.12.04` 이상인지 확인하고 **설치**를 누른다.
+3. Tampermonkey 설치 화면에서 버전이 `26.12.05` 이상인지 확인하고 **설치**를 누른다.
 4. 같은 이름의 FSU 스크립트가 두 개 동시에 활성화되지 않게 한다.
 
 GitHub의 [원본 Raw 링크](https://raw.githubusercontent.com/jonghyunseo/fsu-fc26-enhancer/main/fsu-eafc-fut-web.user.js)를 직접 열었을 때 코드 화면만 보이는 경우에도 위 공식 설치 링크를 사용한다. 공식 설치 페이지에 그대로 머물고 Tampermonkey 설치 확인 화면이 열리지 않으면 Tampermonkey의 **설정 → 일반 → Userscript URL detection**이 `Enabled`인지 확인한다.
