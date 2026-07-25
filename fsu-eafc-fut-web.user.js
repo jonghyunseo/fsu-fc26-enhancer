@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.12.00
+// @version      26.12.01
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -11404,7 +11404,12 @@
                 case SBCEligibilityKey.PLAYER_RARITY:
                     return includes(player.rareflag);
                 case SBCEligibilityKey.PLAYER_RARITY_GROUP:
-                    return _.every(values, value => _.includes(player.groups ?? [], Number(value)));
+                    // EA treats multiple group values as alternatives. For example,
+                    // "Any TOTW/TOTS/FOF" needs a player from at least one group.
+                    return _.some(
+                        values,
+                        value => _.includes(player.groups ?? [], Number(value))
+                    );
                 case SBCEligibilityKey.PLAYER_QUALITY:
                 case SBCEligibilityKey.PLAYER_LEVEL: {
                     const regular =
@@ -11535,7 +11540,10 @@
                 case SBCEligibilityKey.PLAYER_RARITY:
                     return { rareflag: values };
                 case SBCEligibilityKey.PLAYER_RARITY_GROUP:
-                    return { groups: values };
+                    // getItemBy() interprets an array-valued property as AND.
+                    // The full player pool is already loaded, so avoid narrowing an
+                    // EA rarity-group OR requirement to an impossible intersection.
+                    return values.length === 1 ? { groups: values } : {};
                 case SBCEligibilityKey.PLAYER_QUALITY:
                 case SBCEligibilityKey.PLAYER_LEVEL:
                     return values.length === 1 ? { rs: Number(values[0]) - 1 } : {};
