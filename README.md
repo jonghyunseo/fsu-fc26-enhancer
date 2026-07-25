@@ -4,7 +4,7 @@ GreasyFork에 공개된 `【FSU】EAFC FUT WEB 增强器`를 분석하고, FC26 
 
 ## 프로젝트 상태
 
-- 현재 포크 버전: `26.12.02`
+- 현재 포크 버전: `26.12.03`
 - 원본 기준 버전: `26.09`
 - userscript: [`fsu-eafc-fut-web.user.js`](./fsu-eafc-fut-web.user.js)
 - 원본 SHA-256: `A2E0BEB018921CDD334D68BD4AF9BEE843F9F391A98E01E3B27D67E74D6B9634`
@@ -26,11 +26,13 @@ SBC의 `Completion(n)`은 즉시 제출 대신 최대 10개의 독립 제출안�
 
 FSU Configuration의 `표시 언어`에서 `자동(EA)`, `English`, `한국어`를 선택할 수 있다. 한국어를 선택하면 FSU가 추가한 설정, 선수 화면, SBC 기능과 알림을 한국어로 표시한다.
 
+EA Web App이 영어가 아닌 언어로 설정되어 있으면 진화 이름을 `현재 언어명 (EA 공식 영어명)` 형식으로 함께 표시한다. 영어명은 진화 슬롯 ID와 EA의 공식 `en-US` 현지화 카탈로그를 연결하며, 공식 값이 없을 때는 임의 번역을 만들지 않는다.
+
 ## Edge / Tampermonkey 설치
 
 1. 기존 GreasyFork판 FSU가 설치되어 있다면 먼저 **비활성화**한다.
 2. Edge에서 [Tampermonkey 공식 설치 링크](https://www.tampermonkey.net/script_installation.php#url=https://raw.githubusercontent.com/jonghyunseo/fsu-fc26-enhancer/main/fsu-eafc-fut-web.user.js)를 연다. 이 링크는 GreasyFork가 사용하는 것과 같은 Tampermonkey 설치 중계 화면을 거친다.
-3. Tampermonkey 설치 화면에서 버전이 `26.12.02` 이상인지 확인하고 **설치**를 누른다.
+3. Tampermonkey 설치 화면에서 버전이 `26.12.03` 이상인지 확인하고 **설치**를 누른다.
 4. 같은 이름의 FSU 스크립트가 두 개 동시에 활성화되지 않게 한다.
 
 GitHub의 [원본 Raw 링크](https://raw.githubusercontent.com/jonghyunseo/fsu-fc26-enhancer/main/fsu-eafc-fut-web.user.js)를 직접 열었을 때 코드 화면만 보이는 경우에도 위 공식 설치 링크를 사용한다. 공식 설치 페이지에 그대로 머물고 Tampermonkey 설치 확인 화면이 열리지 않으면 Tampermonkey의 **설정 → 일반 → Userscript URL detection**이 `Enabled`인지 확인한다.

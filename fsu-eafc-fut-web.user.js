@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【FSU】EAFC FUT WEB 增强器
 // @namespace    https://futcd.com/
-// @version      26.12.02
+// @version      26.12.03
 // @description  EAFCFUT模式SBC任务便捷操作增强器👍👍👍，模拟开包、额外信息展示、近期低价自动查询、一键挂出球员、跳转FUTBIN、快捷搜索、拍卖行优化等等...👍👍👍
 // @author       Futcd_kcka
 // @match        https://www.ea.com/ea-sports-fc/ultimate-team/web-app/*
@@ -146,6 +146,13 @@
             "extraChemKeys": ["full", "nation", "league", "club", "allNation", "allLeague"],
             "priceType": ["ut", "sbc", "ob", "sp"],
             "academy": [],
+            "academyEnglish":{
+                "names":{},
+                "updatedAt":0,
+                "cacheRead":false,
+                "promise":null,
+                "originalNames":new WeakMap()
+            },
             "attributes": {
                 "pac":{
                     id: PlayerAttribute.ONE,
@@ -570,6 +577,7 @@
             events.addLoadingElment();
  
             info.base.localization = services.Localization.repository._collection;
+            const academyEnglishNamesPromise = events.loadAcademyEnglishNames();
             //25.22 获取SBC信息并插入头部导航
             services.SBC.requestSets().observe(getAppMain().getRootViewController(), function(e, t) {
                 if (e.unobserve(getAppMain().getRootViewController()),t.success && JSUtils.isObject(t.data)) {
@@ -646,6 +654,8 @@
                 info.isEnhancer = false;
             }
             await events.reloadPlayers();
+            await academyEnglishNamesPromise;
+            events.applyAcademyEnglishNames(repositories.Academy.getSlots?.());
 
             //24.18 可进化标识：读取进化任务数据
             //25.02 修复进化任务加载不全的问题
@@ -670,6 +680,7 @@
                                     let academyCache = JSON.parse(GM_getValue("academy","{}"));
                                     
                                     _.map(tt.data.slots,s => {
+                                        events.applyAcademyEnglishName(s);
                                         academyCache[s.id] = {
                                             "name": s.slotName,
                                             "status": s.status == AcademySlotState.NOT_STARTED ? 1 : 0,
@@ -1150,6 +1161,156 @@
         const eafy = function(p){
             return info.base.localization[p] ?? p;
         }
+        const ACADEMY_ENGLISH_CACHE_KEY = "academyEnglishLocalizationV1";
+        const ACADEMY_ENGLISH_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
+        const ACADEMY_ENGLISH_LOCALIZATION_URL = "https://www.ea.com/ea-sports-fc/ultimate-team/web-app/loc/en-US.json";
+        const normalizeAcademyNameForComparison = value => String(value ?? "")
+            .normalize("NFKC")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLocaleLowerCase("en-US");
+        events.isEnglishEALocale = () => {
+            const language = services.Localization?.locale?.language;
+            return typeof language === "string" && language.toLowerCase() === "en";
+        };
+        events.extractAcademyEnglishNames = localization => {
+            const names = {};
+            if(!localization || typeof localization !== "object" || Array.isArray(localization)){
+                return names;
+            }
+            Object.entries(localization).forEach(([key, value]) => {
+                const match = /^AcademySlot(\d+)$/.exec(key);
+                if(match && typeof value === "string"){
+                    const officialName = value.trim();
+                    if(officialName && officialName.length <= 160){
+                        names[match[1]] = officialName;
+                    }
+                }
+            });
+            return names;
+        };
+        events.readAcademyEnglishNamesCache = () => {
+            const state = info.academyEnglish;
+            if(state.cacheRead){
+                return state.names;
+            }
+            state.cacheRead = true;
+            try {
+                const cached = JSON.parse(GM_getValue(ACADEMY_ENGLISH_CACHE_KEY, "{}"));
+                const names = {};
+                if(cached?.names && typeof cached.names === "object" && !Array.isArray(cached.names)){
+                    Object.entries(cached.names).forEach(([id, value]) => {
+                        if(/^\d+$/.test(id) && typeof value === "string"){
+                            const officialName = value.trim();
+                            if(officialName && officialName.length <= 160){
+                                names[id] = officialName;
+                            }
+                        }
+                    });
+                }
+                state.names = names;
+                state.updatedAt = Number(cached?.updatedAt) || 0;
+            } catch(error) {
+                console.warn("[FSU] EA English Evolution-name cache could not be read", error);
+                state.names = {};
+                state.updatedAt = 0;
+            }
+            return state.names;
+        };
+        events.loadAcademyEnglishNames = (force = false) => {
+            const state = info.academyEnglish;
+            events.readAcademyEnglishNamesCache();
+            if(events.isEnglishEALocale()){
+                return Promise.resolve(state.names);
+            }
+            const cacheIsFresh =
+                Object.keys(state.names).length > 0 &&
+                Date.now() - state.updatedAt < ACADEMY_ENGLISH_CACHE_MAX_AGE;
+            if(!force && cacheIsFresh){
+                return Promise.resolve(state.names);
+            }
+            if(state.promise){
+                return state.promise;
+            }
+            state.promise = new Promise((resolve, reject) => {
+                GM_xmlhttpRequest({
+                    method:"GET",
+                    url:ACADEMY_ENGLISH_LOCALIZATION_URL,
+                    timeout:12000,
+                    headers:{
+                        "Accept":"application/json",
+                        "Cache-Control":"no-cache"
+                    },
+                    onload:response => {
+                        if(response.status !== 200){
+                            reject(new Error(`EA localization HTTP ${response.status}`));
+                            return;
+                        }
+                        try {
+                            const localization = JSON.parse(response.responseText || response.response);
+                            const names = events.extractAcademyEnglishNames(localization);
+                            if(!Object.keys(names).length){
+                                throw new Error("EA localization contains no AcademySlot names");
+                            }
+                            state.names = names;
+                            state.updatedAt = Date.now();
+                            GM_setValue(ACADEMY_ENGLISH_CACHE_KEY, JSON.stringify({
+                                updatedAt:state.updatedAt,
+                                names:state.names
+                            }));
+                            resolve(state.names);
+                        } catch(error) {
+                            reject(error);
+                        }
+                    },
+                    onerror:error => reject(error),
+                    ontimeout:() => reject(new Error("EA localization request timed out"))
+                });
+            }).catch(error => {
+                console.warn("[FSU] Official EA English Evolution names could not be loaded", error);
+                return state.names;
+            }).finally(() => {
+                state.promise = null;
+            });
+            return state.promise;
+        };
+        events.getAcademyDisplayName = (slotId, localizedName) => {
+            const localName = typeof localizedName === "string" ? localizedName.trim() : "";
+            if(!localName || events.isEnglishEALocale()){
+                return localName;
+            }
+            const englishName = info.academyEnglish.names[String(slotId)]?.trim();
+            if(!englishName || normalizeAcademyNameForComparison(localName) === normalizeAcademyNameForComparison(englishName)){
+                return localName;
+            }
+            return `${localName} (${englishName})`;
+        };
+        events.applyAcademyEnglishName = slot => {
+            if(!slot || slot.id === undefined || slot.id === null || typeof slot.slotName !== "string"){
+                return slot;
+            }
+            const state = info.academyEnglish;
+            const currentName = slot.slotName.trim();
+            const tracked = state.originalNames.get(slot);
+            let localizedName = tracked?.localizedName ?? currentName;
+            if(tracked && currentName !== tracked.displayName && currentName !== tracked.localizedName){
+                localizedName = currentName;
+            }else if(!tracked){
+                const englishName = state.names[String(slot.id)]?.trim();
+                const suffix = englishName ? ` (${englishName})` : "";
+                if(suffix && localizedName.endsWith(suffix)){
+                    localizedName = localizedName.slice(0, -suffix.length).trim();
+                }
+            }
+            const displayName = events.getAcademyDisplayName(slot.id, localizedName);
+            state.originalNames.set(slot, { localizedName, displayName });
+            slot.slotName = displayName;
+            return slot;
+        };
+        events.applyAcademyEnglishNames = slots => {
+            _.forEach(slots ?? [], slot => events.applyAcademyEnglishName(slot));
+            return slots;
+        };
         //本地化文本内容
         info.localization = {
             "price.btntext":["查询价格","查詢價格","Check Price"],
@@ -5879,6 +6040,7 @@
         //26.02 进化：任务添加到期和新标识
         const UTAcademyHubView_generateSlot = UTAcademyHubView.prototype.generateSlot;
         UTAcademyHubView.prototype.generateSlot = function(e) {
+            events.applyAcademyEnglishName(e);
             const tileView = UTAcademyHubView_generateSlot.call(this, e);
             const tileViewRoot = tileView.getRootElement();
             tileView._fsu ??= {};
@@ -22492,6 +22654,7 @@
                     if (e.unobserve(controller), t.success && JSUtils.isObject(t.data)) {
 
                         const selectedAcademy = t.data.updatedSlot;
+                        events.applyAcademyEnglishName(selectedAcademy);
                         const academyBio = new UTPlayerBioViewController;
                         const boostPlayer = selectedAcademy.levels[selectedAcademy.levels.length - 1].boostedPlayer;
                         selectedAcademy.nowPlayer = player;
