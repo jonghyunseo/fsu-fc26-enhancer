@@ -29,13 +29,13 @@ FSU Configuration의 `표시 언어`에서 `자동(EA)`, `English`, `한국어`�
 ## Edge / Tampermonkey 설치
 
 1. 기존 GreasyFork판 FSU가 설치되어 있다면 먼저 **비활성화**한다.
-2. Edge 주소창에서 [Android Edge용 userscript 설치 링크](https://raw.githack.com/jonghyunseo/fsu-fc26-enhancer/main/fsu-eafc-fut-web.user.js)를 직접 연다. 채팅 안의 미리보기로 열지 말고 링크를 길게 눌러 복사한 뒤 Edge 주소창에 붙여 넣는다.
+2. Edge에서 [Tampermonkey 공식 설치 링크](https://www.tampermonkey.net/script_installation.php#url=https://raw.githubusercontent.com/jonghyunseo/fsu-fc26-enhancer/main/fsu-eafc-fut-web.user.js)를 연다. 이 링크는 GreasyFork가 사용하는 것과 같은 Tampermonkey 설치 중계 화면을 거친다.
 3. Tampermonkey 설치 화면에서 버전이 `26.12.02` 이상인지 확인하고 **설치**를 누른다.
 4. 같은 이름의 FSU 스크립트가 두 개 동시에 활성화되지 않게 한다.
 
-GitHub의 [원본 Raw 링크](https://raw.githubusercontent.com/jonghyunseo/fsu-fc26-enhancer/main/fsu-eafc-fut-web.user.js)는 `text/plain`으로 응답해 Android Edge에서 코드 화면만 열릴 수 있다. 위 Android 설치 링크는 같은 공개 GitHub 파일을 `application/javascript`로 전달한다.
+GitHub의 [원본 Raw 링크](https://raw.githubusercontent.com/jonghyunseo/fsu-fc26-enhancer/main/fsu-eafc-fut-web.user.js)를 직접 열었을 때 코드 화면만 보이는 경우에도 위 공식 설치 링크를 사용한다. 공식 설치 페이지에 그대로 머물고 Tampermonkey 설치 확인 화면이 열리지 않으면 Tampermonkey의 **설정 → 일반 → Userscript URL detection**이 `Enabled`인지 확인한다.
 
-Tampermonkey의 **도구 → URL에서 가져오기** 화면에서 `디코딩 중` 상태가 오래 지속되면 해당 작업을 취소하고 위 링크를 주소창에서 직접 여는 방식을 먼저 사용한다. 이 포크는 설치 지연을 줄이기 위해 원본에 중복 선언되어 있던 Lodash CDN 의존성 하나를 제거했다.
+공식 설치 링크도 동작하지 않을 때는 Tampermonkey의 **도구 → URL에서 가져오기**에 원본 Raw 링크를 붙여 넣는 방식을 사용한다. 이 포크는 설치 지연을 줄이기 위해 원본에 중복 선언되어 있던 Lodash CDN 의존성 하나를 제거했다.
 
 ## 문서
 
